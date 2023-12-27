@@ -162,10 +162,11 @@ export default class Player extends ex.Actor {
       this.graphics.flipHorizontal = isHoldingLeft
       this.setAnimation('run')
     }
-    // if we're not holding left or right, apply friction to slow down until we stop
+    // if we're not holding left or right, stop accelerating
     else {
       this.acc.x = 0
 
+      // if we're not moving, play the idle animation
       if (this.vel.x === 0) {
         this.setAnimation('idle')
       }
