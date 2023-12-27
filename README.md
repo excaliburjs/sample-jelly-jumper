@@ -12,7 +12,9 @@ npm start
 ## Controls
 
 Move - Arrow keys
+
 Run - S
+
 Jump - A (TODO)
 
 ## Credits
