@@ -1,0 +1,21 @@
+{
+  "name": "sample-full-platformer",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel serve index.html",
+    "build": "parcel build ./index.html --dist-dir ./dist --public-url ./"
+  },
+  "author": "mattjennings",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "excalibur": "0.28.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.5",
+    "parcel": "2.10.2",
+    "ts-lit-plugin": "2.0.1",
+    "typescript": "5.3.2"
+  }
+}
