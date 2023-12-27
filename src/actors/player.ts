@@ -1,5 +1,6 @@
 import * as ex from 'excalibur'
 import { Resources } from '../resources'
+import { AnimationComponent } from '../components/AnimationComponent'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img_player,
@@ -41,7 +42,7 @@ export default class Player extends ex.Actor {
   /**
    * The amount of time the player must be running before they can sprint.
    */
-  SPRINT_TRIGGER_TIME = 300
+  SPRINT_TRIGGER_TIME = 500
 
   /**
    * The base duration of each frame in the player's animation.
@@ -49,7 +50,7 @@ export default class Player extends ex.Actor {
    */
   FRAME_DURATION = 140
 
-  animations = {
+  animation = new AnimationComponent({
     idle: ex.Animation.fromSpriteSheet(
       spritesheet,
       [0, 1, 2, 3],
@@ -62,11 +63,7 @@ export default class Player extends ex.Actor {
     ),
     jump: ex.Animation.fromSpriteSheet(spritesheet, [8], this.FRAME_DURATION),
     fall: ex.Animation.fromSpriteSheet(spritesheet, [9], this.FRAME_DURATION),
-    wall_slide: ex.Animation.fromSpriteSheet(
-      spritesheet,
-      [12],
-      this.FRAME_DURATION
-    ),
+    turn: ex.Animation.fromSpriteSheet(spritesheet, [12], this.FRAME_DURATION),
     ladder_climb: ex.Animation.fromSpriteSheet(
       spritesheet,
       [16, 17],
@@ -77,7 +74,7 @@ export default class Player extends ex.Actor {
       [20, 21, 22],
       this.FRAME_DURATION
     ),
-  }
+  })
 
   sprintTimer = 0
 
@@ -90,12 +87,14 @@ export default class Player extends ex.Actor {
       height: 16,
       collisionType: ex.CollisionType.Active,
     })
+
+    this.addComponent(this.animation)
   }
 
   onInitialize() {
     // offset sprite to account for anchor
     this.graphics.offset = new ex.Vector(0, 16)
-    this.setAnimation('idle')
+    this.animation.set('idle')
   }
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
@@ -103,27 +102,16 @@ export default class Player extends ex.Actor {
   }
 
   onPostUpdate(engine: ex.Engine, delta: number): void {
-    const maxVelocity = (() => {
-      switch (true) {
-        case this.isSprinting:
-          return this.SPRINT_MAX_VELOCITY
-        case this.isRunning:
-          return this.RUN_MAX_VELOCITY
-        default:
-          return this.WALK_MAX_VELOCITY
-      }
-    })()
-
     // decelerate if we're over the max velocity or stopped walking
     // (i think this is what causes the oscillating max speed behaviour in SNES mario)
-    if (Math.abs(this.vel.x) > maxVelocity || !this.isWalking) {
+    if (Math.abs(this.vel.x) > this.maxVelocity || !this.isWalking) {
       this.applyGroundFriction()
     }
 
     // increment the sprint timer if we're running
     if (
       this.isRunning &&
-      Math.abs(this.vel.x) >= this.RUN_MAX_VELOCITY * 0.95
+      Math.abs(this.vel.x) >= this.RUN_MAX_VELOCITY * 0.95 // allow a little bit of wiggle room as we're not always at max velocity
     ) {
       this.sprintTimer = Math.min(
         this.sprintTimer + delta,
@@ -135,13 +123,12 @@ export default class Player extends ex.Actor {
       this.sprintTimer = 0
     }
 
-    // modify the current animation frame duration based on the player's velocity
-    this.getCurrentAnimation().frames.forEach((frame) => {
-      frame.duration = Math.max(
-        30,
-        this.FRAME_DURATION - Math.abs(this.vel.x) / 2
-      )
-    })
+    // speed up the animation the faster we're moving
+    this.animation.speed = Math.min(
+      // increase anim speed exponentially up to 3x
+      1 + Math.pow(Math.abs(this.vel.x) / 200, 2) * 3,
+      3
+    )
   }
 
   /**
@@ -153,14 +140,15 @@ export default class Player extends ex.Actor {
       const isHoldingLeft = engine.input.keyboard.isHeld(ex.Keys.Left)
       const direction = isHoldingLeft ? -1 : 1
       this.acc.x = this.ACCELERATION * direction
+      this.graphics.flipHorizontal = isHoldingLeft
 
       // if we're turning around, apply more friction to slow down faster
       if (this.vel.x * direction < 0) {
+        this.animation.set('turn')
         this.applyGroundFriction()
+      } else {
+        this.animation.set('run')
       }
-
-      this.graphics.flipHorizontal = isHoldingLeft
-      this.setAnimation('run')
     }
     // if we're not holding left or right, stop accelerating
     else {
@@ -168,32 +156,9 @@ export default class Player extends ex.Actor {
 
       // if we're not moving, play the idle animation
       if (this.vel.x === 0) {
-        this.setAnimation('idle')
+        this.animation.set('idle')
       }
     }
-  }
-
-  /**
-   * Sets the current animation starting from the beginning. If the animation is already playing,
-   * it will not be restarted.
-   */
-  setAnimation(key: keyof typeof this.animations) {
-    const anim = this.animations[key]
-
-    // if we're already playing this animation, don't restart it
-    if (this.getCurrentAnimation() === anim) return
-
-    this.graphics.use(anim)
-
-    // reset the animation to the beginning
-    anim.reset()
-  }
-
-  /**
-   * Returns the current animation.
-   */
-  getCurrentAnimation() {
-    return this.graphics.current[0]?.graphic as ex.Animation
   }
 
   get isWalking() {
@@ -209,6 +174,17 @@ export default class Player extends ex.Actor {
 
   get isSprinting() {
     return this.isRunning && this.sprintTimer >= this.SPRINT_TRIGGER_TIME
+  }
+
+  get maxVelocity() {
+    switch (true) {
+      case this.isSprinting:
+        return this.SPRINT_MAX_VELOCITY
+      case this.isRunning:
+        return this.RUN_MAX_VELOCITY
+      default:
+        return this.WALK_MAX_VELOCITY
+    }
   }
 
   /**
