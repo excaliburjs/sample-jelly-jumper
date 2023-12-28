@@ -8,6 +8,7 @@ ex.Physics.acc = new ex.Vector(0, 800)
 const game = new ex.Engine({
   resolution: ex.Resolution.SNES,
   displayMode: ex.DisplayMode.FitScreen,
+  fixedUpdateFps: 60,
   antialiasing: false,
 })
 
