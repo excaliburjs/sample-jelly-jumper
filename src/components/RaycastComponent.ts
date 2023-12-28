@@ -125,19 +125,30 @@ export class RaycastComponent extends ex.Component {
       bottomRight: true,
     })
 
-    return hits.bottom.length > 0 || this.isOnSlope()
+    return hits.bottom.length > 0 || this.getSlopeAngle() > 0
   }
 
-  isOnSlope(maxSlopeAngle = 8): false | number {
-    const { bottomLeft, bottomRight } = this.castCorners(maxSlopeAngle, {
+  getSlopeAngle(groundDistance = 1, maxSlopeDistance = 8): number {
+    const { bottomLeft, bottomRight } = this.castCorners(maxSlopeDistance, {
       bottomLeft: true,
       bottomRight: true,
     })
-    const left = bottomLeft?.[0]
-    const right = bottomRight?.[0]
 
-    if (!left || !right || left?.distance === right?.distance) {
-      return false
+    // pick closest hit
+    const left = bottomLeft.sort((a, b) => a.distance - b.distance)[0]
+    const right = bottomRight.sort((a, b) => a.distance - b.distance)[0]
+
+    if (!left || !right) {
+      return 0
+    }
+
+    const leftOnGround = left.distance <= groundDistance
+    const rightOnGround = right.distance <= groundDistance
+    const isEven = leftOnGround === rightOnGround
+
+    // if we're in the air or on flat ground, return 0
+    if ((!leftOnGround && !rightOnGround) || isEven) {
+      return 0
     }
 
     const angle = Math.atan2(

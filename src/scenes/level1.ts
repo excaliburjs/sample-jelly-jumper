@@ -3,7 +3,7 @@ import Player from '../actors/player'
 
 export default class Level1 extends ex.Scene {
   onInitialize() {
-    const player = new Player(32, 32)
+    const player = new Player(320, 32)
     this.add(player)
 
     const checkerboardSize = 32
@@ -16,6 +16,7 @@ export default class Level1 extends ex.Scene {
         const isDarkGreen = (x + y) % 2 === 0
         this.add(
           new ex.Actor({
+            name: `checkerboard-${x}-${y}`,
             x: -100 + x * checkerboardSize,
             y: 100 + y * checkerboardSize,
             width: checkerboardSize,
@@ -39,17 +40,35 @@ export default class Level1 extends ex.Scene {
     // })
     // this.add(ground)
 
-    const slope1 = new ex.Actor({
-      x: 50,
-      y: 200,
-      width: 300,
-      height: 300,
+    const trianglePoints = [ex.vec(-128, 16), ex.vec(0, -16), ex.vec(128, 16)]
+    const triangle = new ex.Actor({
+      name: 'triangle',
+      x: 100,
+      y: 69,
+      collider: new ex.PolygonCollider({ points: trianglePoints }),
+      collisionType: ex.CollisionType.Fixed,
+    })
+    const triangleGraphic = new ex.Polygon({
+      points: trianglePoints,
+      color: ex.Color.Green,
+      filtering: ex.ImageFiltering.Pixel,
+      smoothing: false,
+      quality: 4,
+    })
+    triangle.graphics.use(triangleGraphic)
+    this.add(triangle)
+
+    const leftwall = new ex.Actor({
+      name: 'leftwall',
+      x: -100,
+      y: 100,
+      width: 100,
+      height: 800,
       anchor: ex.vec(0.5, 0.5),
       color: ex.Color.Green,
       collisionType: ex.CollisionType.Fixed,
-      rotation: Math.PI / 15,
     })
-    this.add(slope1)
+    this.add(leftwall)
 
     this.camera.strategy.lockToActor(player)
   }

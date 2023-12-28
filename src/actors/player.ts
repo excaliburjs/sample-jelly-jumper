@@ -106,6 +106,7 @@ export default class Player extends ex.Actor {
       height: 16,
       collisionType: ex.CollisionType.Active,
       collider: ex.Shape.Box(10, 16, ex.vec(0.5, 1)),
+      // collider: ex.Shape.Capsule(10, 16, ex.vec(0.5, -8)),
     })
 
     this.addComponent(this.animation)
@@ -113,26 +114,26 @@ export default class Player extends ex.Actor {
     this.addComponent(this.input)
   }
 
-  onInitialize() {
+  onInitialize(engine: ex.Engine) {
+    super.onInitialize(engine)
+
     // offset sprite to account for anchor
     this.graphics.offset = new ex.Vector(0, 16)
     this.animation.set('idle')
+
+    this.on('precollision', this.onPreCollision.bind(this))
+    this.on('postcollision', this.onPostCollision.bind(this))
   }
+
+  onPreCollision(ev: ex.PreCollisionEvent) {}
+
+  onPostCollision(ev: ex.PostCollisionEvent) {}
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
     this.handleInput(engine, delta)
   }
 
   onPostUpdate(engine: ex.Engine, delta: number): void {
-    // set jump/fall animation if we're in the air
-    if (this.vel.y !== 0 && !this.raycast.isOnGround()) {
-      if (this.vel.y < 0) {
-        this.animation.set('jump')
-      } else {
-        this.animation.set('fall')
-      }
-    }
-
     // decelerate if we're over the max velocity or stopped walking
     // (i think this is what causes the oscillating max speed behaviour in SNES mario)
     if (Math.abs(this.vel.x) > this.maxVelocity || !this.isMoving) {
@@ -162,17 +163,7 @@ export default class Player extends ex.Actor {
       3
     )
 
-    // if standing on slope, apply force to counteract gravity
-    const slopeAngle = this.raycast.isOnSlope()
-    if (slopeAngle) {
-      const gravity = ex.Physics.acc
-      const gravityAngle = Math.atan2(gravity.y, gravity.x)
-      const angle = gravityAngle - slopeAngle
-      const magnitude = Math.sqrt(gravity.x * gravity.x + gravity.y * gravity.y)
-      const forceX = Math.cos(angle) * magnitude
-      this.acc.x += forceX
-      console.log(this.vel.y)
-    }
+    this.handleAnimation()
   }
 
   /**
@@ -187,47 +178,73 @@ export default class Player extends ex.Actor {
     if (this.input.isHeld('Left') || this.input.isHeld('Right')) {
       const isHoldingLeft = this.input.isHeld('Left')
       const direction = isHoldingLeft ? -1 : 1
-      this.acc.x = this.ACCELERATION * direction
+      const accel = this.ACCELERATION * direction
+
       this.graphics.flipHorizontal = isHoldingLeft
 
       // if we're turning around, apply more friction to slow down faster
       if (isOnGround) {
-        if (this.vel.x * direction < 0) {
-          this.animation.set('turn')
+        this.acc.x = accel
+
+        if (this.isTurning) {
+          // apply extra friction to turn around quicker
           this.applyGroundFriction()
-        } else {
-          if (this.isSprinting) {
-            this.animation.set(
-              'sprint',
-              this.animation.current === this.animation.get('run')
-                ? this.animation.current.currentFrameIndex
-                : 0
-            )
-          } else {
-            this.animation.set(
-              'run',
-              this.animation.current === this.animation.get('sprint')
-                ? this.animation.current.currentFrameIndex
-                : 0
-            )
-          }
         }
+      } else {
+        this.acc.x = accel
       }
     }
     // if we're not holding left or right, stop accelerating
     else {
       this.acc.x = 0
-
-      if (isOnGround) {
-        // if we're not moving, play the idle animation
-        if (this.vel.x === 0) {
-          this.animation.set('idle')
-        }
-      }
     }
 
     if (jumpPressed && isOnGround) {
       this.jump()
+    } else if (!jumpHeld && this.vel.y < 0) {
+      this.vel.y *= 0.5
+    }
+  }
+
+  /**
+   * Sets the player's animation based on their current state.
+   */
+  handleAnimation() {
+    const isOnGround = this.raycast.isOnGround()
+
+    if (isOnGround) {
+      if (this.isTurning) {
+        this.animation.set('turn')
+      } else {
+        if (this.isSprinting) {
+          this.animation.set(
+            'sprint',
+            this.animation.current === this.animation.get('run')
+              ? this.animation.current.currentFrameIndex
+              : 0
+          )
+        } else {
+          this.animation.set(
+            'run',
+            this.animation.current === this.animation.get('sprint')
+              ? this.animation.current.currentFrameIndex
+              : 0
+          )
+        }
+      }
+      // if we're not moving, play the idle animation
+      if (this.vel.x === 0) {
+        this.animation.set('idle')
+      }
+    } else {
+      // set jump/fall animation if we're in the air
+      if (this.vel.y !== 0) {
+        if (this.vel.y < 0) {
+          this.animation.set('jump')
+        } else {
+          this.animation.set('fall')
+        }
+      }
     }
   }
 
@@ -256,6 +273,13 @@ export default class Player extends ex.Actor {
       this.isRunning &&
       this.sprintTimer >= this.SPRINT_TRIGGER_TIME &&
       Math.abs(this.vel.x) >= this.RUN_MAX_VELOCITY
+    )
+  }
+
+  get isTurning() {
+    return (
+      (this.input.isHeld('Left') && this.vel.x > 0) ||
+      (this.input.isHeld('Right') && this.vel.x < 0)
     )
   }
 

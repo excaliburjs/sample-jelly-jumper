@@ -10,7 +10,7 @@
   "author": "mattjennings",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "excalibur": "0.28.4"
+    "excalibur": "^0.28.4"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
