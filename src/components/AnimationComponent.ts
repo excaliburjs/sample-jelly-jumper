@@ -22,18 +22,19 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
    * Sets the current animation starting from the beginning. If the animation is already playing,
    * it will not be restarted.
    */
-  set(name: Keys, startFromBeginning = true) {
+  set(name: Keys, startFromFrame = 0) {
     const anim = this._animations[name]
 
     // return if the animation is already playing
     if (this.current === anim) return
 
-    this.owner.graphics.use(anim)
-
-    // reset the animation to the beginning
-    if (startFromBeginning) {
+    if (startFromFrame) {
+      anim.goToFrame(startFromFrame)
+    } else {
       anim.reset()
     }
+
+    this.owner.graphics.use(anim)
   }
 
   /**

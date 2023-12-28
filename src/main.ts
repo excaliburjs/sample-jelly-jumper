@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
-import Level1 from "./scenes/level1"
-import { loader } from "./resources"
+import Level1 from './scenes/level1'
+import { loader } from './resources'
 
 ex.Physics.useArcadePhysics()
 ex.Physics.acc = new ex.Vector(0, 800)

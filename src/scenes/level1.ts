@@ -28,6 +28,29 @@ export default class Level1 extends ex.Scene {
       }
     }
 
+    // const ground = new ex.Actor({
+    //   x: -100,
+    //   y: 100,
+    //   width: 800,
+    //   height: 100,
+    //   anchor: ex.vec(0.5, 0.5),
+    //   color: ex.Color.Green,
+    //   collisionType: ex.CollisionType.Fixed,
+    // })
+    // this.add(ground)
+
+    const slope1 = new ex.Actor({
+      x: 50,
+      y: 200,
+      width: 300,
+      height: 300,
+      anchor: ex.vec(0.5, 0.5),
+      color: ex.Color.Green,
+      collisionType: ex.CollisionType.Fixed,
+      rotation: Math.PI / 15,
+    })
+    this.add(slope1)
+
     this.camera.strategy.lockToActor(player)
   }
 }
