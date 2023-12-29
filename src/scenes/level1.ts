@@ -1,5 +1,6 @@
 import * as ex from 'excalibur'
 import Player from '../actors/player'
+import { MovingPlatform } from '../actors/moving-platform'
 
 export default class Level1 extends ex.Scene {
   onInitialize() {
@@ -69,6 +70,20 @@ export default class Level1 extends ex.Scene {
       collisionType: ex.CollisionType.Fixed,
     })
     this.add(leftwall)
+
+    const platform = new MovingPlatform(
+      {
+        x: 300,
+        y: 75,
+        width: 100,
+        height: 16,
+      },
+      (actions) =>
+        actions.repeatForever((builder) =>
+          builder.moveBy(100, -50, 50).moveBy(-100, 50, 50)
+        )
+    )
+    this.add(platform)
 
     this.camera.strategy.lockToActor(player)
   }

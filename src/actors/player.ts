@@ -1,8 +1,8 @@
 import * as ex from 'excalibur'
 import { Resources } from '../resources'
 import { AnimationComponent } from '../components/AnimationComponent'
-import { RaycastComponent } from '../components/RaycastComponent'
 import { InputComponent } from '../components/InputComponent'
+import { PhysicsActor } from './physics-actor'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img_player,
@@ -14,7 +14,7 @@ const spritesheet = ex.SpriteSheet.fromImageSource({
   },
 })
 
-export default class Player extends ex.Actor {
+export default class Player extends PhysicsActor {
   /* Constants */
 
   /**
@@ -90,7 +90,6 @@ export default class Player extends ex.Actor {
       this.FRAME_DURATION
     ),
   })
-  raycast = new RaycastComponent()
   input = new InputComponent()
 
   /* State */
@@ -110,7 +109,6 @@ export default class Player extends ex.Actor {
     })
 
     this.addComponent(this.animation)
-    this.addComponent(this.raycast)
     this.addComponent(this.input)
   }
 
