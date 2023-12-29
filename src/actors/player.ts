@@ -52,43 +52,17 @@ export default class Player extends PhysicsActor {
    */
   SPRINT_TRIGGER_TIME = 500
 
-  /**
-   * The base duration of each frame in the player's animation.
-   * This gets modified based on the player's velocity.
-   */
-  FRAME_DURATION = 140
-
   /* Components */
 
   animation = new AnimationComponent({
-    idle: ex.Animation.fromSpriteSheet(
-      spritesheet,
-      [0, 1, 2, 3],
-      this.FRAME_DURATION
-    ),
-    run: ex.Animation.fromSpriteSheet(
-      spritesheet,
-      [4, 5, 6, 7],
-      this.FRAME_DURATION
-    ),
-    sprint: ex.Animation.fromSpriteSheet(
-      spritesheet,
-      [8, 9, 10, 11],
-      this.FRAME_DURATION
-    ),
-    jump: ex.Animation.fromSpriteSheet(spritesheet, [12], this.FRAME_DURATION),
-    fall: ex.Animation.fromSpriteSheet(spritesheet, [13], this.FRAME_DURATION),
-    turn: ex.Animation.fromSpriteSheet(spritesheet, [16], this.FRAME_DURATION),
-    ladder_climb: ex.Animation.fromSpriteSheet(
-      spritesheet,
-      [20, 21],
-      this.FRAME_DURATION
-    ),
-    wall_climb: ex.Animation.fromSpriteSheet(
-      spritesheet,
-      [24, 25, 26],
-      this.FRAME_DURATION
-    ),
+    idle: ex.Animation.fromSpriteSheet(spritesheet, [0, 1, 2, 3], 140),
+    run: ex.Animation.fromSpriteSheet(spritesheet, [4, 5, 6, 7], 140),
+    sprint: ex.Animation.fromSpriteSheet(spritesheet, [8, 9, 10, 11], 140),
+    jump: ex.Animation.fromSpriteSheet(spritesheet, [12], 140),
+    fall: ex.Animation.fromSpriteSheet(spritesheet, [13], 140),
+    turn: ex.Animation.fromSpriteSheet(spritesheet, [16], 140),
+    ladder_climb: ex.Animation.fromSpriteSheet(spritesheet, [20, 21], 140),
+    wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [24, 25, 26], 140),
   })
   input = new InputComponent()
 
@@ -127,11 +101,11 @@ export default class Player extends PhysicsActor {
 
   onPostCollision(ev: ex.PostCollisionEvent) {}
 
-  onPreUpdate(engine: ex.Engine, delta: number): void {
-    this.handleInput(engine, delta)
-  }
+  update(engine: ex.Engine, delta: number): void {
+    super.update(engine, delta)
 
-  onPostUpdate(engine: ex.Engine, delta: number): void {
+    this.handleInput(engine, delta)
+
     // decelerate if we're over the max velocity or stopped walking
     // (i think this is what causes the oscillating max speed behaviour in SNES mario)
     if (Math.abs(this.vel.x) > this.maxVelocity || !this.isMoving) {
@@ -163,6 +137,8 @@ export default class Player extends PhysicsActor {
 
     this.handleAnimation()
   }
+
+  onPostUpdate(engine: ex.Engine, delta: number): void {}
 
   /**
    * Process user input to control the character
@@ -221,7 +197,7 @@ export default class Player extends PhysicsActor {
               ? this.animation.current.currentFrameIndex
               : 0
           )
-        } else {
+        } else if (this.isMoving) {
           this.animation.set(
             'run',
             this.animation.current === this.animation.get('sprint')
