@@ -1,7 +1,7 @@
 import * as ex from 'excalibur'
 import { Resources } from '../resources'
-import { AnimationComponent } from '../components/AnimationComponent'
-import { InputComponent } from '../components/InputComponent'
+import { AnimationComponent } from '../components/animation'
+import { InputComponent } from '../components/input'
 import { PhysicsActor } from './physics-actor'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({

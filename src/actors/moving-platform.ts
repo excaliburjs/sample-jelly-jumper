@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { TouchingComponent } from '../components/TouchingComponent'
+import { TouchingComponent } from '../components/touching'
 
 export class MovingPlatform extends ex.Actor {
   touching = new TouchingComponent()
