@@ -80,7 +80,8 @@ export default class Level1 extends ex.Scene {
       },
       (actions) =>
         actions.repeatForever((builder) =>
-          builder.moveBy(100, -50, 50).moveBy(-100, 50, 50)
+          // builder.moveBy(20, 0, 50).moveBy(-20, 0, 50)
+          builder.moveBy(50, -50, 100).moveBy(-50, 50, 100)
         )
     )
     this.add(platform)

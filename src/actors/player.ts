@@ -43,14 +43,14 @@ export default class Player extends PhysicsActor {
    */
   SPRINT_MAX_VELOCITY = 185
 
-  IDLE_JUMP_FORCE = 300
-  WALK_JUMP_FORCE = 375
-  RUN_JUMP_FORCE = 330
-
   /**
    * The amount of time the player must be running before they can sprint.
    */
   SPRINT_TRIGGER_TIME = 500
+
+  IDLE_JUMP_FORCE = 300
+  WALK_JUMP_FORCE = 375
+  RUN_JUMP_FORCE = 330
 
   /* Components */
 
@@ -64,7 +64,7 @@ export default class Player extends PhysicsActor {
     ladder_climb: ex.Animation.fromSpriteSheet(spritesheet, [20, 21], 140),
     wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [24, 25, 26], 140),
   })
-  input = new InputComponent()
+  input = new PlayerInputComponent()
 
   /* State */
 
@@ -101,33 +101,22 @@ export default class Player extends PhysicsActor {
 
   onPostCollision(ev: ex.PostCollisionEvent) {}
 
-  update(engine: ex.Engine, delta: number): void {
-    super.update(engine, delta)
-
+  onPreUpdate(engine: ex.Engine, delta: number): void {
     this.handleInput(engine, delta)
 
     // decelerate if we're over the max velocity or stopped walking
     // (i think this is what causes the oscillating max speed behaviour in SNES mario)
-    if (Math.abs(this.vel.x) > this.maxVelocity || !this.isMoving) {
+    if (Math.abs(this.vel.x) > this.maxVelocity || !this.input.isMoving) {
       this.applyGroundFriction()
     }
+  }
 
-    // increment the sprint timer if we're running
-    if (
-      this.isRunning &&
-      // allow a little bit of wiggle room as we're not always at max velocity
-      Math.abs(this.vel.x) >= this.RUN_MAX_VELOCITY * 0.95
-    ) {
-      this.sprintTimer = Math.min(
-        this.sprintTimer + delta,
-        this.SPRINT_TRIGGER_TIME
-      )
-    }
-    // reset the sprint timer if we're not running
-    else if (!this.isRunning) {
-      this.sprintTimer = 0
-    }
+  update(engine: ex.Engine, delta: number): void {
+    this.acc.setTo(0, 0)
+    super.update(engine, delta)
+  }
 
+  onPostUpdate(engine: ex.Engine, delta: number): void {
     // speed up the animation the faster we're moving
     this.animation.speed = Math.min(
       // increase anim speed exponentially up to 3x
@@ -137,8 +126,6 @@ export default class Player extends PhysicsActor {
 
     this.handleAnimation()
   }
-
-  onPostUpdate(engine: ex.Engine, delta: number): void {}
 
   /**
    * Process user input to control the character
@@ -158,19 +145,15 @@ export default class Player extends PhysicsActor {
 
       // if we're turning around, apply more friction to slow down faster
       if (isOnGround) {
-        this.acc.x = accel
+        this.acc.x += accel
 
-        if (this.isTurning) {
+        if (this.input.isTurning) {
           // apply extra friction to turn around quicker
           this.applyGroundFriction()
         }
       } else {
-        this.acc.x = accel
+        this.acc.x += accel
       }
-    }
-    // if we're not holding left or right, stop accelerating
-    else {
-      this.acc.x = 0
     }
 
     if (jumpPressed && isOnGround) {
@@ -187,23 +170,32 @@ export default class Player extends PhysicsActor {
     const isOnGround = this.raycast.isOnGround()
 
     if (isOnGround) {
-      if (this.isTurning) {
+      if (this.input.isTurning) {
         this.animation.set('turn')
       } else {
-        if (this.isSprinting) {
-          this.animation.set(
-            'sprint',
-            this.animation.current === this.animation.get('run')
-              ? this.animation.current.currentFrameIndex
-              : 0
-          )
-        } else if (this.isMoving) {
-          this.animation.set(
-            'run',
-            this.animation.current === this.animation.get('sprint')
-              ? this.animation.current.currentFrameIndex
-              : 0
-          )
+        const isMovingInInputDirection =
+          (!this.input.isHeld('Left') && !this.input.isHeld('Right')) ||
+          (this.input.isHeld('Left') && this.vel.x < 0) ||
+          (this.input.isHeld('Right') && this.vel.x > 0)
+
+        if (isMovingInInputDirection) {
+          if (this.input.isSprinting) {
+            this.animation.set(
+              'sprint',
+              this.animation.current === this.animation.get('run')
+                ? this.animation.current.currentFrameIndex
+                : 0
+            )
+          } else if (this.vel.x !== 0) {
+            this.animation.set(
+              'run',
+              this.animation.current === this.animation.get('sprint')
+                ? this.animation.current.currentFrameIndex
+                : 0
+            )
+          }
+        } else {
+          this.animation.set('idle')
         }
       }
       // if we're not moving, play the idle animation
@@ -227,41 +219,18 @@ export default class Player extends PhysicsActor {
 
     // if (this.isWalking) {
     //   jumpForce = this.WALK_JUMP_FORCE
-    // } else if (this.isRunning) {
+    // } else if (this.input.isRunning) {
     //   jumpForce = this.RUN_JUMP_FORCE
     // }
 
     this.vel.y = -jumpForce
   }
 
-  get isMoving() {
-    return this.input.isHeld('Left') || this.input.isHeld('Right')
-  }
-
-  get isRunning() {
-    return this.isMoving && this.scene.engine.input.keyboard.isHeld(ex.Keys.S)
-  }
-
-  get isSprinting() {
-    return (
-      this.isRunning &&
-      this.sprintTimer >= this.SPRINT_TRIGGER_TIME &&
-      Math.abs(this.vel.x) >= this.RUN_MAX_VELOCITY
-    )
-  }
-
-  get isTurning() {
-    return (
-      (this.input.isHeld('Left') && this.vel.x > 0) ||
-      (this.input.isHeld('Right') && this.vel.x < 0)
-    )
-  }
-
   get maxVelocity() {
     switch (true) {
-      case this.isSprinting:
+      case this.input.isSprinting:
         return this.SPRINT_MAX_VELOCITY
-      case this.isRunning:
+      case this.input.isRunning:
         return this.RUN_MAX_VELOCITY
       default:
         return this.WALK_MAX_VELOCITY
@@ -281,21 +250,59 @@ export default class Player extends PhysicsActor {
 }
 
 /**
- * NOTES
+ * Handles user input for the player, adding some extra helper methods
+ * to get the intent of movement via input.
  *
- * SNES Mario speeds (https://www.smwcentral.net/?p=viewthread&t=97883)
- *
- * sp = sub pixel
- * 16 sp = 1 pixel
- *
- * walking max speed: 21sp per frame = 1.3125 pixels per frame = 78.75 pixels per second
- * running max speed: 37sp per frame = 2.3125 pixels per frame = 138.75 pixels per second
- * sprinting max speed: 49sp per frame = 3.0625 pixels per frame = 183.75 pixels per second
- *
- * acceleration rate: 1.5sp per frame = 0.09375 pixels per frame = 5.625 pixels per second
- *
- * Mario max speed oscillates in a 0-1-0-1-2 pattern. When mario jumps, his speed stays at that value until he lands.
- *
- * I wonder if this is because mario decelerates when he crosses the max velocity on the ground? I accidentally
- * managed to mimic this behaviour by doing this
+ * For example, `isMoving` returns true if the player is holding left or right, but
+ * does not necessarily mean the player is actually moving.
  */
+class PlayerInputComponent extends InputComponent {
+  declare owner: Player
+
+  sprintTimer = 0
+
+  onAdd(owner: Player): void {
+    super.onAdd?.(owner)
+
+    // increment the sprint timer to toggle sprinting if we're running for SPRINT_TRIGGER_TIME
+    owner.on('postupdate', ({ delta }) => {
+      if (
+        this.isRunning &&
+        // allow a little bit of wiggle room as we're not always at max velocity
+        Math.abs(this.owner.vel.x) >= this.owner.RUN_MAX_VELOCITY * 0.95
+      ) {
+        this.sprintTimer = Math.min(
+          this.sprintTimer + delta,
+          this.owner.SPRINT_TRIGGER_TIME
+        )
+      }
+      // reset the sprint timer if we're not running
+      else if (!this.isRunning) {
+        this.sprintTimer = 0
+      }
+    })
+  }
+
+  get isMoving() {
+    return this.isHeld('Left') || this.isHeld('Right')
+  }
+
+  get isRunning() {
+    return this.isMoving && this.isHeld('Run')
+  }
+
+  get isSprinting() {
+    return (
+      this.isRunning &&
+      this.sprintTimer >= this.owner.SPRINT_TRIGGER_TIME &&
+      Math.abs(this.owner.vel.x) >= this.owner.RUN_MAX_VELOCITY
+    )
+  }
+
+  get isTurning() {
+    return (
+      (this.isHeld('Left') && this.owner.vel.x > 0) ||
+      (this.isHeld('Right') && this.owner.vel.x < 0)
+    )
+  }
+}

@@ -5,20 +5,6 @@ import { PhysicsActor } from './physics-actor'
 export class MovingPlatform extends ex.Actor {
   touching = new TouchingComponent()
 
-  private prevVel = ex.vec(0, 0)
-  private prevPos = ex.vec(0, 0)
-  private prevTouching: {
-    top: ex.Actor[]
-    bottom: ex.Actor[]
-    left: ex.Actor[]
-    right: ex.Actor[]
-  } = {
-    top: [],
-    bottom: [],
-    left: [],
-    right: [],
-  }
-
   private actionsCb: (actions: ex.ActionsComponent) => any
 
   constructor(args: ex.ActorArgs, cb: (actions: ex.ActionsComponent) => any) {
@@ -28,8 +14,6 @@ export class MovingPlatform extends ex.Actor {
       ...args,
     })
 
-    this.body.mass = Infinity
-    this.body.useGravity = false
     this.actionsCb = cb
 
     this.addComponent(new ex.TagComponent('moving-platform'))
@@ -38,46 +22,31 @@ export class MovingPlatform extends ex.Actor {
 
   onInitialize(_engine: ex.Engine): void {
     this.actionsCb(this.actions)
-
-    this.prevPos = this.pos.clone()
-    this.prevVel = this.vel.clone()
-
-    this.on('actionstart', (ev) => {
-      this.snapTopActors(this.prevTouching.top)
-    })
-
-    this.on('actioncomplete', (ev) => {
-      this.prevTouching = {
-        top: [...this.touching.top],
-        bottom: [...this.touching.bottom],
-        left: [...this.touching.left],
-        right: [...this.touching.right],
-      }
-    })
   }
 
-  onPreUpdate(_engine: ex.Engine, _delta: number): void {}
-
-  onPostUpdate(_engine: ex.Engine, _delta: number): void {
-    this.snapTopActors(this.touching.top)
-    this.prevVel = this.vel.clone()
-    this.prevPos = this.pos.clone()
+  update(engine: ex.Engine, delta: number): void {
+    this.movePassengersX(this.touching.top)
+    this.movePassengersY(this.touching.top)
+    super.update(engine, delta)
   }
 
-  /**
-   * Snap actors to the top of the platform
-   */
-  snapTopActors(actors: ex.Actor[]) {
+  onPostUpdate(_engine: ex.Engine, _delta: number): void {}
+  movePassengersY(actors: ex.Actor[]) {
     for (const actor of actors) {
-      const platformBounds = this.collider.bounds
+      // snap the actor to the top of the platform
+      actor.pos.y = this.collider.bounds.top + 1
+    }
+  }
 
-      if (actor.vel.y >= 0) {
-        actor.pos.y = platformBounds.top + 1
-      }
+  movePassengersX(actors: ex.Actor[]) {
+    for (const actor of actors) {
+      // move the actor along with the platform if they're not moving
+      const distance = this.pos.x - this.oldPos.x
+      actor.pos.x += distance
 
-      if (this.pos.x - this.prevPos.x !== 0) {
-        actor.pos.x += this.pos.x - this.prevPos.x
-      }
+      // replace 120 with fixedUpdateFps value
+      // for some reason, this has the same "lag" effect when platform changes direction
+      // actor.pos.x += this.vel.x / 120
     }
   }
 }
