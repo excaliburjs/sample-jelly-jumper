@@ -1,47 +1,75 @@
 import * as ex from 'excalibur'
-import { TouchingComponent } from '../components/touching'
 
 export class MovingPlatform extends ex.Actor {
-  touching = new TouchingComponent()
-
-  private passengers: ex.Actor[] = []
-  private actionCtx = new ex.ActionContext(this)
-
-  constructor(args: ex.ActorArgs, cb: (actions: ex.ActionContext) => any) {
+  constructor(args: ex.ActorArgs, cb: (actions: ex.ActionsComponent) => any) {
     super({
       color: ex.Color.Green,
       collisionType: ex.CollisionType.Fixed,
       ...args,
     })
 
-    this.addComponent(new ex.TagComponent('moving-platform'))
-    this.addComponent(this.touching)
-    cb(this.actionCtx)
+    cb(this.actions)
+
+    this.on('collisionstart', this.onCollisionStart.bind(this))
+    this.on('collisionend', this.onCollisionEnd.bind(this))
   }
 
-  onPreUpdate(_engine: ex.Engine, _delta: number): void {}
+  /**
+   * When an actor lands on top add it as a child so that
+   * it moves with the platform.
+   */
+  onCollisionStart(ev: ex.CollisionStartEvent) {
+    if (ev.other.collider) {
+      const side = this.getCollisionSide(ev.other)
 
-  update(engine: ex.Engine, delta: number): void {
-    this.passengers = [...this.touching.top]
-    this.movePassengers()
-    this.snapPassengers()
-    super.update(engine, delta)
-    this.actionCtx.update(delta)
-  }
+      if (side === 'top' && !this.children.includes(ev.other)) {
+        this.addChild(ev.other)
 
-  onPostUpdate(_engine: ex.Engine, _delta: number): void {}
-
-  snapPassengers() {
-    for (const actor of this.passengers) {
-      // snap the actor to the top of the platform
-      actor.pos.y = this.collider.bounds.top + 1
+        // children's position are local to the parent so we need adjust it
+        // so that the child stays in the same position on the platform
+        ev.other.pos.x -= this.pos.x
+        ev.other.pos.y -= this.pos.y
+      }
     }
   }
 
-  movePassengers() {
-    for (const actor of this.passengers) {
-      // move the actor by the same amount as the platform
-      actor.pos.x += this.vel.x / this.scene.engine.fixedUpdateFps!
+  /**
+   * When an actor leaves the platform remove it as a child
+   */
+  onCollisionEnd(ev: ex.CollisionEndEvent) {
+    if (this.children.includes(ev.other)) {
+      this.removeChild(ev.other)
+      this.scene.add(ev.other)
+
+      // now that the child is no longer a child we need to adjust its position
+      // back to global coordinates
+      ev.other.pos.x += this.pos.x
+      ev.other.pos.y += this.pos.y
+    }
+  }
+
+  /**
+   * Get the side of the collision that is closest to the other actor.
+   */
+  getCollisionSide(other: ex.Actor) {
+    const otherBounds = other.collider.bounds
+    const bounds = this.collider.bounds
+
+    const bottom = Math.abs(bounds.bottom - otherBounds.top)
+    const top = Math.abs(bounds.top - otherBounds.bottom)
+    const left = Math.abs(bounds.left - otherBounds.right)
+    const right = Math.abs(bounds.right - otherBounds.left)
+
+    const min = Math.min(left, right, top, bottom)
+
+    if (min === left) {
+      return 'left'
+    } else if (min === right) {
+      return 'right'
+    } else if (min === top) {
+      return 'top'
+    } else if (min === bottom) {
+      return 'bottom'
     }
   }
 }

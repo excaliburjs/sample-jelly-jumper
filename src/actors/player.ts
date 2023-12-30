@@ -66,10 +66,6 @@ export default class Player extends PhysicsActor {
   })
   input = new PlayerInputComponent()
 
-  /* State */
-
-  sprintTimer = 0
-
   constructor(args: { x: number; y: number }) {
     super({
       ...args,

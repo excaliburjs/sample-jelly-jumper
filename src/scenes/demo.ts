@@ -4,7 +4,7 @@ import { MovingPlatform } from '../actors/moving-platform'
 
 export default class Demo extends ex.Scene {
   onInitialize() {
-    const player = new Player(320, 32)
+    const player = new Player({ x: 320, y: 32 })
     this.add(player)
 
     const checkerboardSize = 32
@@ -74,20 +74,26 @@ export default class Demo extends ex.Scene {
     const platform = new MovingPlatform(
       {
         x: 350,
-        y: 25,
+        y: 50,
         width: 100,
         height: 16,
       },
       (actions) =>
         actions.repeatForever(
-          (builder) => builder.moveBy(50, 50, 50).moveBy(-50, -50, 50)
-          // builder
-          //   .easeBy(-50, 50, 2000, ex.EasingFunctions.EaseOutQuad)
-          //   .delay(500)
-          //   .easeBy(50, -50, 2000, ex.EasingFunctions.EaseOutQuad)
-          //   .delay(500)
+          (builder) =>
+            builder
+              .moveBy(50, -50, 100)
+              .moveBy(50, 50, 100)
+              .moveBy(-50, -50, 500)
+              .moveBy(-50, 50, 500)
+          // .easeBy(-50, 50, 500, ex.EasingFunctions.EaseOutQuad)
+          // .delay(500)
+          // .easeBy(50, -50, 500, ex.EasingFunctions.EaseOutQuad)
+          // .delay(500)
+          // .moveBy(200, -50, 500)
         )
     )
+    200
     this.add(platform)
 
     this.camera.strategy.lockToActor(player)
