@@ -7,12 +7,15 @@
         "public/res"
     ],
     "fileStates": {
+        "": {
+            "scaleInEditor": 2.7514
+        },
         "public/res/tilemaps/level1.tmx": {
-            "scale": 2.4307,
-            "selectedLayer": 1,
+            "scale": 2.4135,
+            "selectedLayer": 0,
             "viewCenter": {
-                "x": 75.49265643641749,
-                "y": 89.68609865470852
+                "x": 95.91879013880256,
+                "y": 147.0892894137145
             }
         },
         "public/res/tilemaps/level1.tmx#tileset": {
