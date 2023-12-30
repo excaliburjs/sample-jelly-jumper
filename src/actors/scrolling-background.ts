@@ -1,8 +1,8 @@
 import * as ex from 'excalibur'
 
 export class ScrollingBackground extends ex.Entity {
-  xSpeed = 0.25
-  ySpeed = 0.1
+  xSpeed: number
+  ySpeed: number
 
   image: ex.ImageSource
 
@@ -15,7 +15,7 @@ export class ScrollingBackground extends ex.Entity {
     ySpeed?: number
     z?: number
   }) {
-    const { xSpeed = 0.25, ySpeed = 0.1, z = -100, image } = args
+    const { xSpeed = 0.25, ySpeed = 0.05, z = -100, image } = args
     super()
     this.addComponent(this.graphics)
     this.addComponent(this.transform)
