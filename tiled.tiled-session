@@ -1,0 +1,30 @@
+{
+    "activeFile": "public/res/tilemaps/level1.tmx",
+    "expandedProjectPaths": [
+        "public/res/tilemaps",
+        "public",
+        ".",
+        "public/res"
+    ],
+    "fileStates": {
+        "public/res/tilemaps/level1.tmx": {
+            "scale": 2.4307,
+            "selectedLayer": 1,
+            "viewCenter": {
+                "x": 75.49265643641749,
+                "y": 89.68609865470852
+            }
+        },
+        "public/res/tilemaps/level1.tmx#tileset": {
+            "scaleInDock": 1
+        }
+    },
+    "openFiles": [
+        "public/res/tilemaps/level1.tmx"
+    ],
+    "project": "tiled.tiled-project",
+    "property.type": "bool",
+    "recentFiles": [
+        "public/res/tilemaps/level1.tmx"
+    ]
+}

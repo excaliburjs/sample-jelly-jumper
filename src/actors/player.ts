@@ -62,7 +62,7 @@ export default class Player extends PhysicsActor {
     fall: ex.Animation.fromSpriteSheet(spritesheet, [13], 140),
     turn: ex.Animation.fromSpriteSheet(spritesheet, [16], 140),
     ladder_climb: ex.Animation.fromSpriteSheet(spritesheet, [20, 21], 140),
-    wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [24, 25, 26], 140),
+    wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [28, 29, 30], 140),
   })
   input = new PlayerInputComponent()
 
@@ -70,10 +70,10 @@ export default class Player extends PhysicsActor {
 
   sprintTimer = 0
 
-  constructor(x: number, y: number) {
+  constructor(args: { x: number; y: number }) {
     super({
+      ...args,
       name: 'Player',
-      pos: new ex.Vector(x, y),
       anchor: new ex.Vector(0.5, 1),
       width: 16,
       height: 16,
