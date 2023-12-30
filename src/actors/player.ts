@@ -199,7 +199,7 @@ export default class Player extends PhysicsActor {
         }
       }
       // if we're not moving, play the idle animation
-      if (this.vel.x === 0) {
+      if (Math.round(this.vel.x) === 0) {
         this.animation.set('idle')
       }
     } else {

@@ -45,7 +45,7 @@ export default class Level1 extends ex.Scene {
     const triangle = new ex.Actor({
       name: 'triangle',
       x: 100,
-      y: 69,
+      y: 68,
       collider: new ex.PolygonCollider({ points: trianglePoints }),
       collisionType: ex.CollisionType.Fixed,
     })
@@ -73,15 +73,19 @@ export default class Level1 extends ex.Scene {
 
     const platform = new MovingPlatform(
       {
-        x: 300,
-        y: 75,
+        x: 350,
+        y: 25,
         width: 100,
         height: 16,
       },
       (actions) =>
-        actions.repeatForever((builder) =>
-          // builder.moveBy(20, 0, 50).moveBy(-20, 0, 50)
-          builder.moveBy(50, -50, 100).moveBy(-50, 50, 100)
+        actions.repeatForever(
+          (builder) => builder.moveBy(50, 50, 50).moveBy(-50, -50, 50)
+          // builder
+          //   .easeBy(-50, 50, 2000, ex.EasingFunctions.EaseOutQuad)
+          //   .delay(500)
+          //   .easeBy(50, -50, 2000, ex.EasingFunctions.EaseOutQuad)
+          //   .delay(500)
         )
     )
     this.add(platform)
