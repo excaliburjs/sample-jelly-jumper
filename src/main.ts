@@ -7,10 +7,14 @@ ex.Physics.useArcadePhysics()
 ex.Physics.acc = new ex.Vector(0, 800)
 
 const game = new ex.Engine({
-  resolution: ex.Resolution.SNES,
+  resolution: {
+    height: ex.Resolution.SNES.height,
+    // make 16:9
+    width: (ex.Resolution.SNES.height / 9) * 16,
+  },
   displayMode: ex.DisplayMode.FitScreen,
-  fixedUpdateFps: 120,
-  maxFps: 60,
+  // fixedUpdateFps: 120,
+  // maxFps: 60,
   antialiasing: false,
 })
 

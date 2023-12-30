@@ -3,18 +3,21 @@ import Player from '../actors/player'
 import { Resources } from '../resources'
 import { TiledMapResource, TiledObjectGroup } from '@excaliburjs/plugin-tiled'
 import { OneWayPlatform } from '../actors/one-way-platform'
+import { ScrollingBackground } from '../actors/scrolling-background'
 
 export default class BaseLevelScene extends ex.Scene {
   tilemap: TiledMapResource
+  background: ex.ImageSource
 
   entityFactory: Record<string, any> = {
     Player,
     OneWayPlatform,
   }
 
-  constructor(args: { tilemap: TiledMapResource }) {
+  constructor(args: { tilemap: TiledMapResource; background: ex.ImageSource }) {
     super()
     this.tilemap = args.tilemap
+    this.background = args.background
   }
 
   onInitialize() {
@@ -23,6 +26,7 @@ export default class BaseLevelScene extends ex.Scene {
     this.setupEntities()
     this.setupCamera()
     this.setupWorldBounds()
+    this.setupBackground()
   }
 
   setupEntities() {
@@ -92,5 +96,9 @@ export default class BaseLevelScene extends ex.Scene {
         ]),
       })
     )
+  }
+
+  setupBackground() {
+    this.add(new ScrollingBackground({ image: this.background }))
   }
 }

@@ -5,7 +5,6 @@ export class OneWayPlatform extends ex.Actor {
     super({
       ...args,
       collisionType: ex.CollisionType.Passive,
-
       anchor: ex.vec(0, 0),
       height: 4,
     })
