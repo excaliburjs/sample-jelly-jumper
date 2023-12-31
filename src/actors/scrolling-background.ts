@@ -15,7 +15,7 @@ export class ScrollingBackground extends ex.Entity {
     ySpeed?: number
     z?: number
   }) {
-    const { xSpeed = 0.25, ySpeed = 0.05, z = -100, image } = args
+    const { xSpeed = 0.1, ySpeed = 0.05, z = -100, image } = args
     super()
     this.addComponent(this.graphics)
     this.addComponent(this.transform)
