@@ -13,8 +13,7 @@ const game = new ex.Engine({
     width: (ex.Resolution.SNES.height / 9) * 16,
   },
   displayMode: ex.DisplayMode.FitScreen,
-  // fixedUpdateFps: 120,
-  // maxFps: 60,
+  fixedUpdateFps: 60,
   antialiasing: false,
 })
 

@@ -57,19 +57,21 @@ export class ScrollingBackground extends ex.Entity {
     this.scene.on('predraw', () => {
       const camera = this.scene.camera
 
+      const cameraLeft = camera.interpolatedPos.x - _engine.halfDrawWidth
+      const cameraTop = camera.interpolatedPos.y - _engine.halfDrawHeight
+      const cameraCenter = camera.interpolatedPos
+
       // set the position of the background to the top left of the camera
-      this.transform.pos.x = camera.viewport.left
-      this.transform.pos.y = camera.viewport.top
+      this.transform.pos.x = cameraLeft
+      this.transform.pos.y = cameraTop
 
       // create a parallax effect by adjusting the anchor based on the camera's
       // position
       this.graphics.anchor.x =
-        ((camera.viewport.center.x / sprite.width) * this.xSpeed) %
-        (1 / xRepeat)
+        ((cameraCenter.x / sprite.width) * this.xSpeed) % (1 / xRepeat)
 
       this.graphics.anchor.y =
-        ((camera.viewport.center.y / sprite.height) * this.ySpeed) %
-        (1 / yRepeat)
+        ((cameraCenter.y / sprite.height) * this.ySpeed) % (1 / yRepeat)
     })
   }
 }
