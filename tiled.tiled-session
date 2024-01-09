@@ -1,21 +1,21 @@
 {
     "activeFile": "public/res/tilemaps/level1.tmx",
     "expandedProjectPaths": [
-        "public/res/tilemaps",
         ".",
-        "public",
-        "public/res"
+        "public/res",
+        "public/res/tilemaps",
+        "public"
     ],
     "fileStates": {
         "": {
             "scaleInEditor": 1
         },
         "public/res/tilemaps/level1.tmx": {
-            "scale": 1.6854,
+            "scale": 0.8105,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 193.12922748309006,
-                "y": 233.77239824374035
+                "x": 236.2739049969155,
+                "y": 243.05983960518202
             }
         },
         "public/res/tilemaps/level1.tmx#tileset": {
