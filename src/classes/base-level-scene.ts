@@ -38,7 +38,6 @@ export default class BaseLevelScene extends ex.Scene {
   }
 
   setupWorldBounds() {
-    console.log(this.tilemap)
     const tilemapWidth = this.tilemap.map.width * this.tilemap.map.tilewidth
     const tilemapHeight = this.tilemap.map.height * this.tilemap.map.tileheight
 
