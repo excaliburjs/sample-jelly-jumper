@@ -25,6 +25,7 @@ export default class BaseLevelScene extends ex.Scene {
 
     this.setupCamera()
     this.setupBackground()
+    this.setupWorldBounds()
   }
 
   setupCamera() {
@@ -37,9 +38,9 @@ export default class BaseLevelScene extends ex.Scene {
   }
 
   setupWorldBounds() {
-    const tilemapWidth = this.tilemap.data.width * this.tilemap.data.tileWidth
-    const tilemapHeight =
-      this.tilemap.data.height * this.tilemap.data.tileHeight
+    console.log(this.tilemap)
+    const tilemapWidth = this.tilemap.map.width * this.tilemap.map.tilewidth
+    const tilemapHeight = this.tilemap.map.height * this.tilemap.map.tileheight
 
     // create world bounds
     this.engine.add(
