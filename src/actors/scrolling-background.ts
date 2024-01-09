@@ -57,9 +57,9 @@ export class ScrollingBackground extends ex.Entity {
     this.scene.on('predraw', () => {
       const camera = this.scene.camera
 
-      const cameraLeft = camera.interpolatedPos.x - _engine.halfDrawWidth
-      const cameraTop = camera.interpolatedPos.y - _engine.halfDrawHeight
-      const cameraCenter = camera.interpolatedPos
+      const cameraLeft = camera.drawPos.x - _engine.halfDrawWidth
+      const cameraTop = camera.drawPos.y - _engine.halfDrawHeight
+      const cameraCenter = camera.drawPos
 
       // set the position of the background to the top left of the camera
       this.transform.pos.x = cameraLeft

@@ -66,7 +66,7 @@ export default class Player extends PhysicsActor {
   /* State */
   // (none yet)
 
-  constructor(args: { x: number; y: number }) {
+  constructor(args: { x: number; y: number; z?: number }) {
     super({
       ...args,
       name: 'Player',

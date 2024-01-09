@@ -1,12 +1,12 @@
 import * as ex from 'excalibur'
 import Player from '../actors/player'
 import { Resources } from '../resources'
-import { TiledMapResource, TiledObjectGroup } from '@excaliburjs/plugin-tiled'
+import { TiledResource, TiledObjectGroup } from '@excaliburjs/plugin-tiled'
 import { OneWayPlatform } from '../actors/one-way-platform'
 import { ScrollingBackground } from '../actors/scrolling-background'
 
 export default class BaseLevelScene extends ex.Scene {
-  tilemap: TiledMapResource
+  tilemap: TiledResource
   background: ex.ImageSource
 
   entityFactory: Record<string, any> = {
@@ -14,41 +14,17 @@ export default class BaseLevelScene extends ex.Scene {
     OneWayPlatform,
   }
 
-  constructor(args: { tilemap: TiledMapResource; background: ex.ImageSource }) {
+  constructor(args: { tilemap: TiledResource; background: ex.ImageSource }) {
     super()
     this.tilemap = args.tilemap
     this.background = args.background
   }
 
   onInitialize() {
-    this.tilemap.addTiledMapToScene(this)
+    this.tilemap.addToScene(this)
 
-    this.setupEntities()
     this.setupCamera()
-    this.setupWorldBounds()
     this.setupBackground()
-  }
-
-  setupEntities() {
-    const objectLayers: TiledObjectGroup[] =
-      Resources.tilemap_level1.data.getObjects()
-
-    for (const layer of objectLayers) {
-      for (const object of layer.objects) {
-        let className = object.type as keyof typeof this.entityFactory
-
-        if (className && this.entityFactory[className]) {
-          const entity = new this.entityFactory[className]({
-            x: object.x,
-            y: object.y,
-            width: object.width,
-            height: object.height,
-            z: objectLayers.indexOf(layer),
-          })
-          this.add(entity)
-        }
-      }
-    }
   }
 
   setupCamera() {
@@ -56,15 +32,8 @@ export default class BaseLevelScene extends ex.Scene {
     const player = this.entities.find((e) => e instanceof Player) as Player
     this.camera.strategy.lockToActor(player)
 
-    // set camera bounds
-    const width = this.tilemap.data.width * this.tilemap.data.tileWidth
-    const height = this.tilemap.data.height * this.tilemap.data.tileHeight
-    const tilemap = this.tileMaps[0]
-    if (tilemap) {
-      this.camera.strategy.limitCameraBounds(
-        new ex.BoundingBox(0, 0, width, height)
-      )
-    }
+    // @ts-expect-error - temporary to prioritize lockToActor over tilemap strategy
+    this.camera._cameraStrategies.reverse()
   }
 
   setupWorldBounds() {

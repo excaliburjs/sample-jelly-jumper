@@ -2,7 +2,7 @@ import * as ex from 'excalibur'
 import Level1 from './scenes/level1'
 import { loader } from './resources'
 import Demo from './scenes/demo'
-
+import { TiledResources } from './resources.tiled'
 ex.Physics.useArcadePhysics()
 ex.Physics.acc = new ex.Vector(0, 800)
 
@@ -19,6 +19,10 @@ const game = new ex.Engine({
 
 game.addScene('level1', new Level1())
 game.addScene('demo', new Demo())
+
+Object.values(TiledResources).forEach((resource) => {
+  loader.addResource(resource)
+})
 
 game.start(loader).then(() => {
   game.goToScene('level1')
