@@ -20,7 +20,7 @@ export default class Player extends PhysicsActor {
   /**
    * The amount of acceleration to apply to the player when they are walking or running.
    */
-  ACCELERATION = 0.1015625 * Math.pow(60, 2)
+  ACCELERATION = 365
 
   STOP_DECELERATION = this.ACCELERATION
   TURN_DECELERATION = this.ACCELERATION * 2
