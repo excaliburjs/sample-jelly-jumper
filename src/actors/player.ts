@@ -18,39 +18,36 @@ export default class Player extends PhysicsActor {
   /* Constants */
 
   /**
-   * The amount of friction to apply to the player when they are on the ground and not
-   * moving left or right.
-   */
-  GROUND_FRICTION = 0.925
-
-  /**
    * The amount of acceleration to apply to the player when they are walking or running.
    */
-  ACCELERATION = 384
+  ACCELERATION = 0.1015625 * Math.pow(60, 2)
+
+  STOP_DECELERATION = this.ACCELERATION
+  TURN_DECELERATION = this.ACCELERATION * 2
 
   /**
    * The maximum velocity the player can walk at.
    */
-  WALK_MAX_VELOCITY = 80
+  WALK_MAX_VELOCITY = 90
 
   /**
    * The maximum velocity the player can run at.
    */
-  RUN_MAX_VELOCITY = 140
+  RUN_MAX_VELOCITY = 150
 
   /**
    * The maximum velocity the player can sprint at (triggers when running for a while)
    */
-  SPRINT_MAX_VELOCITY = 185
+  SPRINT_MAX_VELOCITY = 210
 
   /**
    * The amount of time the player must be running before they can sprint.
    */
-  SPRINT_TRIGGER_TIME = 500
+  SPRINT_TRIGGER_TIME = 1000
 
   IDLE_JUMP_FORCE = 300
-  WALK_JUMP_FORCE = 375
   RUN_JUMP_FORCE = 330
+  SPRINT_JUMP_FORCE = 375
 
   /* Components */
 
@@ -65,6 +62,9 @@ export default class Player extends PhysicsActor {
     wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [28, 29, 30], 140),
   })
   input = new PlayerInputComponent()
+
+  /* State */
+  // (none yet)
 
   constructor(args: { x: number; y: number }) {
     super({
@@ -99,12 +99,6 @@ export default class Player extends PhysicsActor {
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
     this.handleInput(engine, delta)
-
-    // decelerate if we're over the max velocity or stopped walking
-    // (i think this is what causes the oscillating max speed behaviour in SNES mario)
-    if (Math.abs(this.vel.x) > this.maxVelocity || !this.input.isMoving) {
-      this.applyGroundFriction()
-    }
   }
 
   update(engine: ex.Engine, delta: number): void {
@@ -121,6 +115,7 @@ export default class Player extends PhysicsActor {
     )
 
     this.handleAnimation()
+    this.applyDeceleration()
   }
 
   /**
@@ -139,17 +134,7 @@ export default class Player extends PhysicsActor {
 
       this.graphics.flipHorizontal = isHoldingLeft
 
-      // if we're turning around, apply more friction to slow down faster
-      if (isOnGround) {
-        this.acc.x += accel
-
-        if (this.input.isTurning) {
-          // apply extra friction to turn around quicker
-          this.applyGroundFriction()
-        }
-      } else {
-        this.acc.x += accel
-      }
+      this.acc.x += accel
     }
 
     if (jumpPressed && isOnGround) {
@@ -213,11 +198,11 @@ export default class Player extends PhysicsActor {
   jump() {
     let jumpForce = this.IDLE_JUMP_FORCE
 
-    // if (this.isWalking) {
-    //   jumpForce = this.WALK_JUMP_FORCE
-    // } else if (this.input.isRunning) {
-    //   jumpForce = this.RUN_JUMP_FORCE
-    // }
+    if (this.input.isSprinting) {
+      jumpForce = this.SPRINT_JUMP_FORCE
+    } else if (this.input.isRunning) {
+      jumpForce = this.RUN_JUMP_FORCE
+    }
 
     this.vel.y = -jumpForce
   }
@@ -236,11 +221,36 @@ export default class Player extends PhysicsActor {
   /**
    * Applies ground friction to the player's velocity.
    */
-  applyGroundFriction(friction = this.GROUND_FRICTION) {
-    if (this.vel.x > 1 || this.vel.x < -1) {
-      this.vel.x *= friction
-    } else {
-      this.vel.x = 0
+  applyDeceleration() {
+    const isOnGround = this.raycast.isOnGround()
+    const isOverMaxVelocity = Math.abs(this.vel.x) > this.maxVelocity
+
+    // ground deceleration
+    if (isOnGround) {
+      // apply turn deceleration if we're turning
+      if (this.input.isTurning) {
+        this.acc.x = -this.TURN_DECELERATION * Math.sign(this.vel.x)
+      }
+      // decelerate if we're over the max velocity or stopped walking
+      else if (!this.input.isMoving || isOverMaxVelocity) {
+        // if we're close to stopping, just stop
+        if (Math.abs(this.vel.x) < 3) {
+          this.vel.x = 0
+          this.acc.x = 0
+        } else if (this.vel.x !== 0) {
+          this.acc.x = -this.STOP_DECELERATION * Math.sign(this.vel.x)
+        }
+      }
+    }
+    // air deceleration
+    else {
+      if (this.input.isTurning) {
+        this.acc.x = -this.TURN_DECELERATION * Math.sign(this.vel.x)
+      } else if (isOverMaxVelocity) {
+        // in air, clamp to max velocity
+        this.vel.x = ex.clamp(this.vel.x, -this.maxVelocity, this.maxVelocity)
+        this.acc.x = 0
+      }
     }
   }
 }
@@ -262,18 +272,18 @@ class PlayerInputComponent extends InputComponent {
 
     // increment the sprint timer to toggle sprinting if we're running for SPRINT_TRIGGER_TIME
     owner.on('postupdate', ({ delta }) => {
-      if (
-        this.isRunning &&
-        // allow a little bit of wiggle room as we're not always at max velocity
-        Math.abs(this.owner.vel.x) >= this.owner.RUN_MAX_VELOCITY * 0.95
-      ) {
+      const isOnGround = this.owner.raycast.isOnGround()
+      const jumpedBeforeSprinting = !isOnGround && !this.isSprinting
+      const isTurningOnGround = this.isTurning && isOnGround
+
+      if (this.isRunning && isOnGround) {
         this.sprintTimer = Math.min(
           this.sprintTimer + delta,
           this.owner.SPRINT_TRIGGER_TIME
         )
       }
       // reset the sprint timer if we're not running
-      else if (!this.isRunning) {
+      else if (!this.isRunning || isTurningOnGround || jumpedBeforeSprinting) {
         this.sprintTimer = 0
       }
     })
@@ -288,11 +298,7 @@ class PlayerInputComponent extends InputComponent {
   }
 
   get isSprinting() {
-    return (
-      this.isRunning &&
-      this.sprintTimer >= this.owner.SPRINT_TRIGGER_TIME &&
-      Math.abs(this.owner.vel.x) >= this.owner.RUN_MAX_VELOCITY
-    )
+    return this.isRunning && this.sprintTimer >= this.owner.SPRINT_TRIGGER_TIME
   }
 
   get isTurning() {
@@ -302,3 +308,17 @@ class PlayerInputComponent extends InputComponent {
     )
   }
 }
+/*
+Flat Ground Physics
+ 
+                px/s
+Max velocity (walking)        - 90
+Max velocity (running)        - 150
+Max velocity (sprinting)      - 210
+End-of-level walk speed       - 75
+Airship cutscene walk speed   - 120
+ 
+                px/s^2
+Walk/run/sprint acceleration  - 0.1015625
+Stop Deceleration (normal)    - 0.1015625
+*/
