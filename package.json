@@ -12,7 +12,7 @@
   "license": "BSD-2-Clause",
   "dependencies": {
     "@excaliburjs/plugin-tiled": "^0.29.0-alpha.1",
-    "excalibur": "^0.28.5"
+    "excalibur": "0.29.0-alpha.828"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",

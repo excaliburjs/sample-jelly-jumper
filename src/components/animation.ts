@@ -20,16 +20,16 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
 
   /**
    * Sets the current animation starting from the beginning. If the animation is already playing,
-   * it will not be restarted.
+   * it will not be restarted. Optionally provide a duration left
    */
-  set(name: Keys, startFromFrame = 0) {
+  set(name: Keys, startFromFrame = 0, durationLeft?: number) {
     const anim = this._animations[name]
 
     // return if the animation is already playing
     if (this.current === anim) return
 
     if (startFromFrame) {
-      anim.goToFrame(startFromFrame)
+      anim.goToFrame(startFromFrame, durationLeft)
     } else {
       anim.reset()
     }
