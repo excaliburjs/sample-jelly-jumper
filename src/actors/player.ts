@@ -149,6 +149,8 @@ export default class Player extends PhysicsActor {
    */
   handleAnimation() {
     const isOnGround = this.raycast.isOnGround()
+    const currentFrameIndex = this.animation.current.currentFrameIndex
+    const currentFrameTimeLeft = this.animation.current.currentFrameTimeLeft
 
     if (isOnGround) {
       if (this.input.isTurning) {
@@ -161,17 +163,25 @@ export default class Player extends PhysicsActor {
 
         if (isMovingInInputDirection) {
           if (this.input.isSprinting) {
+            const fromRunToSprint = this.animation.current === this.animation.get('run')
             this.animation.set(
-              'sprint',
-              this.animation.current === this.animation.get('run')
-                ? this.animation.current.currentFrameIndex
-                : 0
+              'sprint', 
+                fromRunToSprint
+                  ? currentFrameIndex
+                  : 0,
+                fromRunToSprint
+                  ? currentFrameTimeLeft
+                  : 0
             )
           } else if (this.vel.x !== 0) {
+            const fromSprintToRun = this.animation.current === this.animation.get('sprint')
             this.animation.set(
               'run',
-              this.animation.current === this.animation.get('sprint')
-                ? this.animation.current.currentFrameIndex
+              fromSprintToRun
+                ? currentFrameIndex
+                : 0,
+              fromSprintToRun 
+                ? currentFrameTimeLeft
                 : 0
             )
           }
