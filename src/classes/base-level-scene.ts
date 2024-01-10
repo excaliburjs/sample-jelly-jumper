@@ -1,7 +1,11 @@
 import * as ex from 'excalibur'
 import Player from '../actors/player'
 import { Resources } from '../resources'
-import { TiledResource, TiledObjectGroup } from '@excaliburjs/plugin-tiled'
+import {
+  TiledResource,
+  TiledObjectGroup,
+  TiledMap,
+} from '@excaliburjs/plugin-tiled'
 import { OneWayPlatform } from '../actors/one-way-platform'
 import { ScrollingBackground } from '../actors/scrolling-background'
 
@@ -26,6 +30,7 @@ export default class BaseLevelScene extends ex.Scene {
     this.setupCamera()
     this.setupBackground()
     this.setupWorldBounds()
+    this.setupOneWayPlatforms()
   }
 
   setupCamera() {
@@ -69,5 +74,35 @@ export default class BaseLevelScene extends ex.Scene {
 
   setupBackground() {
     this.add(new ScrollingBackground({ image: this.background }))
+  }
+
+  setupOneWayPlatforms() {
+    // get all tiles with oneway property
+    const onewayTiles = this.tilemap.getTilesByProperty('oneway', true)
+    const layerNames = this.tilemap.map.layers.map((l) => l.name)
+    const tileWidth = this.tilemap.map.tilewidth
+    const tileHeight = this.tilemap.map.tileheight
+
+    // iterate through all tiles, check if they are oneway tiles, and
+    // then create a OneWayPlatform at that location
+    for (const layerName of layerNames) {
+      for (let row = 0; row < this.tilemap.map.width; row++) {
+        for (let col = 0; col < this.tilemap.map.height; col++) {
+          const tile = this.tilemap.getTileByCoordinate(layerName, row, col)
+
+          if (!tile) continue
+
+          if (onewayTiles.includes(tile?.tiledTile!)) {
+            const platform = new OneWayPlatform({
+              x: row * tileWidth,
+              y: col * tileHeight,
+              width: tileWidth,
+              height: tileHeight,
+            })
+            this.add(platform)
+          }
+        }
+      }
+    }
   }
 }

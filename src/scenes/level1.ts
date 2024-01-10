@@ -19,6 +19,6 @@ export default class Level1 extends BaseLevelScene {
       color: ex.Color.Red,
       collisionType: ex.CollisionType.Active,
     })
-    this.add(square)
+    // this.add(square)
   }
 }
