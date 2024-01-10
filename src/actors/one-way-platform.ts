@@ -6,7 +6,7 @@ export class OneWayPlatform extends ex.Actor {
       ...args,
       collisionType: ex.CollisionType.Fixed,
       anchor: ex.vec(0, 0),
-      height: 1,
+      height: 16,
     })
   }
 
@@ -18,23 +18,18 @@ export class OneWayPlatform extends ex.Actor {
   ): void {
     if (!(other.owner instanceof ex.Actor)) return
 
-    // ignore if the other actor is moving up
-    if (other.owner.vel.y < 0) {
+    // the difference between the current and previous position of the other actor
+    const otherPosDelta = other.owner.pos.sub(other.owner.oldPos)
+
+    // was the other actor above the platform in the previous frame?
+    const otherWasAbovePlatform =
+      other.bounds.bottom - otherPosDelta.y < self.bounds.top + 1
+
+    // ignore collision if the collision side is not on the top,
+    // or if other was not above the platform in the previous frame
+    if (side !== ex.Side.Top || !otherWasAbovePlatform) {
       contact.cancel()
       return
     }
-
-    // ignore if collision is not from the top
-    if (side !== ex.Side.Top) {
-      contact.cancel()
-      return
-    }
-
-    const bottomDistance = other.bounds.bottom - self.bounds.top
-
-    // if (bottomDistance < 2) {
-    //   contact.cancel()
-    //   return
-    // }
   }
 }
