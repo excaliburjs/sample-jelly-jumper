@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
-import { RaycastComponent } from '../components/raycast'
-import { TouchingComponent } from '../components/touching'
+import { RaycastComponent } from '../components/physics/raycast'
+import { TouchingComponent } from '../components/physics/touching'
 
 export class PhysicsActor extends ex.Actor {
   touching = new TouchingComponent()

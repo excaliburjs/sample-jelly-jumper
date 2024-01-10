@@ -1,7 +1,7 @@
 import * as ex from 'excalibur'
 import { Resources } from '../resources'
-import { AnimationComponent } from '../components/animation'
-import { InputComponent } from '../components/input'
+import { AnimationComponent } from '../components/graphics/animation'
+import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from './physics-actor'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
@@ -61,7 +61,7 @@ export default class Player extends PhysicsActor {
     ladder_climb: ex.Animation.fromSpriteSheet(spritesheet, [20, 21], 140),
     wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [28, 29, 30], 140),
   })
-  input = new PlayerInputComponent()
+  controls = new PlayerControlsComponent()
 
   /* State */
   // (none yet)
@@ -79,7 +79,7 @@ export default class Player extends PhysicsActor {
     })
 
     this.addComponent(this.animation)
-    this.addComponent(this.input)
+    this.addComponent(this.controls)
   }
 
   onInitialize(engine: ex.Engine) {
@@ -122,13 +122,13 @@ export default class Player extends PhysicsActor {
    * Process user input to control the character
    */
   handleInput(engine: ex.Engine, delta: number) {
-    const jumpPressed = this.input.wasPressed('Jump')
-    const jumpHeld = this.input.isHeld('Jump')
+    const jumpPressed = this.controls.wasPressed('Jump')
+    const jumpHeld = this.controls.isHeld('Jump')
     const isOnGround = this.raycast.isOnGround()
 
     // move left or right
-    if (this.input.isHeld('Left') || this.input.isHeld('Right')) {
-      const isHoldingLeft = this.input.isHeld('Left')
+    if (this.controls.isHeld('Left') || this.controls.isHeld('Right')) {
+      const isHoldingLeft = this.controls.isHeld('Left')
       const direction = isHoldingLeft ? -1 : 1
       const accel = this.ACCELERATION * direction
 
@@ -153,36 +153,30 @@ export default class Player extends PhysicsActor {
     const currentFrameTimeLeft = this.animation.current.currentFrameTimeLeft
 
     if (isOnGround) {
-      if (this.input.isTurning) {
+      if (this.controls.isTurning) {
         this.animation.set('turn')
       } else {
         const isMovingInInputDirection =
-          (!this.input.isHeld('Left') && !this.input.isHeld('Right')) ||
-          (this.input.isHeld('Left') && this.vel.x < 0) ||
-          (this.input.isHeld('Right') && this.vel.x > 0)
+          (!this.controls.isHeld('Left') && !this.controls.isHeld('Right')) ||
+          (this.controls.isHeld('Left') && this.vel.x < 0) ||
+          (this.controls.isHeld('Right') && this.vel.x > 0)
 
         if (isMovingInInputDirection) {
-          if (this.input.isSprinting) {
-            const fromRunToSprint = this.animation.current === this.animation.get('run')
+          if (this.controls.isSprinting) {
+            const fromRunToSprint =
+              this.animation.current === this.animation.get('run')
             this.animation.set(
-              'sprint', 
-                fromRunToSprint
-                  ? currentFrameIndex
-                  : 0,
-                fromRunToSprint
-                  ? currentFrameTimeLeft
-                  : 0
+              'sprint',
+              fromRunToSprint ? currentFrameIndex : 0,
+              fromRunToSprint ? currentFrameTimeLeft : 0
             )
           } else if (this.vel.x !== 0) {
-            const fromSprintToRun = this.animation.current === this.animation.get('sprint')
+            const fromSprintToRun =
+              this.animation.current === this.animation.get('sprint')
             this.animation.set(
               'run',
-              fromSprintToRun
-                ? currentFrameIndex
-                : 0,
-              fromSprintToRun 
-                ? currentFrameTimeLeft
-                : 0
+              fromSprintToRun ? currentFrameIndex : 0,
+              fromSprintToRun ? currentFrameTimeLeft : 0
             )
           }
         } else {
@@ -208,9 +202,9 @@ export default class Player extends PhysicsActor {
   jump() {
     let jumpForce = this.IDLE_JUMP_FORCE
 
-    if (this.input.isSprinting) {
+    if (this.controls.isSprinting) {
       jumpForce = this.SPRINT_JUMP_FORCE
-    } else if (this.input.isRunning) {
+    } else if (this.controls.isRunning) {
       jumpForce = this.RUN_JUMP_FORCE
     }
 
@@ -219,9 +213,9 @@ export default class Player extends PhysicsActor {
 
   get maxVelocity() {
     switch (true) {
-      case this.input.isSprinting:
+      case this.controls.isSprinting:
         return this.SPRINT_MAX_VELOCITY
-      case this.input.isRunning:
+      case this.controls.isRunning:
         return this.RUN_MAX_VELOCITY
       default:
         return this.WALK_MAX_VELOCITY
@@ -238,11 +232,11 @@ export default class Player extends PhysicsActor {
     // ground deceleration
     if (isOnGround) {
       // apply turn deceleration if we're turning
-      if (this.input.isTurning) {
+      if (this.controls.isTurning) {
         this.acc.x = -this.TURN_DECELERATION * Math.sign(this.vel.x)
       }
       // decelerate if we're over the max velocity or stopped walking
-      else if (!this.input.isMoving || isOverMaxVelocity) {
+      else if (!this.controls.isMoving || isOverMaxVelocity) {
         // if we're close to stopping, just stop
         if (Math.abs(this.vel.x) < 3) {
           this.vel.x = 0
@@ -254,7 +248,7 @@ export default class Player extends PhysicsActor {
     }
     // air deceleration
     else {
-      if (this.input.isTurning) {
+      if (this.controls.isTurning) {
         this.acc.x = -this.TURN_DECELERATION * Math.sign(this.vel.x)
       } else if (isOverMaxVelocity) {
         // in air, clamp to max velocity
@@ -272,7 +266,7 @@ export default class Player extends PhysicsActor {
  * For example, `isMoving` returns true if the player is holding left or right, but
  * does not necessarily mean the player is actually moving.
  */
-class PlayerInputComponent extends InputComponent {
+class PlayerControlsComponent extends ControlsComponent {
   declare owner: Player
 
   sprintTimer = 0

@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
 
-export class InputComponent extends ex.Component {
+export class ControlsComponent extends ex.Component {
   declare owner: ex.Entity
 
   type = 'input'
