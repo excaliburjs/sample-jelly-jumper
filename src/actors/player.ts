@@ -18,12 +18,34 @@ export default class Player extends PhysicsActor {
   /* Constants */
 
   /**
+   * The amount of gravity to apply to the player when they are jumping.
+   */
+  JUMP_GRAVITY = ex.Physics.acc.y * 0.5
+
+  /**
+   * The amount of gravity to apply to the player when they are near the apex of their jump.
+   */
+  APEX_GRAVITY = ex.Physics.acc.y * 0.3
+
+  /**
+   * The maximum speed the player can fall at.
+   */
+  MAX_FALL_SPEED = 270
+
+  /**
    * The amount of acceleration to apply to the player when they are walking or running.
    */
-  ACCELERATION = 365
+  ACCELERATION = 300
 
+  /**
+   * The amount of deceleration to apply to the player when they are stopping (i.e not hold any movement keys)
+   */
   STOP_DECELERATION = this.ACCELERATION
-  TURN_DECELERATION = this.ACCELERATION * 2
+
+  /**
+   * The amount of deceleration to apply to the player when they are turning around.
+   */
+  TURN_DECELERATION = this.ACCELERATION * 4
 
   /**
    * The maximum velocity the player can walk at.
@@ -45,9 +67,20 @@ export default class Player extends PhysicsActor {
    */
   SPRINT_TRIGGER_TIME = 1000
 
-  IDLE_JUMP_FORCE = 300
-  RUN_JUMP_FORCE = 330
-  SPRINT_JUMP_FORCE = 375
+  /**
+   * The amount of force to apply to the player when they jump while standing still or walking
+   */
+  JUMP_FORCE = 300
+
+  /**
+   * The amount of force to apply to the player when they jump while running
+   */
+  RUN_JUMP_FORCE = this.JUMP_FORCE * 1.15
+
+  /**
+   * The amount of force to apply to the player when they jump while sprinting
+   */
+  SPRINT_JUMP_FORCE = this.JUMP_FORCE * 1.3
 
   /* Components */
 
@@ -64,7 +97,12 @@ export default class Player extends PhysicsActor {
   controls = new PlayerControlsComponent()
 
   /* State */
-  // (none yet)
+
+  /**
+   * True while the user is holding the jump button or reached the
+   * apex of their jump before releasing the jump button.
+   */
+  isUsingJumpGravity = false
 
   constructor(args: { x: number; y: number; z?: number }) {
     super({
@@ -75,8 +113,10 @@ export default class Player extends PhysicsActor {
       height: 16,
       collisionType: ex.CollisionType.Active,
       collider: ex.Shape.Box(10, 16, ex.vec(0.5, 1)),
-      // collider: ex.Shape.Capsule(10, 16, ex.vec(0.5, -8)),
     })
+
+    // we'll handle gravity ourselves
+    this.body.useGravity = false
 
     this.addComponent(this.animation)
     this.addComponent(this.controls)
@@ -88,21 +128,34 @@ export default class Player extends PhysicsActor {
     // offset sprite to account for anchor
     this.graphics.offset = new ex.Vector(0, 16)
     this.animation.set('idle')
-
-    this.on('precollision', this.onPreCollision.bind(this))
-    this.on('postcollision', this.onPostCollision.bind(this))
   }
-
-  onPreCollision(ev: ex.PreCollisionEvent) {}
-
-  onPostCollision(ev: ex.PostCollisionEvent) {}
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
     this.handleInput(engine, delta)
   }
 
   update(engine: ex.Engine, delta: number): void {
-    this.acc.setTo(0, 0)
+    let useApexGravity = false
+
+    // if we're jumping use our jump gravity
+    if (this.vel.y < 0) {
+      this.isUsingJumpGravity = this.controls.isHeld('Jump')
+    }
+
+    // if we're near the apex of our jump, use apex gravity
+    if (this.isUsingJumpGravity && this.vel.y > -10 && this.vel.y < 10) {
+      useApexGravity = true
+    }
+
+    // apply gravity and reset X acceleration
+    if (useApexGravity) {
+      this.acc.setTo(0, this.APEX_GRAVITY)
+    } else if (this.isUsingJumpGravity) {
+      this.acc.setTo(0, this.JUMP_GRAVITY)
+    } else {
+      this.acc.setTo(0, ex.Physics.acc.y)
+    }
+
     super.update(engine, delta)
   }
 
@@ -116,6 +169,16 @@ export default class Player extends PhysicsActor {
 
     this.handleAnimation()
     this.applyDeceleration()
+
+    // clamp to max velocity
+    if (this.vel.y > this.MAX_FALL_SPEED) {
+      this.vel.y = this.MAX_FALL_SPEED
+    }
+
+    // reset jump gravity once we land on the ground
+    if (this.raycast.isOnGround()) {
+      this.isUsingJumpGravity = false
+    }
   }
 
   /**
@@ -139,8 +202,12 @@ export default class Player extends PhysicsActor {
 
     if (jumpPressed && isOnGround) {
       this.jump()
-    } else if (!jumpHeld && this.vel.y < 0) {
+    }
+    // cancel jump if we're not holding the jump button, but still
+    // enforce a minimum jump height
+    else if (!jumpHeld && this.vel.y < 0 && this.vel.y > -75) {
       this.vel.y *= 0.5
+      this.isUsingJumpGravity = false
     }
   }
 
@@ -162,7 +229,10 @@ export default class Player extends PhysicsActor {
           (this.controls.isHeld('Right') && this.vel.x > 0)
 
         if (isMovingInInputDirection) {
-          if (this.controls.isSprinting) {
+          if (
+            this.controls.isSprinting &&
+            Math.abs(this.vel.x) > this.RUN_MAX_VELOCITY
+          ) {
             const fromRunToSprint =
               this.animation.current === this.animation.get('run')
             this.animation.set(
@@ -200,7 +270,7 @@ export default class Player extends PhysicsActor {
   }
 
   jump() {
-    let jumpForce = this.IDLE_JUMP_FORCE
+    let jumpForce = this.JUMP_FORCE
 
     if (this.controls.isSprinting) {
       jumpForce = this.SPRINT_JUMP_FORCE
@@ -237,11 +307,7 @@ export default class Player extends PhysicsActor {
       }
       // decelerate if we're over the max velocity or stopped walking
       else if (!this.controls.isMoving || isOverMaxVelocity) {
-        // if we're close to stopping, just stop
-        if (Math.abs(this.vel.x) < 3) {
-          this.vel.x = 0
-          this.acc.x = 0
-        } else if (this.vel.x !== 0) {
+        if (this.vel.x !== 0) {
           this.acc.x = -this.STOP_DECELERATION * Math.sign(this.vel.x)
         }
       }
@@ -255,6 +321,15 @@ export default class Player extends PhysicsActor {
         this.vel.x = ex.clamp(this.vel.x, -this.maxVelocity, this.maxVelocity)
         this.acc.x = 0
       }
+    }
+
+    const isDecelerating =
+      Math.sign(this.vel.x) !== 0 &&
+      Math.sign(this.vel.x) !== Math.sign(this.acc.x)
+    // clamp to 0 if we're close enough
+    if (isDecelerating && Math.abs(this.vel.x) < 1) {
+      this.vel.x = 0
+      this.acc.x = 0
     }
   }
 }
@@ -280,7 +355,7 @@ class PlayerControlsComponent extends ControlsComponent {
       const jumpedBeforeSprinting = !isOnGround && !this.isSprinting
       const isTurningOnGround = this.isTurning && isOnGround
 
-      if (this.isRunning && isOnGround) {
+      if (this.isRunning && isOnGround && !isTurningOnGround) {
         this.sprintTimer = Math.min(
           this.sprintTimer + delta,
           this.owner.SPRINT_TRIGGER_TIME
@@ -312,17 +387,3 @@ class PlayerControlsComponent extends ControlsComponent {
     )
   }
 }
-/*
-Flat Ground Physics
- 
-                px/s
-Max velocity (walking)        - 90
-Max velocity (running)        - 150
-Max velocity (sprinting)      - 210
-End-of-level walk speed       - 75
-Airship cutscene walk speed   - 120
- 
-                px/s^2
-Walk/run/sprint acceleration  - 0.1015625
-Stop Deceleration (normal)    - 0.1015625
-*/
