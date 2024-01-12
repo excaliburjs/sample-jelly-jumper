@@ -112,7 +112,7 @@ class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
   /**
    * The duration of the camera offset tween in milliseconds.
    */
-  X_OFFSET_UPDATE_RATE = 700
+  X_OFFSET_UPDATE_RATE = 500
 
   /**
    * The number of pixels from the center of the screen that the player
@@ -128,7 +128,7 @@ class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
   constructor(target: Player) {
     this.target = target
     this.xOffset = new Tween(this.target.scene.engine, 40, {
-      easing: ex.EasingFunctions.EaseOutCubic,
+      easing: ex.EasingFunctions.Linear,
       duration: this.X_OFFSET_UPDATE_RATE,
     })
   }
