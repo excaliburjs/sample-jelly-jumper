@@ -103,6 +103,7 @@ export default class Player extends PhysicsActor {
    * apex of their jump before releasing the jump button.
    */
   isUsingJumpGravity = false
+  facing: 'left' | 'right' = 'right'
 
   constructor(args: { x: number; y: number; z?: number }) {
     super({
@@ -195,7 +196,7 @@ export default class Player extends PhysicsActor {
       const direction = isHoldingLeft ? -1 : 1
       const accel = this.ACCELERATION * direction
 
-      this.graphics.flipHorizontal = isHoldingLeft
+      this.facing = isHoldingLeft ? 'left' : 'right'
 
       this.acc.x += accel
     }
@@ -219,6 +220,7 @@ export default class Player extends PhysicsActor {
     const currentFrameIndex = this.animation.current.currentFrameIndex
     const currentFrameTimeLeft = this.animation.current.currentFrameTimeLeft
 
+    this.graphics.flipHorizontal = this.facing === 'left'
     if (isOnGround) {
       if (this.controls.isTurning) {
         this.animation.set('turn')
