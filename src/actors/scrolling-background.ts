@@ -15,7 +15,7 @@ export class ScrollingBackground extends ex.Entity {
     ySpeed?: number
     z?: number
   }) {
-    const { xSpeed = 0.1, ySpeed = 0.05, z = -100, image } = args
+    const { xSpeed = 0.25, ySpeed = 0.1, z = -100, image } = args
     super()
     this.addComponent(this.graphics)
     this.addComponent(this.transform)
@@ -24,7 +24,7 @@ export class ScrollingBackground extends ex.Entity {
     this.xSpeed = xSpeed
     this.ySpeed = ySpeed
 
-    this.graphics.anchor = ex.vec(0, 0)
+    this.graphics.anchor = ex.vec(0.5, 0.5)
     this.transform.pos = ex.vec(0, 0)
     this.transform.z = z
   }
@@ -54,24 +54,23 @@ export class ScrollingBackground extends ex.Entity {
       })
     )
 
-    this.scene.on('predraw', () => {
+    this.on('pretransformdraw', () => {
       const camera = this.scene.camera
 
       const cameraLeft = camera.drawPos.x - _engine.halfDrawWidth
       const cameraTop = camera.drawPos.y - _engine.halfDrawHeight
-      const cameraCenter = camera.drawPos
 
       // set the position of the background to the top left of the camera
       this.transform.pos.x = cameraLeft
       this.transform.pos.y = cameraTop
 
-      // create a parallax effect by adjusting the anchor based on the camera's
-      // position
-      this.graphics.anchor.x =
-        ((cameraCenter.x / sprite.width) * this.xSpeed) % (1 / xRepeat)
+      const xOffset =
+        ((cameraLeft * -this.xSpeed) % sprite.width) + sprite.width
 
-      this.graphics.anchor.y =
-        ((cameraCenter.y / sprite.height) * this.ySpeed) % (1 / yRepeat)
+      const yOffset =
+        ((cameraTop * -this.ySpeed) % sprite.height) + sprite.height
+
+      this.graphics.offset.setTo(xOffset, yOffset)
     })
   }
 }
