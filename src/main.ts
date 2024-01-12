@@ -3,8 +3,9 @@ import Level1 from './scenes/level1'
 import { loader } from './resources'
 import Demo from './scenes/demo'
 import { TiledResources } from './resources.tiled'
+
 ex.Physics.useArcadePhysics()
-ex.Physics.acc = new ex.Vector(0, 800)
+ex.Physics.acc = new ex.Vector(0, 1400)
 
 const game = new ex.Engine({
   resolution: {
@@ -13,7 +14,8 @@ const game = new ex.Engine({
     width: (ex.Resolution.SNES.height / 9) * 16,
   },
   displayMode: ex.DisplayMode.FitScreen,
-  // fixedUpdateFps: 60,
+  fixedUpdateFps: 60,
+  // maxFps: 60,
   antialiasing: false,
 })
 

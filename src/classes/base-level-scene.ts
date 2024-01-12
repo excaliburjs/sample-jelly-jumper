@@ -1,12 +1,7 @@
+import { TiledResource } from '@excaliburjs/plugin-tiled'
 import * as ex from 'excalibur'
-import Player from '../actors/player'
-import { Resources } from '../resources'
-import {
-  TiledResource,
-  TiledObjectGroup,
-  TiledMap,
-} from '@excaliburjs/plugin-tiled'
 import { OneWayPlatform } from '../actors/one-way-platform'
+import Player from '../actors/player'
 import { ScrollingBackground } from '../actors/scrolling-background'
 
 export default class BaseLevelScene extends ex.Scene {
