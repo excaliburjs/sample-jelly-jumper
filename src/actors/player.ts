@@ -190,13 +190,13 @@ export default class Player extends PhysicsActor {
     const jumpHeld = this.controls.isHeld('Jump')
     const isOnGround = this.raycast.isOnGround()
 
+    const heldDirection = this.controls.getHeldDirection()
     // move left or right
-    if (this.controls.isHeld('Left') || this.controls.isHeld('Right')) {
-      const isHoldingLeft = this.controls.isHeld('Left')
-      const direction = isHoldingLeft ? -1 : 1
+    if (heldDirection) {
+      const direction = heldDirection === 'Left' ? -1 : 1
       const accel = this.ACCELERATION * direction
 
-      this.facing = isHoldingLeft ? 'left' : 'right'
+      this.facing = direction === -1 ? 'left' : 'right'
 
       this.acc.x += accel
     }
@@ -219,18 +219,19 @@ export default class Player extends PhysicsActor {
     const isOnGround = this.raycast.isOnGround()
     const currentFrameIndex = this.animation.current.currentFrameIndex
     const currentFrameTimeLeft = this.animation.current.currentFrameTimeLeft
+    const heldDirection = this.controls.getHeldDirection()
 
     this.graphics.flipHorizontal = this.facing === 'left'
     if (isOnGround) {
       if (this.controls.isTurning) {
         this.animation.set('turn')
       } else {
-        const isMovingInInputDirection =
-          (!this.controls.isHeld('Left') && !this.controls.isHeld('Right')) ||
-          (this.controls.isHeld('Left') && this.vel.x < 0) ||
-          (this.controls.isHeld('Right') && this.vel.x > 0)
+        const isMovingInHeldDirection =
+          !heldDirection ||
+          (heldDirection === 'Left' && this.vel.x < 0) ||
+          (heldDirection === 'Right' && this.vel.x > 0)
 
-        if (isMovingInInputDirection) {
+        if (isMovingInHeldDirection) {
           if (
             this.controls.isSprinting &&
             Math.abs(this.vel.x) > this.RUN_MAX_VELOCITY
@@ -371,7 +372,7 @@ class PlayerControlsComponent extends ControlsComponent {
   }
 
   get isMoving() {
-    return this.isHeld('Left') || this.isHeld('Right')
+    return this.getHeldDirection() !== undefined
   }
 
   get isRunning() {
@@ -383,9 +384,10 @@ class PlayerControlsComponent extends ControlsComponent {
   }
 
   get isTurning() {
+    const heldDirection = this.getHeldDirection()
     return (
-      (this.isHeld('Left') && this.owner.vel.x > 0) ||
-      (this.isHeld('Right') && this.owner.vel.x < 0)
+      (heldDirection === 'Left' && this.owner.vel.x > 0) ||
+      (heldDirection === 'Right' && this.owner.vel.x < 0)
     )
   }
 }

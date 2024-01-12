@@ -53,4 +53,23 @@ export class ControlsComponent extends ex.Component {
       engine.input.gamepads.at(3),
     ].find((g) => g.connected)
   }
+
+  /**
+   * Returns the latest of the Left or Right keys that was pressed. Helpful for
+   * keyboard controls where both keys may be pressed at the same time if you
+   * want to prioritize one over the other.
+   */
+  getHeldDirection(): 'Left' | 'Right' | undefined {
+    const engine = this.owner.scene.engine
+
+    for (const key of engine.input.keyboard.getKeys().slice().reverse()) {
+      if (this.controls.Left.includes(key as any)) return 'Left'
+      if (this.controls.Right.includes(key as any)) return 'Right'
+    }
+
+    if (this.getGamepad()) {
+      if (this.isHeld('Left')) return 'Left'
+      if (this.isHeld('Right')) return 'Right'
+    }
+  }
 }
