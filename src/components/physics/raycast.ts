@@ -152,11 +152,11 @@ export class RaycastComponent extends ex.Component {
       return null
     }
 
-    const leftOnGround = left.distance <= groundDistance
-    const rightOnGround = right.distance <= groundDistance
-    const isEven = leftOnGround === rightOnGround
+    const leftOnGround = Math.round(left.distance) <= groundDistance
+    const rightOnGround = Math.round(right.distance) <= groundDistance
+    const isEven = Math.round(left.distance) === Math.round(right.distance)
 
-    // if we're in the air or on flat ground, return 0
+    // if we're in the air or on flat ground
     if ((!leftOnGround && !rightOnGround) || isEven) {
       return null
     }
