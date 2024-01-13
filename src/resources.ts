@@ -6,6 +6,7 @@ export const Resources = {
     level1Background: new ex.ImageSource('/res/images/Forest_Background_0.png'),
     spiderGreen: new ex.ImageSource('/res/images/Spider_1.png'),
     spiderGray: new ex.ImageSource('/res/images/Spider_2.png'),
+    platform: new ex.ImageSource('/res/images/Platform.png'),
   },
 
   music: {
