@@ -19,13 +19,16 @@ const game = new ex.Engine({
   antialiasing: false,
 })
 
+// setup scenes
 game.addScene('level1', new Level1())
 game.addScene('demo', new Demo())
 
+// temporary
 Object.values(TiledResources).forEach((resource) => {
   loader.addResource(resource)
 })
 
+// start game
 game.start(loader).then(() => {
   game.goToScene('level1')
 })

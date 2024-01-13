@@ -17,7 +17,7 @@ export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
    * can move before the camera starts to follow.
    */
   X_EDGE_BUFFER = 20
-  Y_EDGE_BUFFER = 10
+  Y_EDGE_BUFFER = 40
 
   target: Player
   xOffset: Tween

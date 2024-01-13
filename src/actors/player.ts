@@ -3,6 +3,8 @@ import { Resources } from '../resources'
 import { AnimationComponent } from '../components/graphics/animation'
 import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from '../classes/physics-actor'
+import { EnemyActor } from '../classes/enemy-actor'
+import { FakeDie } from './fake-die'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img_player,
@@ -182,6 +184,33 @@ export default class Player extends PhysicsActor {
     }
   }
 
+  onPreCollisionResolve(
+    self: ex.Collider,
+    other: ex.Collider,
+    side: ex.Side,
+    contact: ex.CollisionContact
+  ): void {
+    if (other.owner instanceof EnemyActor) {
+      if (side === ex.Side.Bottom) {
+        // jump off enemy
+        this.bounceOffEnemy(other.owner)
+      } else {
+        if (!other.owner.dead) {
+          if (!this.scene.entities.find((e) => e instanceof FakeDie)) {
+            this.scene.add(
+              new FakeDie({
+                x: this.pos.x,
+                y: this.pos.y,
+              })
+            )
+          }
+        }
+      }
+      contact.cancel()
+      return
+    }
+  }
+
   /**
    * Process user input to control the character
    */
@@ -206,7 +235,7 @@ export default class Player extends PhysicsActor {
     }
     // cancel jump if we're not holding the jump button, but still
     // enforce a minimum jump height
-    else if (!jumpHeld && this.vel.y < 0 && this.vel.y > -75) {
+    else if (!jumpHeld && this.vel.y < 0 && this.vel.y > -200) {
       this.vel.y *= 0.5
       this.isUsingJumpGravity = false
     }
@@ -272,6 +301,9 @@ export default class Player extends PhysicsActor {
     }
   }
 
+  /**
+   * Applies a jump force to the player.
+   */
   jump() {
     let jumpForce = this.JUMP_FORCE
 
@@ -282,6 +314,14 @@ export default class Player extends PhysicsActor {
     }
 
     this.vel.y = -jumpForce
+  }
+
+  bounceOffEnemy(enemy: EnemyActor) {
+    if (enemy.dead) return
+
+    // use a higher jump force if we're jumping off an enemy
+    this.vel.y = -this.RUN_JUMP_FORCE
+    enemy.kill('squish')
   }
 
   get maxVelocity() {

@@ -5,6 +5,7 @@ until entityClassNameFactories can be provided at runtime w/ scene
 import { TiledResource } from '@excaliburjs/plugin-tiled'
 import Player from './actors/player'
 import { OneWayPlatform } from './actors/platforms/one-way-platform'
+import { BugEnemy } from './actors/enemies/bug'
 
 export const TiledResources = {
   tilemap_level1: new TiledResource('/res/tilemaps/level1.tmx', {
@@ -17,13 +18,14 @@ export const TiledResources = {
           z: props.layer.order ?? 0,
         }),
 
-      OneWayPlatform: (props) =>
-        new OneWayPlatform({
+      BugEnemy: (props) =>
+        new BugEnemy({
           x: props.object?.x ?? 0,
           y: props.object?.y ?? 0,
-          width: props.object?.tiledObject.width ?? 0,
-          height: props.object?.tiledObject.height ?? 0,
           z: props.layer.order ?? 0,
+          type:
+            (props.object?.properties.get('type') as 'green' | 'gray') ??
+            'green',
         }),
     },
   }),
