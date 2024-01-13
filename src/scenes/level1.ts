@@ -1,10 +1,11 @@
 import * as ex from 'excalibur'
 import { Resources } from '../resources'
-import BaseLevelScene from '../classes/base-level-scene'
-import { TiledResources } from '../resources.tiled'
-import { MovingPlatform } from '../actors/moving-platform'
 
-export default class Level1 extends BaseLevelScene {
+import { TiledResources } from '../resources.tiled'
+import { MovingPlatform } from '../actors/platforms/moving-platform'
+import LevelScene from '../classes/level-scene'
+
+export default class Level1 extends LevelScene {
   constructor() {
     super({
       tilemap: TiledResources.tilemap_level1,

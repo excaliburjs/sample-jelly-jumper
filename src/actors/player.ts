@@ -2,7 +2,7 @@ import * as ex from 'excalibur'
 import { Resources } from '../resources'
 import { AnimationComponent } from '../components/graphics/animation'
 import { ControlsComponent } from '../components/input/controls'
-import { PhysicsActor } from './physics-actor'
+import { PhysicsActor } from '../classes/physics-actor'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img_player,

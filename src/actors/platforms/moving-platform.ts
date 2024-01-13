@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
-import { OneWayCollisionComponent } from '../components/physics/one-way-collision'
-import { CarrierComponent } from '../components/physics/carrier'
+import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
+import { CarrierComponent } from '../../components/physics/carrier'
 
 export interface MovingPlatformArgs extends ex.ActorArgs {
   oneWay?: boolean

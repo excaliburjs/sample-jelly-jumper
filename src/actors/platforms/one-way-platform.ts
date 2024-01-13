@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { OneWayCollisionComponent } from '../components/physics/one-way-collision'
+import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
 
 export class OneWayPlatform extends ex.Actor {
   constructor(args: ex.ActorArgs) {

@@ -4,7 +4,7 @@ until entityClassNameFactories can be provided at runtime w/ scene
 */
 import { TiledResource } from '@excaliburjs/plugin-tiled'
 import Player from './actors/player'
-import { OneWayPlatform } from './actors/one-way-platform'
+import { OneWayPlatform } from './actors/platforms/one-way-platform'
 
 export const TiledResources = {
   tilemap_level1: new TiledResource('/res/tilemaps/level1.tmx', {
