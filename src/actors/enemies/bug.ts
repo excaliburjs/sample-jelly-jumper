@@ -33,7 +33,7 @@ export class BugEnemy extends EnemyActor {
     super({
       ...args,
       anchor: ex.vec(0.5, 0.65),
-      collider: ex.Shape.Box(20, 10, ex.vec(0.5, 1)),
+      collider: ex.Shape.Box(20, 4, ex.vec(0.5, 1)),
       collisionGroup: ex.CollisionGroupManager.groupByName('enemies'),
     })
 
@@ -60,10 +60,14 @@ export class BugEnemy extends EnemyActor {
       this.vel.x = this.speed
     }
 
-    const corners = this.raycast.castCorners(1, {
-      bottomLeft: true,
-      bottomRight: true,
-    })
+    const corners = this.raycast.castCorners(
+      // account for slopes
+      4,
+      {
+        bottomLeft: true,
+        bottomRight: true,
+      }
+    )
 
     const isAtLeftEdge = this.direction === 'left' && !corners.bottomLeft.length
     const isAtRightEdge =
@@ -82,8 +86,12 @@ export class BugEnemy extends EnemyActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
-    if (side === ex.Side.Left || side === ex.Side.Right) {
-      this.direction = this.direction === 'left' ? 'right' : 'left'
+    const isSlope =
+      Math.abs(contact.normal.x) !== 0 && Math.abs(contact.normal.y) !== 0
+    if (!isSlope) {
+      if (side === ex.Side.Left || side === ex.Side.Right) {
+        this.direction = this.direction === 'left' ? 'right' : 'left'
+      }
     }
   }
 
