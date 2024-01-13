@@ -5,7 +5,7 @@ import Demo from './scenes/demo'
 import { TiledResources } from './resources.tiled'
 
 ex.Physics.useArcadePhysics()
-ex.Physics.acc = new ex.Vector(0, 1400)
+ex.Physics.acc = new ex.Vector(0, 1450)
 
 const game = new ex.Engine({
   resolution: {
