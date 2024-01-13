@@ -101,6 +101,7 @@ export class BugEnemy extends EnemyActor {
     anim.pause()
     this.vel.x = 0
     this.vel.y = 0
+    this.body.useGravity = false
 
     super.kill(method)
   }

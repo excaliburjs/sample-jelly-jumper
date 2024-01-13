@@ -208,7 +208,6 @@ export default class Player extends PhysicsActor {
       if (side === ex.Side.Bottom) {
         // jump off enemy
         this.bounceOffEnemy(other.owner)
-        return
       } else {
         if (!other.owner.dead) {
           if (!this.scene.entities.find((e) => e instanceof FakeDie)) {
@@ -222,7 +221,6 @@ export default class Player extends PhysicsActor {
         }
       }
       contact.cancel()
-      return
     } else {
     }
   }
