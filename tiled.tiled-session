@@ -26,7 +26,7 @@
         "public/res/tilemaps/level1.tmx"
     ],
     "project": "tiled.tiled-project",
-    "property.type": "string",
+    "property.type": "object",
     "recentFiles": [
         "public/res/tilemaps/level1.tmx"
     ]

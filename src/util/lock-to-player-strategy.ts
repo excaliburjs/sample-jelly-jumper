@@ -41,6 +41,9 @@ export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
     const isAtTopEdge = relativeY < -this.Y_EDGE_BUFFER
     const isAtBottomEdge = relativeY > this.Y_EDGE_BUFFER
 
+    // get global position of target as target.pos is relative to its parent
+    const targetPos = target.getGlobalPos()
+
     let nextX = camera.pos.x
     let nextY = camera.pos.y
 
@@ -52,15 +55,15 @@ export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
     }
 
     if (isAtLeftEdge) {
-      nextX = target.pos.x + this.X_EDGE_BUFFER + this.xOffset.value
+      nextX = targetPos.x + this.X_EDGE_BUFFER + this.xOffset.value
     } else if (isAtRightEdge) {
-      nextX = target.pos.x - this.X_EDGE_BUFFER + this.xOffset.value
+      nextX = targetPos.x - this.X_EDGE_BUFFER + this.xOffset.value
     }
 
     if (isAtTopEdge || isAtBottomEdge) {
       nextY = isAtTopEdge
-        ? target.pos.y + this.Y_EDGE_BUFFER
-        : target.pos.y - this.Y_EDGE_BUFFER
+        ? targetPos.y + this.Y_EDGE_BUFFER
+        : targetPos.y - this.Y_EDGE_BUFFER
     }
 
     return ex.vec(nextX, nextY)

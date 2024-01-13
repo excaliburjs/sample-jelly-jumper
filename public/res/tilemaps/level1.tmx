@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="24">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="31">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -129,7 +129,7 @@
   <object id="18" name="Bug" type="BugEnemy" x="304" y="448">
    <point/>
   </object>
-  <object id="19" name="PolygonCollider" type="PolygonCollider" x="128" y="449">
+  <object id="19" name="PolygonCollider" type="PolygonCollider" x="336" y="304">
    <properties>
     <property name="CollisionType" value="Fixed"/>
    </properties>
@@ -142,6 +142,14 @@
    <properties>
     <property name="type" value="gray"/>
    </properties>
+   <point/>
+  </object>
+  <object id="24" name="MovingPlatform" type="MovingPlatform" x="144" y="432" width="112" height="16">
+   <properties>
+    <property name="path" type="object" value="25"/>
+   </properties>
+  </object>
+  <object id="25" x="144" y="272">
    <point/>
   </object>
  </objectgroup>

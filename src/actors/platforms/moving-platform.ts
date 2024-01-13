@@ -8,7 +8,7 @@ export interface MovingPlatformArgs extends ex.ActorArgs {
 
 export class MovingPlatform extends ex.Actor {
   constructor(
-    args: MovingPlatformArgs,
+    { oneWay = true, ...args }: MovingPlatformArgs,
     cb: (actions: ex.ActionsComponent) => any
   ) {
     super({
@@ -21,7 +21,7 @@ export class MovingPlatform extends ex.Actor {
 
     this.addComponent(new CarrierComponent())
 
-    if (!args.oneWay) {
+    if (oneWay) {
       this.addComponent(new OneWayCollisionComponent())
     }
   }
