@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="23">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="24">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -136,6 +136,12 @@
    <polygon points="0,0 72,-16 144,0"/>
   </object>
   <object id="22" name="Bug" type="BugEnemy" x="352" y="400">
+   <point/>
+  </object>
+  <object id="23" name="Bug" type="BugEnemy" x="784" y="400">
+   <properties>
+    <property name="type" value="gray"/>
+   </properties>
    <point/>
   </object>
  </objectgroup>
