@@ -221,7 +221,6 @@ export default class Player extends PhysicsActor {
         }
       }
       contact.cancel()
-    } else {
     }
   }
 

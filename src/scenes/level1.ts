@@ -12,36 +12,5 @@ export default class Level1 extends LevelScene {
       background: Resources.img.level1Background,
       song: Resources.music.stage1,
     })
-
-    // add 16x16 physics squar
-    const square = new ex.Actor({
-      x: 80,
-      y: 100,
-      width: 16,
-      height: 16,
-      color: ex.Color.Red,
-      collisionType: ex.CollisionType.Active,
-    })
-    // this.add(square)
-
-    // const platform = new MovingPlatform(
-    //   {
-    //     x: 100,
-    //     y: 150,
-    //     width: 100,
-    //     height: 16,
-    //   },
-    //   (actions) =>
-    //     actions.repeatForever(
-    //       (builder) => builder.moveBy(0, -50, 30).moveBy(0, 50, 30)
-    //       // .easeBy(-50, 50, 500, ex.EasingFunctions.EaseOutQuad)
-    //       // .delay(500)
-    //       // .easeBy(50, -50, 500, ex.EasingFunctions.EaseOutQuad)
-    //       // .delay(500)
-    //       // .moveBy(200, -50, 500)
-    //     )
-    // )
-    // 200
-    // this.add(platform)
   }
 }
