@@ -45,9 +45,14 @@ export default class Player extends PhysicsActor {
   STOP_DECELERATION = this.ACCELERATION
 
   /**
-   * The amount of deceleration to apply to the player when they are turning around.
+   * The amount of deceleration to apply to the player when they are turning around on the ground.
    */
-  TURN_DECELERATION = this.ACCELERATION * 4
+  GROUND_TURN_DECELERATION = this.ACCELERATION * 4
+
+  /**
+   * The amount of deceleration to apply to the player when they are turning around in the air.
+   */
+  AIR_TURN_DECELERATION = this.ACCELERATION * 7
 
   /**
    * The maximum velocity the player can walk at.
@@ -347,7 +352,7 @@ export default class Player extends PhysicsActor {
     if (isOnGround) {
       // apply turn deceleration if we're turning
       if (this.controls.isTurning) {
-        this.acc.x = -this.TURN_DECELERATION * Math.sign(this.vel.x)
+        this.acc.x = -this.GROUND_TURN_DECELERATION * Math.sign(this.vel.x)
       }
       // decelerate if we're over the max velocity or stopped walking
       else if (!this.controls.isMoving || isOverMaxVelocity) {
@@ -359,7 +364,7 @@ export default class Player extends PhysicsActor {
     // air deceleration
     else {
       if (this.controls.isTurning) {
-        this.acc.x = -this.TURN_DECELERATION * Math.sign(this.vel.x)
+        this.acc.x = -this.AIR_TURN_DECELERATION * Math.sign(this.vel.x)
       } else if (isOverMaxVelocity) {
         // in air, clamp to max velocity
         this.vel.x = ex.clamp(this.vel.x, -this.maxVelocity, this.maxVelocity)
