@@ -125,10 +125,20 @@ export class RaycastComponent extends ex.Component {
       bottomRight: true,
     })
 
-    return hits.bottom.length > 0 || this.getSlopeAngle() > 0
+    return hits.bottom.length > 0 || !!this.getSlope()
   }
 
-  getSlopeAngle(groundDistance = 1, maxSlopeDistance = 8): number {
+  isOnSlope() {
+    return !!this.getSlope()
+  }
+
+  getSlope(
+    groundDistance = 1,
+    maxSlopeDistance = 8
+  ): {
+    angle: number
+    hit: ex.RayCastHit
+  } | null {
     const { bottomLeft, bottomRight } = this.castCorners(maxSlopeDistance, {
       bottomLeft: true,
       bottomRight: true,
@@ -139,7 +149,7 @@ export class RaycastComponent extends ex.Component {
     const right = bottomRight.sort((a, b) => a.distance - b.distance)[0]
 
     if (!left || !right) {
-      return 0
+      return null
     }
 
     const leftOnGround = left.distance <= groundDistance
@@ -148,7 +158,7 @@ export class RaycastComponent extends ex.Component {
 
     // if we're in the air or on flat ground, return 0
     if ((!leftOnGround && !rightOnGround) || isEven) {
-      return 0
+      return null
     }
 
     const angle = Math.atan2(
@@ -156,7 +166,7 @@ export class RaycastComponent extends ex.Component {
       left.point.x - right.point.x
     )
 
-    return angle
+    return { angle, hit: leftOnGround ? right : left }
   }
 
   isOnWall(distance: number = 1) {

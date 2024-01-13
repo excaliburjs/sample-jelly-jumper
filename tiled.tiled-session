@@ -11,11 +11,11 @@
             "scaleInEditor": 1
         },
         "public/res/tilemaps/level1.tmx": {
-            "scale": 0.8105,
-            "selectedLayer": 1,
+            "scale": 6.1373,
+            "selectedLayer": 2,
             "viewCenter": {
-                "x": 236.2739049969155,
-                "y": 243.05983960518202
+                "x": 639.9393870268684,
+                "y": 239.8448829289753
             }
         },
         "public/res/tilemaps/level1.tmx#tileset": {

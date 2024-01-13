@@ -10,4 +10,22 @@ export class PhysicsActor extends ex.Actor {
     this.addComponent(this.raycast)
     this.addComponent(this.touching)
   }
+
+  onPreCollisionResolve(
+    self: ex.Collider,
+    other: ex.Collider,
+    side: ex.Side,
+    contact: ex.CollisionContact
+  ): void {
+    const isSlope =
+      Math.abs(contact.normal.x) !== 0 && Math.abs(contact.normal.y) !== 0
+
+    // manually resolve slope collisions
+    if (isSlope && this.vel.y !== 0) {
+      contact.cancel()
+
+      this.pos.y -= contact.mtv.y
+      this.vel.y = 0
+    }
+  }
 }

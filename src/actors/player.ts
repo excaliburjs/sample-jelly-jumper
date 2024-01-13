@@ -190,6 +190,7 @@ export default class Player extends PhysicsActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
+    super.onPreCollisionResolve(self, other, side, contact)
     if (other.owner instanceof EnemyActor) {
       if (side === ex.Side.Bottom) {
         // jump off enemy
