@@ -26,6 +26,10 @@ export class PhysicsActor extends ex.Actor {
 
       this.pos.y -= contact.mtv.y
       this.vel.y = 0
+
+      // manually call onCollisionStart since because we cancelled the default collision
+      // and actor may be expecting this event
+      this.onCollisionStart(self, other, side, contact)
     }
   }
 }

@@ -9,29 +9,31 @@ import { BugEnemy } from './actors/enemies/bug'
 import { EnemySpawner } from './actors/enemy-spawner'
 
 export const TiledResources = {
-  tilemap_level1: new TiledResource('/res/tilemaps/level1.tmx', {
-    useTilemapCameraStrategy: true,
-    entityClassNameFactories: {
-      Player: (props) =>
-        new Player({
-          x: props.object?.x ?? 0,
-          y: props.object?.y ?? 0,
-          z: props.layer.order ?? 0,
+  tiled: {
+    level1: new TiledResource('/res/tilemaps/level1.tmx', {
+      useTilemapCameraStrategy: true,
+      entityClassNameFactories: {
+        Player: (props) =>
+          new Player({
+            x: props.object?.x ?? 0,
+            y: props.object?.y ?? 0,
+            z: props.layer.order ?? 0,
+          }),
+
+        BugEnemy: makeSpawner((args, props) => {
+          const typeProp = props.object?.properties.get('type') as
+            | 'green'
+            | 'gray'
+            | undefined
+
+          return new BugEnemy({
+            ...args,
+            type: typeProp ?? 'green',
+          })
         }),
-
-      BugEnemy: makeSpawner((args, props) => {
-        const typeProp = props.object?.properties.get('type') as
-          | 'green'
-          | 'gray'
-          | undefined
-
-        return new BugEnemy({
-          ...args,
-          type: typeProp ?? 'green',
-        })
-      }),
-    },
-  }),
+      },
+    }),
+  },
 } as const
 
 /**

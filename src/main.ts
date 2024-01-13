@@ -3,6 +3,7 @@ import Level1 from './scenes/level1'
 import { loader } from './resources'
 import Demo from './scenes/demo'
 import { TiledResources } from './resources.tiled'
+import { audioManager } from './util/audio-manager'
 
 ex.Physics.useArcadePhysics()
 ex.Physics.acc = new ex.Vector(0, 1450)
@@ -24,9 +25,14 @@ game.addScene('level1', new Level1())
 game.addScene('demo', new Demo())
 
 // temporary
-Object.values(TiledResources).forEach((resource) => {
-  loader.addResource(resource)
-})
+for (const group of Object.values(TiledResources)) {
+  for (const resource of Object.values(group)) {
+    loader.addResource(resource)
+  }
+}
+
+// setup audio manager
+audioManager.init(game)
 
 // start game
 game.start(loader).then(() => {

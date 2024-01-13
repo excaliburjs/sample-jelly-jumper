@@ -10,12 +10,12 @@ const grid = {
 }
 
 const greenSpritesheet = ex.SpriteSheet.fromImageSource({
-  image: Resources.img_spider_green,
+  image: Resources.img.spiderGreen,
   grid,
 })
 
 const graySpritesheet = ex.SpriteSheet.fromImageSource({
-  image: Resources.img_spider_gray,
+  image: Resources.img.spiderGray,
   grid,
 })
 

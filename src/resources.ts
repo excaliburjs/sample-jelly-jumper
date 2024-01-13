@@ -1,10 +1,24 @@
 import * as ex from 'excalibur'
 
 export const Resources = {
-  img_player: new ex.ImageSource('/res/images/Player.png'),
-  img_level1_bg: new ex.ImageSource('/res/images/Forest_Background_0.png'),
-  img_spider_green: new ex.ImageSource('/res/images/Spider_1.png'),
-  img_spider_gray: new ex.ImageSource('/res/images/Spider_2.png'),
+  img: {
+    player: new ex.ImageSource('/res/images/Player.png'),
+    level1Background: new ex.ImageSource('/res/images/Forest_Background_0.png'),
+    spiderGreen: new ex.ImageSource('/res/images/Spider_1.png'),
+    spiderGray: new ex.ImageSource('/res/images/Spider_2.png'),
+  },
+
+  music: {
+    stage1: new ex.Sound('/res/music/stage1.ogg'),
+    stage2: new ex.Sound('/res/music/stage2.ogg'),
+  },
+  sfx: {
+    playerJump: new ex.Sound('/res/sfx/player-jump.wav'),
+    playerLand: new ex.Sound('/res/sfx/player-land.wav'),
+    footstep: new ex.Sound('/res/sfx/footstep.wav'),
+    turnAround: new ex.Sound('/res/sfx/turn-around.wav'),
+    squish: new ex.Sound('/res/sfx/squish.wav'),
+  },
 } as const
 
 // instantly starts game once loading has completed
@@ -19,6 +33,8 @@ class DevLoader extends ex.Loader {
 export const loader =
   process.env.NODE_ENV === 'development' ? new DevLoader() : new ex.Loader()
 
-for (const resource of Object.values(Resources)) {
-  loader.addResource(resource)
+for (const group of Object.values(Resources)) {
+  for (const resource of Object.values(group)) {
+    loader.addResource(resource)
+  }
 }

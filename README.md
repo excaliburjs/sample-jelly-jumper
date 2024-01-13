@@ -15,11 +15,15 @@ Move - Arrow keys
 
 Run - S
 
-Jump - A (TODO)
+Jump - A
+
+Also works with gamepads.
 
 ## Credits
 
 Assets by [JuhoSprite](https://juhosprite.itch.io/super-mango-2d-pixelart-platformer-asset-pack16x16)
+
+Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 
 ## TODO
 
@@ -27,6 +31,7 @@ Assets by [JuhoSprite](https://juhosprite.itch.io/super-mango-2d-pixelart-platfo
 - Items
 - Level 1, 2, 3
 - UI (health, score, etc)
+- Document file structure
 
 ## Notes
 

@@ -5,9 +5,10 @@ import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from '../classes/physics-actor'
 import { EnemyActor } from '../classes/enemy-actor'
 import { FakeDie } from './fake-die'
+import { audioManager } from '../util/audio-manager'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
-  image: Resources.img_player,
+  image: Resources.img.player,
   grid: {
     columns: 4,
     rows: 6,
@@ -128,6 +129,12 @@ export default class Player extends PhysicsActor {
 
     this.addComponent(this.animation)
     this.addComponent(this.controls)
+
+    this.animation.get('turn').events.on('frame', (frame) => {
+      if (frame.frameIndex === 0) {
+        audioManager.playSfx(Resources.sfx.turnAround)
+      }
+    })
   }
 
   onInitialize(engine: ex.Engine) {
@@ -196,10 +203,12 @@ export default class Player extends PhysicsActor {
     contact: ex.CollisionContact
   ): void {
     super.onPreCollisionResolve(self, other, side, contact)
+
     if (other.owner instanceof EnemyActor) {
       if (side === ex.Side.Bottom) {
         // jump off enemy
         this.bounceOffEnemy(other.owner)
+        return
       } else {
         if (!other.owner.dead) {
           if (!this.scene.entities.find((e) => e instanceof FakeDie)) {
@@ -214,6 +223,21 @@ export default class Player extends PhysicsActor {
       }
       contact.cancel()
       return
+    } else {
+    }
+  }
+
+  onCollisionStart(
+    self: ex.Collider,
+    other: ex.Collider,
+    side: ex.Side,
+    contact: ex.CollisionContact
+  ): void {
+    const wasInAir = Math.round(this.pos.y - this.oldPos.y) > 1
+
+    // player landed on the ground
+    if (side === ex.Side.Bottom && wasInAir) {
+      audioManager.playSfx(Resources.sfx.footstep)
     }
   }
 
@@ -257,6 +281,7 @@ export default class Player extends PhysicsActor {
     const heldDirection = this.controls.getHeldDirection()
 
     this.graphics.flipHorizontal = this.facing === 'left'
+
     if (isOnGround) {
       if (this.controls.isTurning) {
         this.animation.set('turn')
@@ -273,6 +298,7 @@ export default class Player extends PhysicsActor {
           ) {
             const fromRunToSprint =
               this.animation.current === this.animation.get('run')
+
             this.animation.set(
               'sprint',
               fromRunToSprint ? currentFrameIndex : 0,
@@ -281,6 +307,7 @@ export default class Player extends PhysicsActor {
           } else if (this.vel.x !== 0) {
             const fromSprintToRun =
               this.animation.current === this.animation.get('sprint')
+
             this.animation.set(
               'run',
               fromSprintToRun ? currentFrameIndex : 0,
@@ -320,6 +347,7 @@ export default class Player extends PhysicsActor {
     }
 
     this.vel.y = -jumpForce
+    audioManager.playSfx(Resources.sfx.playerJump)
   }
 
   bounceOffEnemy(enemy: EnemyActor) {
@@ -328,6 +356,7 @@ export default class Player extends PhysicsActor {
     // use a higher jump force if we're jumping off an enemy
     this.vel.y = -this.RUN_JUMP_FORCE
     enemy.kill('squish')
+    audioManager.playSfx(Resources.sfx.squish)
   }
 
   get maxVelocity() {

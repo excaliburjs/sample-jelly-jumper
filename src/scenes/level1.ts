@@ -8,8 +8,9 @@ import LevelScene from '../classes/level-scene'
 export default class Level1 extends LevelScene {
   constructor() {
     super({
-      tilemap: TiledResources.tilemap_level1,
-      background: Resources.img_level1_bg,
+      tilemap: TiledResources.tiled.level1,
+      background: Resources.img.level1Background,
+      song: Resources.music.stage1,
     })
 
     // add 16x16 physics squar

@@ -4,8 +4,10 @@ import { OneWayPlatform } from '../actors/platforms/one-way-platform'
 import Player from '../actors/player'
 import { ScrollingBackground } from '../actors/scrolling-background'
 import { LockToPlayerStrategy } from '../util/lock-to-player-strategy'
+import { audioManager } from '../util/audio-manager'
 
 export default class LevelScene extends ex.Scene {
+  song?: ex.Sound
   tilemap: TiledResource
   background: ex.ImageSource
 
@@ -14,21 +16,30 @@ export default class LevelScene extends ex.Scene {
     OneWayPlatform,
   }
 
-  constructor(args: { tilemap: TiledResource; background: ex.ImageSource }) {
+  constructor(args: {
+    tilemap: TiledResource
+    background: ex.ImageSource
+    song?: ex.Sound
+  }) {
     super()
     this.tilemap = args.tilemap
     this.background = args.background
+    this.song = args.song
   }
 
   onInitialize() {
     this.tilemap.addToScene(this)
-
     this.setupCamera()
     this.setupBackground()
     this.setupWorldBounds()
     this.setupOneWayPlatforms()
   }
 
+  onActivate(context: ex.SceneActivationContext<unknown>): void {
+    if (this.song) {
+      audioManager.playSong(this.song)
+    }
+  }
   setupCamera() {
     // set camera to follow player
     const player = this.entities.find((e) => e instanceof Player) as Player
