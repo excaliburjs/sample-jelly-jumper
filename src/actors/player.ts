@@ -77,12 +77,12 @@ export default class Player extends PhysicsActor {
   /**
    * The amount of force to apply to the player when they jump while running
    */
-  RUN_JUMP_FORCE = this.JUMP_FORCE * 1.15
+  RUN_JUMP_FORCE = this.JUMP_FORCE * 1.1
 
   /**
    * The amount of force to apply to the player when they jump while sprinting
    */
-  SPRINT_JUMP_FORCE = this.JUMP_FORCE * 1.3
+  SPRINT_JUMP_FORCE = this.JUMP_FORCE * 1.2
 
   /* Components */
 
