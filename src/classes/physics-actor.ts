@@ -24,7 +24,13 @@ export class PhysicsActor extends ex.Actor {
     if (isSlope && this.vel.y !== 0) {
       contact.cancel()
 
-      this.pos.y -= contact.mtv.y
+      // but colliderA is not guaranteed to be self - mtv always points away from colliderA
+      if (self === contact.colliderA) {
+        this.pos.y -= contact.mtv.y
+      } else {
+        this.pos.y += contact.mtv.y
+      }
+
       this.vel.y = 0
 
       // manually call onCollisionStart since because we cancelled the default collision
