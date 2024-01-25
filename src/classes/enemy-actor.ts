@@ -13,7 +13,7 @@ export class EnemyActor extends PhysicsActor {
       collisionType: ex.CollisionType.Active,
     })
 
-    this.addComponent(new ex.TagComponent('enemy'))
+    this.addTag('enemy')
   }
 
   onPreCollisionResolve(

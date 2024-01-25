@@ -212,8 +212,8 @@ export default class Player extends PhysicsActor {
         this.bounceOffEnemy(other.owner)
       } else {
         if (!other.owner.dead) {
-          if (!this.scene.entities.find((e) => e instanceof FakeDie)) {
-            this.scene.add(
+          if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
+            this.scene?.add(
               new FakeDie({
                 x: this.pos.x,
                 y: this.pos.y,
