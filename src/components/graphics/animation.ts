@@ -74,6 +74,6 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
    * Returns the current animation.
    */
   get current() {
-    return this.owner.graphics.current[0]?.graphic as ex.Animation
+    return this.owner.graphics.current as ex.Animation
   }
 }

@@ -96,7 +96,7 @@ export class BugEnemy extends EnemyActor {
   }
 
   kill(method: EnemyKillMethod) {
-    const anim = this.graphics.current[0].graphic as ex.Animation
+    const anim = this.graphics.current as ex.Animation
 
     anim.pause()
     this.vel.x = 0

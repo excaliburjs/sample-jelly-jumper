@@ -36,7 +36,7 @@ export class EnemyActor extends PhysicsActor {
     } else if (method === 'squish') {
       this.actions
         .callMethod(() => {
-          this.graphics.current[0].graphic.scale = ex.vec(1, 0.25)
+          this.graphics.current!.scale = ex.vec(1, 0.25)
         })
         .delay(700)
         .callMethod(() => {

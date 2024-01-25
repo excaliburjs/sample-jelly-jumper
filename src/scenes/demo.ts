@@ -96,6 +96,6 @@ export default class Demo extends ex.Scene {
     200
     this.add(platform)
 
-    this.camera.strategy.lockToActor(player)
+    this.camera.strategy.lockToActor(player as any)
   }
 }

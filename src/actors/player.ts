@@ -122,6 +122,7 @@ export default class Player extends PhysicsActor {
       height: 16,
       collisionType: ex.CollisionType.Active,
       collider: ex.Shape.Box(10, 16, ex.vec(0.5, 1)),
+      // collider: ex.Shape.Capsule(10, 16, ex.vec(0.5, -8)),
     })
 
     // we'll handle gravity ourselves
@@ -149,7 +150,8 @@ export default class Player extends PhysicsActor {
     this.handleInput(engine, delta)
   }
 
-  update(engine: ex.Engine, delta: number): void {
+  // @ts-ignore
+  update(engine: ex.Engine<any>, delta: number): void {
     let useApexGravity = false
 
     // if we're jumping use our jump gravity

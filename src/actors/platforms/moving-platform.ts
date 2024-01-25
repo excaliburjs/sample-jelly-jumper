@@ -71,15 +71,15 @@ export class MovingPlatform extends ex.Actor {
         members: [
           {
             graphic: leftEnd,
-            pos: ex.vec(0, 0),
+            offset: ex.vec(0, 0),
           },
           ...Array.from({ length: middleWidth / 16 }, (_, i) => ({
             graphic: middle,
-            pos: ex.vec(16 + i * 16, 0),
+            offset: ex.vec(16 + i * 16, 0),
           })),
           {
             graphic: rightEnd,
-            pos: ex.vec(this.width - 16, 0),
+            offset: ex.vec(this.width - 16, 0),
           },
         ],
       })

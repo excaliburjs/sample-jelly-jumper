@@ -48,7 +48,7 @@ export class ScrollingBackground extends ex.Entity {
 
           return {
             graphic: sprite,
-            pos: ex.vec(sprite.width * column, sprite.height * row),
+            offset: ex.vec(sprite.width * column, sprite.height * row),
           }
         }),
       })
