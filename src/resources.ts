@@ -35,6 +35,7 @@ class DevLoader extends ex.Loader {
   }
 
   draw() {}
+  dispose() {}
 }
 
 export const loader =

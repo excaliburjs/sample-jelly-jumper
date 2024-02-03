@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
-import Level1 from './scenes/level1'
 import { loader } from './resources'
+import Level1 from './scenes/level1'
 import Demo from './scenes/demo'
 
 ex.Physics.useArcadePhysics()
@@ -14,15 +14,22 @@ const game = new ex.Engine({
   },
   displayMode: ex.DisplayMode.FitScreen,
   fixedUpdateFps: 60,
-  maxFps: 60,
+  // maxFps: 60,
   antialiasing: false,
+  scenes: {
+    root: {
+      scene: Level1,
+      transitions: {
+        out: new ex.FadeInOut({
+          duration: 300,
+          direction: 'out',
+        }),
+        in: new ex.FadeInOut({ duration: 300, direction: 'in' }),
+      },
+    },
+    demo: Demo,
+  },
 })
-
-// setup scenes
-game.addScene('level1', new Level1())
-game.addScene('demo', new Demo())
 
 // start game
-game.start(loader).then(() => {
-  game.goToScene('level1')
-})
+game.start(loader)
