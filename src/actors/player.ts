@@ -193,7 +193,7 @@ export default class Player extends PhysicsActor {
     }
 
     // reset jump gravity once we land on the ground
-    if (this.raycast.isOnGround()) {
+    if (this.isOnGround) {
       this.isUsingJumpGravity = false
     }
   }
@@ -246,7 +246,7 @@ export default class Player extends PhysicsActor {
   handleInput(engine: ex.Engine, delta: number) {
     const jumpPressed = this.controls.wasPressed('Jump')
     const jumpHeld = this.controls.isHeld('Jump')
-    const isOnGround = this.raycast.isOnGround()
+    const isOnGround = this.isOnGround
 
     const heldDirection = this.controls.getHeldDirection()
     // move left or right
@@ -274,7 +274,7 @@ export default class Player extends PhysicsActor {
    * Sets the player's animation based on their current state.
    */
   handleAnimation() {
-    const isOnGround = this.raycast.isOnGround()
+    const isOnGround = this.isOnGround
     const currentFrameIndex = this.animation.current.currentFrameIndex
     const currentFrameTimeLeft = this.animation.current.currentFrameTimeLeft
     const heldDirection = this.controls.getHeldDirection()
@@ -373,7 +373,7 @@ export default class Player extends PhysicsActor {
    * Applies ground friction to the player's velocity.
    */
   applyDeceleration() {
-    const isOnGround = this.raycast.isOnGround()
+    const isOnGround = this.isOnGround
     const isOverMaxVelocity = Math.abs(this.vel.x) > this.maxVelocity
 
     // ground deceleration
@@ -428,7 +428,7 @@ class PlayerControlsComponent extends ControlsComponent {
 
     // increment the sprint timer to toggle sprinting if we're running for SPRINT_TRIGGER_TIME
     owner.on('postupdate', ({ delta }) => {
-      const isOnGround = this.owner.raycast.isOnGround()
+      const isOnGround = this.owner.isOnGround
       const jumpedBeforeSprinting = !isOnGround && !this.isSprinting
       const isTurningOnGround = this.isTurning && isOnGround
 

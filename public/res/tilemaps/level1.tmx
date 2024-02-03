@@ -166,12 +166,13 @@
 </data>
  </layer>
  <objectgroup id="6" name="platforms">
-  <object id="31" name="MovingPlatform" type="MovingPlatform" x="288" y="272" width="112" height="16">
+  <object id="31" name="MovingPlatform" type="MovingPlatform" x="432" y="432" width="112" height="16">
    <properties>
     <property name="path" type="object" value="32"/>
+    <property name="speed" type="int" value="50"/>
    </properties>
   </object>
-  <object id="32" x="224" y="240">
+  <object id="32" x="496" y="336">
    <point/>
   </object>
  </objectgroup>

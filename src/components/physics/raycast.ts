@@ -5,10 +5,6 @@ export class RaycastComponent extends ex.Component {
   declare owner: ex.Actor
   type = 'raycast'
 
-  isOnGround(distance: number = 1) {
-    return this.checkCollision(ex.Side.Bottom, distance)
-  }
-
   cast(ray: ex.Ray, distance: number) {
     Debug.drawRay(this.owner, ray, distance)
     return this.owner
@@ -21,7 +17,13 @@ export class RaycastComponent extends ex.Component {
   }
 
   checkCollision(side: ex.Side, distance: number) {
-    const bounds = this.owner.collider.bounds
+    const bounds = new ex.BoundingBox(
+      Math.round(this.owner.collider.bounds.left),
+      Math.round(this.owner.collider.bounds.top),
+      Math.round(this.owner.collider.bounds.right),
+      Math.round(this.owner.collider.bounds.bottom)
+    )
+
     let corner1!: ex.Vector
     let corner2!: ex.Vector
     let direction!: ex.Vector
@@ -53,6 +55,13 @@ export class RaycastComponent extends ex.Component {
     const corner1Hits = this.cast(new ex.Ray(corner1, direction), distance)
     const corner2Hits = this.cast(new ex.Ray(corner2, direction), distance)
 
-    return [...corner1Hits, ...corner2Hits]
+    return (
+      [...corner1Hits, ...corner2Hits]
+        // remove duplicates
+        .filter(
+          (hit, index, self) =>
+            self.findIndex((h) => h.body === hit.body) === index
+        )
+    )
   }
 }

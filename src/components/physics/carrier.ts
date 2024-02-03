@@ -1,4 +1,5 @@
 import * as ex from 'excalibur'
+import { PhysicsActor } from '../../classes/physics-actor'
 
 /**
  * Attaches actors that land on top of it as children, causing
@@ -36,7 +37,7 @@ export class CarrierComponent extends ex.Component {
     if (other instanceof ex.Actor) {
       if (this.owner.children.includes(other)) {
         this.owner.removeChild(other)
-        this.owner.scene.add(other)
+        this.owner.scene!.add(other)
 
         // now that the child is no longer a child we need to adjust its position
         // back to global coordinates

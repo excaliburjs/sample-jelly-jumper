@@ -25,24 +25,24 @@ export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
 
   constructor(target: Player) {
     this.target = target
-    this.xOffset = new Tween(this.target.scene.engine, 40, {
+    this.xOffset = new Tween(this.target.scene!.engine, 40, {
       easing: ex.EasingFunctions.Linear,
       duration: this.X_OFFSET_UPDATE_RATE,
     })
   }
 
   action(target: Player, camera: ex.Camera, engine: ex.Engine, delta: number) {
-    const relativeX = target.pos.x - camera.pos.x + this.xOffset.value
-    const relativeY = target.pos.y - camera.pos.y
+    // get global position of target as target.pos is relative to its parent
+    const targetPos = target.getGlobalPos()
+
+    const relativeX = targetPos.x - camera.pos.x + this.xOffset.value
+    const relativeY = targetPos.y - camera.pos.y
 
     const isAtLeftEdge = relativeX < -this.X_EDGE_BUFFER
     const isAtRightEdge = relativeX > this.X_EDGE_BUFFER
 
     const isAtTopEdge = relativeY < -this.Y_EDGE_BUFFER
     const isAtBottomEdge = relativeY > this.Y_EDGE_BUFFER
-
-    // get global position of target as target.pos is relative to its parent
-    const targetPos = target.getGlobalPos()
 
     let nextX = camera.pos.x
     let nextY = camera.pos.y

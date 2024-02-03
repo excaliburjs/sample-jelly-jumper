@@ -40,6 +40,7 @@ export default class LevelScene extends ex.Scene {
       audioManager.playSong(this.song)
     }
   }
+
   setupCamera() {
     // set camera to follow player
     const player = this.entities.find((e) => e instanceof Player) as Player

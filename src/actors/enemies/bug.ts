@@ -56,18 +56,24 @@ export class BugEnemy extends EnemyActor {
 
     const bottomLeft = this.raycast.cast(
       new ex.Ray(
-        ex.vec(this.collider.bounds.left + 1, this.collider.bounds.bottom),
+        ex.vec(
+          this.collider.bounds.left + 1,
+          Math.round(this.collider.bounds.bottom) - 1
+        ),
         ex.Vector.Down
       ),
-      5
+      1
     )
 
     const bottomRight = this.raycast.cast(
       new ex.Ray(
-        ex.vec(this.collider.bounds.right - 1, this.collider.bounds.bottom),
+        ex.vec(
+          this.collider.bounds.right - 1,
+          Math.round(this.collider.bounds.bottom) - 1
+        ),
         ex.Vector.Down
       ),
-      5
+      1
     )
 
     const isAtLeftEdge = this.direction === 'left' && bottomLeft.length === 0
