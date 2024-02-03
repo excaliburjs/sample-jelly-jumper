@@ -87,30 +87,21 @@ export default class LevelScene extends ex.Scene {
   setupOneWayPlatforms() {
     // get all tiles with oneway property
     const onewayTiles = this.tilemap.getTilesByProperty('oneway', true)
-    const layerNames = this.tilemap.map.layers.map((l) => l.name)
     const tileWidth = this.tilemap.map.tilewidth
     const tileHeight = this.tilemap.map.tileheight
 
-    // iterate through all tiles, check if they are oneway tiles, and
-    // then create a OneWayPlatform at that location
-    for (const layerName of layerNames) {
-      for (let row = 0; row < this.tilemap.map.width; row++) {
-        for (let col = 0; col < this.tilemap.map.height; col++) {
-          const tile = this.tilemap.getTileByCoordinate(layerName, row, col)
+    // create one way platforms at each tile
+    for (const { exTile } of onewayTiles) {
+      const col = exTile.x
+      const row = exTile.y
 
-          if (!tile) continue
-
-          if (onewayTiles.includes(tile?.tiledTile!)) {
-            const platform = new OneWayPlatform({
-              x: row * tileWidth,
-              y: col * tileHeight,
-              width: tileWidth,
-              height: tileHeight,
-            })
-            this.add(platform)
-          }
-        }
-      }
+      const platform = new OneWayPlatform({
+        x: col * tileWidth,
+        y: row * tileHeight,
+        width: tileWidth,
+        height: tileHeight,
+      })
+      this.add(platform)
     }
   }
 }
