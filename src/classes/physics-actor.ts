@@ -6,11 +6,16 @@ export class PhysicsActor extends ex.Actor {
 
   isOnGround = false
 
+  private _oldPosGlobal = ex.vec(0, 0)
+
   onInitialize(engine: ex.Engine): void {
     this.addComponent(this.touching)
 
     this.on('preupdate', () => {
       this.isOnGround = this.touching.bottom.length > 0
+    })
+    this.on('postupdate', () => {
+      this._oldPosGlobal = this.getGlobalPos().clone()
     })
   }
 
@@ -21,5 +26,9 @@ export class PhysicsActor extends ex.Actor {
     })
       .filter((hit) => hit.body !== this.body)
       .sort((a, b) => a.distance - b.distance)
+  }
+
+  getGlobalOldPos() {
+    return this._oldPosGlobal
   }
 }

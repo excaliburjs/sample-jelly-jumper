@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="41">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="7" nextobjectid="43">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -172,7 +172,7 @@
     <property name="speed" type="int" value="50"/>
    </properties>
   </object>
-  <object id="32" x="496" y="336">
+  <object id="32" x="432" y="336">
    <point/>
   </object>
  </objectgroup>
@@ -180,12 +180,24 @@
   <object id="4" name="Player" type="Player" x="240" y="432">
    <point/>
   </object>
-  <object id="22" name="Bug" type="BugEnemy" x="336" y="400">
+  <object id="22" name="Spider" type="SpiderEnemy" x="336" y="400">
    <point/>
   </object>
-  <object id="23" name="Bug" type="BugEnemyy" x="784" y="400">
+  <object id="23" name="Spider" type="SpiderEnemy" x="784" y="400">
    <properties>
     <property name="type" value="gray"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="41" name="Bird" type="BirdEnemy" x="608" y="400">
+   <properties>
+    <property name="type" value="purple"/>
+   </properties>
+   <point/>
+  </object>
+  <object id="42" name="Bird" type="BirdEnemy" x="624" y="336">
+   <properties>
+    <property name="type" value="orange"/>
    </properties>
    <point/>
   </object>

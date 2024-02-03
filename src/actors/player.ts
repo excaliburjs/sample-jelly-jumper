@@ -207,16 +207,20 @@ export default class Player extends PhysicsActor {
     super.onPreCollisionResolve(self, other, side, contact)
 
     if (other.owner instanceof EnemyActor) {
-      if (side === ex.Side.Bottom) {
-        // jump off enemy
+      // a lenient check to see if we stomped on the enemy by using the previous position.y
+      // (we could check for side === ex.Side.Bottom, but depending on the angle you stomp an enemy, it might not be the case)
+      const posDelta = this.getGlobalPos().sub(this.getGlobalOldPos())
+      const didStomp = self.bounds.bottom - posDelta.y < other.bounds.top + 1
+
+      if (didStomp) {
         this.bounceOffEnemy(other.owner)
       } else {
         if (!other.owner.dead) {
           if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
             this.scene?.add(
               new FakeDie({
-                x: this.pos.x,
-                y: this.pos.y,
+                x: this.getGlobalPos().x,
+                y: this.getGlobalPos().y,
               })
             )
           }
@@ -232,7 +236,8 @@ export default class Player extends PhysicsActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
-    const wasInAir = Math.round(this.pos.y - this.oldPos.y) > 1
+    const wasInAir =
+      Math.round(this.getGlobalPos().y - this.getGlobalOldPos().y) > 1
 
     // player landed on the ground
     if (side === ex.Side.Bottom && wasInAir) {

@@ -1,6 +1,7 @@
 import * as ex from 'excalibur'
 import { EnemyActor, EnemyKillMethod } from '../../classes/enemy-actor'
 import { Resources } from '../../resources'
+import Player from '../player'
 
 const grid = {
   rows: 1,
@@ -9,27 +10,34 @@ const grid = {
   spriteHeight: 48,
 }
 
-const greenSpritesheet = ex.SpriteSheet.fromImageSource({
-  image: Resources.img.spiderGreen,
-  grid,
-})
-
-const graySpritesheet = ex.SpriteSheet.fromImageSource({
-  image: Resources.img.spiderGray,
-  grid,
-})
-
-export interface BugEnemyArgs extends ex.ActorArgs {
-  type: 'green' | 'gray'
+const variants = {
+  green: {
+    speed: 20,
+    spritesheet: ex.SpriteSheet.fromImageSource({
+      image: Resources.img.spiderGreen,
+      grid,
+    }),
+  },
+  gray: {
+    speed: 30,
+    spritesheet: ex.SpriteSheet.fromImageSource({
+      image: Resources.img.spiderGray,
+      grid,
+    }),
+  },
 }
 
-export class BugEnemy extends EnemyActor {
+export interface SpiderEnemyArgs extends ex.ActorArgs {
+  type: keyof typeof variants
+}
+
+export class SpiderEnemy extends EnemyActor {
   spritesheet: ex.SpriteSheet
 
   speed: number
   direction: 'left' | 'right' = 'left'
 
-  constructor(args: BugEnemyArgs) {
+  constructor(args: SpiderEnemyArgs) {
     super({
       ...args,
       anchor: ex.vec(0.5, 0.65),
@@ -37,10 +45,8 @@ export class BugEnemy extends EnemyActor {
       collisionGroup: ex.CollisionGroupManager.groupByName('enemies'),
     })
 
-    this.spritesheet =
-      args.type === 'green' ? greenSpritesheet : graySpritesheet
-
-    this.speed = args.type === 'green' ? 20 : 30
+    this.spritesheet = variants[args.type].spritesheet
+    this.speed = variants[args.type].speed
 
     this.graphics.use(
       ex.Animation.fromSpriteSheet(
@@ -98,12 +104,10 @@ export class BugEnemy extends EnemyActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
-    const isSlope =
-      Math.abs(contact.normal.x) !== 0 && Math.abs(contact.normal.y) !== 0
-    if (!isSlope) {
-      if (side === ex.Side.Left || side === ex.Side.Right) {
-        this.direction = this.direction === 'left' ? 'right' : 'left'
-      }
+    if (other instanceof Player) return
+
+    if (side === ex.Side.Left || side === ex.Side.Right) {
+      this.direction = this.direction === 'left' ? 'right' : 'left'
     }
   }
 

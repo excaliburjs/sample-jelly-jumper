@@ -17,7 +17,10 @@ export class PassengerComponent extends ex.Component {
    * it moves with the platform.
    */
   onCollisionStart({ other, side }: ex.CollisionStartEvent): void {
-    if (other instanceof ex.Actor) {
+    if (
+      other instanceof ex.Actor &&
+      other.body.collisionType === ex.CollisionType.Active
+    ) {
       if (side === ex.Side.Top && !this.owner.children.includes(other)) {
         this.owner.addChild(other)
 

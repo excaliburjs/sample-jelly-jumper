@@ -9,8 +9,8 @@ export class EnemyActor extends PhysicsActor {
   dead = false
   constructor(args: EnemyActorArgs) {
     super({
-      ...args,
       collisionType: ex.CollisionType.Active,
+      ...args,
     })
 
     this.addTag('enemy')
@@ -27,7 +27,7 @@ export class EnemyActor extends PhysicsActor {
     }
   }
 
-  kill(method: EnemyKillMethod = 'instant') {
+  kill(method: EnemyKillMethod = 'instant', duration = 700) {
     if (this.dead) return
     this.dead = true
 
@@ -38,7 +38,8 @@ export class EnemyActor extends PhysicsActor {
         .callMethod(() => {
           this.graphics.current!.scale = ex.vec(1, 0.25)
         })
-        .delay(700)
+        .delay(duration * 0.8)
+        .fade(0, duration * 0.2)
         .callMethod(() => {
           super.kill()
         })

@@ -32,9 +32,9 @@ Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 - Level 1, 2, 3
 - UI (health, score, etc)
 - Document file structure
+- Revise jump physics for easier tweaking
+- Palette swapping materials?
 
-## Notes
+## Advanced TODO after basic game is done
 
-- Raycast component
-  - To this point it's just used to see if you're on the ground. It's a fairly complex component for this purpose, could get away with just the Touching component.
-  - But raycasting is something I would like to have in this sample if there's a necessary use for it.
+- Slopes

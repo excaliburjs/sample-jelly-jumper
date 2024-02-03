@@ -7,9 +7,10 @@ import { audioManager } from '../util/audio-manager'
 import { LockToPlayerStrategy } from '../util/lock-to-player-strategy'
 
 import { FactoryProps, TiledObject } from '@excaliburjs/plugin-tiled'
-import { BugEnemy } from '../actors/enemies/bug'
+import { SpiderEnemy } from '../actors/enemies/spider'
 import { MovingPlatform } from '../actors/platforms/moving-platform'
 import { EnemySpawner } from '../actors/enemy-spawner'
+import { BirdEnemy } from '../actors/enemies/bird'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -59,15 +60,25 @@ export default class LevelScene extends ex.Scene {
     },
 
     /* Enemies */
-    BugEnemy: makeSpawner((args, props) => {
+    SpiderEnemy: makeSpawner((args, props) => {
       const typeProp = props.object?.properties.get('type') as
         | 'green'
         | 'gray'
         | undefined
 
-      return new BugEnemy({
+      return new SpiderEnemy({
         ...args,
         type: typeProp ?? 'green',
+      })
+    }),
+    BirdEnemy: makeSpawner((args, props) => {
+      const typeProp = props.object?.properties.get('type') as
+        | 'purple'
+        | 'orange'
+
+      return new BirdEnemy({
+        ...args,
+        type: typeProp ?? 'red',
       })
     }),
   }
