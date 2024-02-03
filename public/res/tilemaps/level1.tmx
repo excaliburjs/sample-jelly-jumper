@@ -169,7 +169,7 @@
   <object id="31" name="MovingPlatform" type="MovingPlatform" x="432" y="432" width="112" height="16">
    <properties>
     <property name="path" type="object" value="32"/>
-    <property name="speed" type="int" value="50"/>
+    <property name="speed" type="int" value="30"/>
    </properties>
   </object>
   <object id="32" x="432" y="336">

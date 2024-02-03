@@ -12,7 +12,7 @@ export interface EnemySpawnerArgs {
  * when the enemy is killed or leaves the viewport
  */
 export class EnemySpawner extends ex.Actor {
-  OFFSCREEN_BUFFER = 200
+  OFFSCREEN_BUFFER = 100
 
   private spawnedInstance: EnemyActor | null = null
   private canSpawn = true
@@ -42,7 +42,7 @@ export class EnemySpawner extends ex.Actor {
       this.spawnedInstance = null
     })
 
-    this.scene.engine.add(this.spawnedInstance)
+    this.scene!.engine.add(this.spawnedInstance)
   }
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
