@@ -1,3 +1,4 @@
+import { TiledResource } from '@excaliburjs/plugin-tiled'
 import * as ex from 'excalibur'
 
 export const Resources = {
@@ -19,6 +20,11 @@ export const Resources = {
     footstep: new ex.Sound('/res/sfx/footstep.wav'),
     turnAround: new ex.Sound('/res/sfx/turn-around.wav'),
     squish: new ex.Sound('/res/sfx/squish.wav'),
+  },
+  tiled: {
+    level1: new TiledResource('/res/tilemaps/level1.tmx', {
+      useTilemapCameraStrategy: true,
+    }),
   },
 } as const
 

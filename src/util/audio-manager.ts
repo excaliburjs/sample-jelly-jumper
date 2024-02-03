@@ -2,11 +2,6 @@ import * as ex from 'excalibur'
 
 class AudioManager {
   currentSong: ex.Sound | null = null
-  engine!: ex.Engine
-
-  init(engine: ex.Engine) {
-    this.engine = engine
-  }
 
   playSong(song: ex.Sound) {
     if (this.currentSong) {
