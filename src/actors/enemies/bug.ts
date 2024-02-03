@@ -54,7 +54,7 @@ export class BugEnemy extends EnemyActor {
   onPreUpdate(engine: ex.Engine, delta: number): void {
     if (this.dead) return
 
-    const bottomLeft = this.raycast.cast(
+    const bottomLeft = this.raycast(
       new ex.Ray(
         ex.vec(
           this.collider.bounds.left + 1,
@@ -65,7 +65,7 @@ export class BugEnemy extends EnemyActor {
       1
     )
 
-    const bottomRight = this.raycast.cast(
+    const bottomRight = this.raycast(
       new ex.Ray(
         ex.vec(
           this.collider.bounds.right - 1,

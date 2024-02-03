@@ -1,38 +1,25 @@
 import * as ex from 'excalibur'
-import { RaycastComponent } from '../components/physics/raycast'
-import { CarrierComponent } from '../components/physics/carrier'
-import { OneWayCollisionComponent } from '../components/physics/one-way-collision'
+import { TouchingComponent } from '../components/physics/touching'
 
 export class PhysicsActor extends ex.Actor {
-  raycast = new RaycastComponent()
+  touching = new TouchingComponent()
 
   isOnGround = false
 
   onInitialize(engine: ex.Engine): void {
-    this.addComponent(this.raycast)
+    this.addComponent(this.touching)
 
-    this.on('preupdate', ({ delta }) => {
-      if (this.parent?.get(CarrierComponent)) {
-        this.isOnGround = true
-        return
-      }
-
-      const distance = Math.max(1, (this.vel.y * delta) / 1000)
-
-      const hits = this.raycast
-        .checkCollision(ex.Side.Bottom, distance)
-        .filter((hit) => {
-          if (hit.body.owner?.get(OneWayCollisionComponent)) {
-            return (
-              Math.round(this.collider.bounds.bottom) <=
-              Math.round(hit.collider.bounds.top)
-            )
-          }
-
-          return true
-        })
-
-      this.isOnGround = hits.length > 0
+    this.on('preupdate', () => {
+      this.isOnGround = this.touching.bottom.length > 0
     })
+  }
+
+  raycast(ray: ex.Ray, distance: number) {
+    return this.scene!.physics.rayCast(ray, {
+      maxDistance: distance,
+      searchAllColliders: true,
+    })
+      .filter((hit) => hit.body !== this.body)
+      .sort((a, b) => a.distance - b.distance)
   }
 }

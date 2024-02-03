@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
 import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
-import { CarrierComponent } from '../../components/physics/carrier'
+import { PassengerComponent } from '../../components/physics/passenger'
 import { Resources } from '../../resources'
 
 const sprite = Resources.img.platform.toSprite()
@@ -86,7 +86,7 @@ export class MovingPlatform extends ex.Actor {
     )
     cb(this.actions)
 
-    this.addComponent(new CarrierComponent())
+    this.addComponent(new PassengerComponent())
 
     if (oneWay) {
       this.addComponent(new OneWayCollisionComponent())

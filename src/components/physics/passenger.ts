@@ -1,11 +1,10 @@
 import * as ex from 'excalibur'
-import { PhysicsActor } from '../../classes/physics-actor'
 
 /**
  * Attaches actors that land on top of it as children, causing
  * them to move with it. Useful for moving platforms.
  */
-export class CarrierComponent extends ex.Component {
+export class PassengerComponent extends ex.Component {
   declare owner: ex.Actor
   type = 'carrier'
 
