@@ -54,30 +54,36 @@ export class BugEnemy extends EnemyActor {
   onPreUpdate(engine: ex.Engine, delta: number): void {
     if (this.dead) return
 
-    if (this.direction === 'left') {
-      this.vel.x = -this.speed
-    } else {
-      this.vel.x = this.speed
-    }
-
-    const corners = this.raycast.castCorners(
-      // account for slopes
-      4,
-      {
-        bottomLeft: true,
-        bottomRight: true,
-      }
+    const bottomLeft = this.raycast.cast(
+      new ex.Ray(
+        ex.vec(this.collider.bounds.left + 1, this.collider.bounds.bottom),
+        ex.Vector.Down
+      ),
+      5
     )
 
-    const isAtLeftEdge = this.direction === 'left' && !corners.bottomLeft.length
-    const isAtRightEdge =
-      this.direction === 'right' && !corners.bottomRight.length
+    const bottomRight = this.raycast.cast(
+      new ex.Ray(
+        ex.vec(this.collider.bounds.right - 1, this.collider.bounds.bottom),
+        ex.Vector.Down
+      ),
+      5
+    )
+
+    const isAtLeftEdge = this.direction === 'left' && bottomLeft.length === 0
+    const isAtRightEdge = this.direction === 'right' && bottomRight.length === 0
 
     if (isAtLeftEdge || isAtRightEdge) {
       this.direction = this.direction === 'left' ? 'right' : 'left'
     }
 
     this.graphics.flipHorizontal = this.direction === 'right'
+
+    if (this.direction === 'left') {
+      this.vel.x = -this.speed
+    } else {
+      this.vel.x = this.speed
+    }
   }
 
   onCollisionStart(

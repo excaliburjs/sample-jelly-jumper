@@ -16,7 +16,7 @@ const game = new ex.Engine({
   },
   displayMode: ex.DisplayMode.FitScreen,
   fixedUpdateFps: 60,
-  // maxFps: 60,
+  maxFps: 60,
   antialiasing: false,
 })
 
