@@ -302,6 +302,8 @@ export default class Player extends PhysicsActor {
       this.vel.y *= 0.5
       this.isUsingJumpGravity = false
     }
+
+    console.log('touching.top', this.touching.top)
   }
 
   /**
@@ -398,11 +400,11 @@ export default class Player extends PhysicsActor {
 
       // climb on to the ladder
       if (heldYDirection === 'Up') {
-        if (isOccupyingSameTile && xDistanceToLadder < 4) {
+        if (isOccupyingSameTile && xDistanceToLadder < 8) {
           this.isOnLadder = true
         }
       } else if (heldYDirection === 'Down') {
-        if (isStandingAboveLadder && xDistanceToLadder < 4) {
+        if (isStandingAboveLadder && xDistanceToLadder < 8) {
           this.isOnLadder = true
           this.pos.y += 1
         }
