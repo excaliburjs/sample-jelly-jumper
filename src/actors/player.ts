@@ -36,6 +36,11 @@ export default class Player extends PhysicsActor {
   MAX_FALL_SPEED = 270
 
   /**
+   * The speed at which the player can climb ladders.
+   */
+  LADDER_CLIMB_SPEED = 75
+
+  /**
    * The amount of acceleration to apply to the player when they are walking or running.
    */
   ACCELERATION = 300
@@ -110,8 +115,9 @@ export default class Player extends PhysicsActor {
    * True while the user is holding the jump button or reached the
    * apex of their jump before releasing the jump button.
    */
-  isUsingJumpGravity = false
   facing: 'left' | 'right' = 'right'
+  isUsingJumpGravity = false
+  isOnLadder = false
 
   constructor(args: { x: number; y: number; z?: number }) {
     super({
@@ -122,7 +128,6 @@ export default class Player extends PhysicsActor {
       height: 16,
       collisionType: ex.CollisionType.Active,
       collider: ex.Shape.Box(10, 16, ex.vec(0.5, 1)),
-      // collider: ex.Shape.Capsule(10, 16, ex.vec(0.5, -8)),
     })
 
     // we'll handle gravity ourselves
@@ -173,6 +178,11 @@ export default class Player extends PhysicsActor {
       this.acc.setTo(0, ex.Physics.acc.y)
     }
 
+    if (this.isOnLadder) {
+      this.acc.setTo(0, 0)
+      this.vel.setTo(0, 0)
+    }
+
     super.update(engine, delta)
   }
 
@@ -195,6 +205,10 @@ export default class Player extends PhysicsActor {
     // reset jump gravity once we land on the ground
     if (this.isOnGround) {
       this.isUsingJumpGravity = false
+    }
+
+    if (!this.touching.ladders.length) {
+      this.isOnLadder = false
     }
   }
 
@@ -253,10 +267,12 @@ export default class Player extends PhysicsActor {
     const jumpHeld = this.controls.isHeld('Jump')
     const isOnGround = this.isOnGround
 
-    const heldDirection = this.controls.getHeldDirection()
+    const heldXDirection = this.controls.getHeldXDirection()
+    const heldYDirection = this.controls.getHeldYDirection()
+
     // move left or right
-    if (heldDirection) {
-      const direction = heldDirection === 'Left' ? -1 : 1
+    if (heldXDirection && !this.isOnLadder) {
+      const direction = heldXDirection === 'Left' ? -1 : 1
       const accel = this.ACCELERATION * direction
 
       this.facing = direction === -1 ? 'left' : 'right'
@@ -264,12 +280,25 @@ export default class Player extends PhysicsActor {
       this.acc.x += accel
     }
 
-    if (jumpPressed && isOnGround) {
+    // climb ladder
+    if (heldYDirection) {
+      if (this.touching.ladders.length) {
+        this.climbLadder()
+      }
+    }
+
+    if (jumpPressed && (isOnGround || this.isOnLadder)) {
+      this.isOnLadder = false
       this.jump()
     }
     // cancel jump if we're not holding the jump button, but still
     // enforce a minimum jump height
-    else if (!jumpHeld && this.vel.y < 0 && this.vel.y > -200) {
+    else if (
+      !jumpHeld &&
+      this.vel.y < 0 &&
+      this.vel.y > -200 &&
+      !this.isOnLadder
+    ) {
       this.vel.y *= 0.5
       this.isUsingJumpGravity = false
     }
@@ -279,14 +308,18 @@ export default class Player extends PhysicsActor {
    * Sets the player's animation based on their current state.
    */
   handleAnimation() {
-    const isOnGround = this.isOnGround
     const currentFrameIndex = this.animation.current.currentFrameIndex
     const currentFrameTimeLeft = this.animation.current.currentFrameTimeLeft
-    const heldDirection = this.controls.getHeldDirection()
+    const heldDirection = this.controls.getHeldXDirection()
 
     this.graphics.flipHorizontal = this.facing === 'left'
 
-    if (isOnGround) {
+    if (this.isOnLadder) {
+      this.animation.set('ladder_climb')
+      if (this.vel.y === 0) {
+        this.animation.current.goToFrame(0)
+      }
+    } else if (this.isOnGround) {
       if (this.controls.isTurning) {
         this.animation.set('turn')
       } else {
@@ -333,6 +366,61 @@ export default class Player extends PhysicsActor {
           this.animation.set('jump')
         } else {
           this.animation.set('fall')
+        }
+      }
+    }
+  }
+
+  climbLadder() {
+    // it's possible to be touching multiple ladder tiles at once - find the closet one
+    const closestLadder = this.touching.ladders
+      .sort((a, b) => {
+        return (
+          Math.abs(this.pos.x - a.center.x) - Math.abs(this.pos.x - b.center.x)
+        )
+      })
+      .at(0)
+
+    if (closestLadder) {
+      const heldYDirection = this.controls.getHeldYDirection()
+      const dir = heldYDirection === 'Up' ? -1 : 1
+      const xDistanceToLadder = Math.abs(this.pos.x - closestLadder.center.x)
+
+      // if we're in the same tile as the ladder
+      const isOccupyingSameTile =
+        Math.ceil(Math.round(this.collider.bounds.top) / 16) ===
+        Math.ceil(Math.round(closestLadder.collider.bounds.top) / 16)
+
+      // if we're in the tile above the ladder
+      const isStandingAboveLadder =
+        Math.ceil(Math.round(this.collider.bounds.top) / 16) <
+        Math.ceil(Math.round(closestLadder.collider.bounds.top) / 16)
+
+      // climb on to the ladder
+      if (heldYDirection === 'Up') {
+        if (isOccupyingSameTile && xDistanceToLadder < 4) {
+          this.isOnLadder = true
+        }
+      } else if (heldYDirection === 'Down') {
+        if (isStandingAboveLadder && xDistanceToLadder < 4) {
+          this.isOnLadder = true
+          this.pos.y += 1
+        }
+      }
+
+      // apply climbing speed
+      if (this.isOnLadder) {
+        this.pos.x = closestLadder.center.x
+        this.vel.y = this.LADDER_CLIMB_SPEED * dir
+        this.vel.x = 0
+
+        // if we're on the ground, exit the ladder
+        if (
+          this.isOnGround &&
+          heldYDirection === 'Down' &&
+          !isStandingAboveLadder
+        ) {
+          this.isOnLadder = false
         }
       }
     }
@@ -451,7 +539,7 @@ class PlayerControlsComponent extends ControlsComponent {
   }
 
   get isMoving() {
-    return this.getHeldDirection() !== undefined
+    return this.getHeldXDirection() !== undefined
   }
 
   get isRunning() {
@@ -463,7 +551,7 @@ class PlayerControlsComponent extends ControlsComponent {
   }
 
   get isTurning() {
-    const heldDirection = this.getHeldDirection()
+    const heldDirection = this.getHeldXDirection()
     return (
       (heldDirection === 'Left' && this.owner.vel.x > 0) ||
       (heldDirection === 'Right' && this.owner.vel.x < 0)

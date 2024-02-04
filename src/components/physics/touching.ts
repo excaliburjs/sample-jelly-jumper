@@ -1,4 +1,5 @@
 import * as ex from 'excalibur'
+import { LadderComponent } from './ladder'
 
 /**
  * Tracks which entities are touching this entity currently.
@@ -10,6 +11,8 @@ export class TouchingComponent extends ex.Component {
   right: ex.Actor[] = []
   top: ex.Actor[] = []
   bottom: ex.Actor[] = []
+
+  ladders: ex.Actor[] = []
 
   onAdd(owner: ex.Actor): void {
     owner.on('collisionstart', (ev) => {
@@ -39,10 +42,14 @@ export class TouchingComponent extends ex.Component {
           }
         }
 
-        const side = getSide()
+        if (ev.other.has(LadderComponent)) {
+          this.ladders.push(ev.other)
+        } else {
+          const side = getSide()
 
-        if (side) {
-          this[side].push(ev.other)
+          if (side) {
+            this[side].push(ev.other)
+          }
         }
       }
     })
@@ -59,6 +66,7 @@ export class TouchingComponent extends ex.Component {
       remove(this.right)
       remove(this.top)
       remove(this.bottom)
+      remove(this.ladders)
     })
   }
 }

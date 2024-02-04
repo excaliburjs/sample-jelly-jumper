@@ -20,9 +20,6 @@ const game = new ex.Engine({
     filtering: ex.ImageFiltering.Pixel,
     pixelArtSampler: false,
   },
-  // because we're using a low resolution we can up the pixel ratio a little bit
-  // based on the device's pixel ratio for a crisper image
-  pixelRatio: window.devicePixelRatio * 2,
   scenes: {
     root: {
       scene: Level1,

@@ -11,6 +11,7 @@ import { SpiderEnemy } from '../actors/enemies/spider'
 import { MovingPlatform } from '../actors/platforms/moving-platform'
 import { EnemySpawner } from '../actors/enemy-spawner'
 import { BirdEnemy } from '../actors/enemies/bird'
+import { LadderComponent } from '../components/physics/ladder'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -104,6 +105,7 @@ export default class LevelScene extends ex.Scene {
     this.setupBackground()
     this.setupWorldBounds()
     this.setupOneWayPlatforms()
+    this.setupLadders()
   }
 
   onActivate(context: ex.SceneActivationContext<unknown>): void {
@@ -173,6 +175,28 @@ export default class LevelScene extends ex.Scene {
         height: tileHeight,
       })
       this.add(platform)
+    }
+  }
+
+  setupLadders() {
+    const ladderTiles = this.tilemap.getTilesByProperty('ladder', true)
+    const tileWidth = this.tilemap.map.tilewidth
+    const tileHeight = this.tilemap.map.tileheight
+
+    // create one way platforms at each tile
+    for (const { exTile } of ladderTiles) {
+      const col = exTile.x
+      const row = exTile.y
+      const ladder = new ex.Actor({
+        anchor: ex.vec(0, 0),
+        x: col * tileWidth,
+        y: row * tileHeight,
+        width: tileWidth,
+        height: tileHeight,
+        collisionType: ex.CollisionType.Passive,
+      })
+      ladder.addComponent(new LadderComponent())
+      this.add(ladder)
     }
   }
 }

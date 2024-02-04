@@ -15,7 +15,7 @@ export class ControlsComponent extends ex.Component {
   } as const
 
   isHeld(control: keyof typeof this.controls) {
-    const engine = this.owner.scene.engine
+    const engine = this.owner.scene!.engine
     const [key, button] = this.controls[control]
 
     return Boolean(
@@ -25,7 +25,7 @@ export class ControlsComponent extends ex.Component {
   }
 
   wasPressed(control: keyof typeof this.controls) {
-    const engine = this.owner.scene.engine
+    const engine = this.owner.scene!.engine
     const [key, button] = this.controls[control]
 
     return Boolean(
@@ -35,7 +35,7 @@ export class ControlsComponent extends ex.Component {
   }
 
   wasReleased(control: keyof typeof this.controls) {
-    const engine = this.owner.scene.engine
+    const engine = this.owner.scene!.engine
     const [key, button] = this.controls[control]
 
     return Boolean(
@@ -45,7 +45,7 @@ export class ControlsComponent extends ex.Component {
   }
 
   getGamepad() {
-    const engine = this.owner.scene.engine
+    const engine = this.owner.scene!.engine
     return [
       engine.input.gamepads.at(0),
       engine.input.gamepads.at(1),
@@ -59,8 +59,8 @@ export class ControlsComponent extends ex.Component {
    * keyboard controls where both keys may be pressed at the same time if you
    * want to prioritize one over the other.
    */
-  getHeldDirection(): 'Left' | 'Right' | undefined {
-    const engine = this.owner.scene.engine
+  getHeldXDirection(): 'Left' | 'Right' | undefined {
+    const engine = this.owner.scene!.engine
 
     for (const key of engine.input.keyboard.getKeys().slice().reverse()) {
       if (this.controls.Left.includes(key as any)) return 'Left'
@@ -70,6 +70,20 @@ export class ControlsComponent extends ex.Component {
     if (this.getGamepad()) {
       if (this.isHeld('Left')) return 'Left'
       if (this.isHeld('Right')) return 'Right'
+    }
+  }
+
+  getHeldYDirection(): 'Up' | 'Down' | undefined {
+    const engine = this.owner.scene!.engine
+
+    for (const key of engine.input.keyboard.getKeys().slice().reverse()) {
+      if (this.controls.Up.includes(key as any)) return 'Up'
+      if (this.controls.Down.includes(key as any)) return 'Down'
+    }
+
+    if (this.getGamepad()) {
+      if (this.isHeld('Up')) return 'Up'
+      if (this.isHeld('Down')) return 'Down'
     }
   }
 }
