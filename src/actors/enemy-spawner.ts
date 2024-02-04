@@ -64,7 +64,7 @@ export class EnemySpawner extends ex.Actor {
 
     if (
       this.spawnedInstance &&
-      !boundsWithBuffer.contains(this.spawnedInstance.pos)
+      !boundsWithBuffer.contains(this.spawnedInstance.getGlobalPos())
     ) {
       this.spawnedInstance.kill()
       this.spawnedInstance = null
