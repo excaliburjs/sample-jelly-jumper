@@ -250,12 +250,19 @@ export default class Player extends PhysicsActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
-    const wasInAir =
-      Math.round(this.getGlobalPos().y - this.getGlobalOldPos().y) > 1
+    const otherBody = other.owner.get(ex.BodyComponent)
 
-    // player landed on the ground
-    if (side === ex.Side.Bottom && wasInAir) {
-      audioManager.playSfx(Resources.sfx.footstep)
+    if (
+      otherBody?.collisionType === ex.CollisionType.Fixed ||
+      otherBody?.collisionType === ex.CollisionType.Active
+    ) {
+      const wasInAir =
+        Math.round(this.getGlobalPos().y - this.getGlobalOldPos().y) > 1
+
+      // player landed on the ground
+      if (side === ex.Side.Bottom && wasInAir) {
+        audioManager.playSfx(Resources.sfx.footstep)
+      }
     }
   }
 
@@ -287,9 +294,20 @@ export default class Player extends PhysicsActor {
       }
     }
 
-    if (jumpPressed && (isOnGround || this.isOnLadder)) {
-      this.isOnLadder = false
-      this.jump()
+    if (jumpPressed) {
+      // normal jump
+      if (isOnGround) {
+        this.jump()
+      }
+      // jump or fall off ladder
+      else if (this.isOnLadder) {
+        this.isOnLadder = false
+
+        // when down is held we'll just let the player fall, otherwise jump
+        if (heldYDirection !== 'Down') {
+          this.jump()
+        }
+      }
     }
     // cancel jump if we're not holding the jump button, but still
     // enforce a minimum jump height
@@ -386,7 +404,9 @@ export default class Player extends PhysicsActor {
     if (closestLadder) {
       const heldYDirection = this.controls.getHeldYDirection()
       const dir = heldYDirection === 'Up' ? -1 : 1
-      const xDistanceToLadder = Math.abs(this.pos.x - closestLadder.center.x)
+
+      const isCloseEnoughOnX = Math.abs(this.pos.x - closestLadder.center.x) < 8
+      const isJumping = this.vel.y <= -50
 
       // if we're in the same tile as the ladder
       const isOccupyingSameTile =
@@ -399,17 +419,14 @@ export default class Player extends PhysicsActor {
         Math.ceil(Math.round(closestLadder.collider.bounds.top) / 16)
 
       // climb on to the ladder
-      if (heldYDirection === 'Up') {
-        if (isOccupyingSameTile && xDistanceToLadder < 8) {
+      if (isCloseEnoughOnX && !isJumping) {
+        if (heldYDirection === 'Up' && isOccupyingSameTile) {
           this.isOnLadder = true
-        }
-      } else if (heldYDirection === 'Down') {
-        if (isStandingAboveLadder && xDistanceToLadder < 8) {
+        } else if (heldYDirection === 'Down' && isStandingAboveLadder) {
           this.isOnLadder = true
           this.pos.y += 1
         }
       }
-
       // apply climbing speed
       if (this.isOnLadder) {
         this.pos.x = closestLadder.center.x
