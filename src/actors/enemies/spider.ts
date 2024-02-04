@@ -104,7 +104,15 @@ export class SpiderEnemy extends EnemyActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
-    if (other instanceof Player) return
+    if (other instanceof Player) {
+      return
+    }
+
+    if (other.owner instanceof ex.Actor) {
+      if (other.owner.body.collisionType === ex.CollisionType.Passive) {
+        return
+      }
+    }
 
     if (side === ex.Side.Left || side === ex.Side.Right) {
       this.direction = this.direction === 'left' ? 'right' : 'left'
