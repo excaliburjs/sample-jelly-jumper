@@ -35,5 +35,9 @@ const game = new ex.Engine({
   },
 })
 
+// game.toggleDebug();
+// game.debug.tilemap.showColliderGeometry = true;
+// game.debug.collider.geometryLineWidth = 1.5;
+
 // start game
 game.start(loader)

@@ -24,20 +24,23 @@ export class TouchingComponent extends ex.Component {
         const bounds = owner.collider.bounds
 
         const getSide = () => {
-          const bottom = Math.abs(bounds.bottom - otherBounds.top)
-          const top = Math.abs(bounds.top - otherBounds.bottom)
-          const left = Math.abs(bounds.left - otherBounds.right)
-          const right = Math.abs(bounds.right - otherBounds.left)
+          // Contact normal points away from collider A, but we aren't guaranteed an order
+          // so flip to match
+          let normal: ex.Vector;
+          if (ev.contact.colliderA === owner.collider.get()) {
+            normal = ev.contact.normal;
+          } else {
+            normal = ev.contact.normal.negate();
+          }
 
-          const min = Math.min(left, right, top, bottom)
-
-          if (min === left) {
+          const side = ex.Side.fromDirection(normal);
+          if (side === ex.Side.Left) {
             return 'left'
-          } else if (min === right) {
+          } else if (side === ex.Side.Right) {
             return 'right'
-          } else if (min === top) {
+          } else if (side === ex.Side.Top) {
             return 'top'
-          } else if (min === bottom) {
+          } else if (side === ex.Side.Bottom) {
             return 'bottom'
           }
         }

@@ -320,8 +320,6 @@ export default class Player extends PhysicsActor {
       this.vel.y *= 0.5
       this.isUsingJumpGravity = false
     }
-
-    console.log('touching.top', this.touching.top)
   }
 
   /**
