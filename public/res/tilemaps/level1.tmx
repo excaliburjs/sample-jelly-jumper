@@ -226,7 +226,7 @@
   </object>
  </objectgroup>
  <objectgroup id="2" name="actors">
-  <object id="4" name="Player" type="Player" x="240" y="448">
+  <object id="4" name="Player" type="Player" x="144" y="448">
    <point/>
   </object>
   <object id="22" name="Spider" type="SpiderEnemy" x="336" y="400">

@@ -44,10 +44,17 @@ export class Tween {
     }
   }
 
-  set(value: number) {
-    this._startValue = this.value
-    this._targetValue = value
+  set(value: number, immediately = false) {
     this._elapsed = 0
+
+    if (immediately) {
+      this.value = value
+      this._startValue = value
+      this._targetValue = value
+    } else {
+      this._startValue = this.value
+      this._targetValue = value
+    }
   }
 
   destroy() {

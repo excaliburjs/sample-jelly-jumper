@@ -8,9 +8,17 @@ import { Tween } from './tween'
  */
 export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
   /**
-   * The duration of the camera offset tween in milliseconds.
+   * The damping factor for the camera when following target position.
+   *
+   * Between 0 and 1, where 0 is no damping and 1 is no movement.
    */
-  X_OFFSET_UPDATE_RATE = 500
+  FOLLOW_DAMPING = 0.5
+
+  /**
+   * How long it takes for the camera to turn around when the player
+   * is at the X_EDGE_BUFFER or Y_EDGE_BUFFER.
+   */
+  TURN_TWEEN_DURATION = 400
 
   /**
    * The number of pixels from the center of the screen that the player
@@ -21,14 +29,18 @@ export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
 
   target: Player
   xOffset: Tween
+
   facing: 'left' | 'right' = 'right'
+
+  private isFirstUpdate = true
 
   constructor(target: Player) {
     this.target = target
-    this.xOffset = new Tween(this.target.scene!.engine, 40, {
+    this.xOffset = new Tween(this.target.scene!.engine, 0, {
       easing: ex.EasingFunctions.Linear,
-      duration: this.X_OFFSET_UPDATE_RATE,
+      duration: this.TURN_TWEEN_DURATION,
     })
+    this.turn('right', true)
   }
 
   action(target: Player, camera: ex.Camera, engine: ex.Engine, delta: number) {
@@ -66,15 +78,36 @@ export class LockToPlayerStrategy implements ex.CameraStrategy<Player> {
         : targetPos.y - this.Y_EDGE_BUFFER
     }
 
+    // set position on first update immediately
+    if (this.isFirstUpdate) {
+      this.isFirstUpdate = false
+      return ex.vec(nextX, nextY)
+    }
+    // apply damping when following the player
+    else {
+      if (isAtLeftEdge || isAtRightEdge) {
+        const diffX = nextX - camera.pos.x
+        const diffY = nextY - camera.pos.y
+
+        if (Math.abs(diffX) > 0.1) {
+          nextX -= diffX * this.FOLLOW_DAMPING
+        }
+
+        if (Math.abs(diffY) > 0.1) {
+          nextY -= diffY * this.FOLLOW_DAMPING
+        }
+      }
+    }
+
     return ex.vec(nextX, nextY)
   }
 
-  turn(direction: 'left' | 'right') {
+  turn(direction: 'left' | 'right', immediately = false) {
     this.facing = direction
     if (direction === 'left') {
-      this.xOffset.set(-this.X_EDGE_BUFFER * 4)
+      this.xOffset.set(-this.X_EDGE_BUFFER * 4, immediately)
     } else {
-      this.xOffset.set(this.X_EDGE_BUFFER * 4)
+      this.xOffset.set(this.X_EDGE_BUFFER * 4, immediately)
     }
   }
 }

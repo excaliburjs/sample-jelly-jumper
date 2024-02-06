@@ -183,7 +183,7 @@ export default class LevelScene extends ex.Scene {
     const tileWidth = this.tilemap.map.tilewidth
     const tileHeight = this.tilemap.map.tileheight
 
-    // create one way platforms at each tile
+    // create an actor with a ladder component at each tile
     for (const { exTile } of ladderTiles) {
       const col = exTile.x
       const row = exTile.y
