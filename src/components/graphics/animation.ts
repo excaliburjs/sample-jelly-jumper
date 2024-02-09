@@ -23,6 +23,7 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
    * it will not be restarted. Optionally provide a duration left
    */
   set(name: Keys, startFromFrame = 0, durationLeft?: number) {
+    const prevAnim = this.owner.graphics.current
     const anim = this._animations[name]
 
     // return if the animation is already playing
@@ -32,6 +33,11 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
       anim.goToFrame(startFromFrame, durationLeft)
     } else {
       anim.reset()
+    }
+
+    // carry over scale from the previous graphic
+    if (prevAnim) {
+      anim.scale.setTo(prevAnim.scale.x, prevAnim.scale.y)
     }
 
     this.owner.graphics.use(anim)

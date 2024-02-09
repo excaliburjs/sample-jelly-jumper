@@ -7,14 +7,18 @@ import { EnemyActor } from '../classes/enemy-actor'
 import { FakeDie } from './fake-die'
 import { audioManager } from '../util/audio-manager'
 import { GRAVITY } from '../util/world'
+import { EaseAction } from '../actions/EaseAction'
+import { coroutine } from '../util/coroutine'
 
+const SPRITE_WIDTH = 48
+const SPRITE_HEIGHT = 48
 const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img.player,
   grid: {
     columns: 4,
     rows: 6,
-    spriteWidth: 48,
-    spriteHeight: 48,
+    spriteWidth: SPRITE_WIDTH,
+    spriteHeight: SPRITE_HEIGHT,
   },
 })
 
@@ -95,6 +99,14 @@ export default class Player extends PhysicsActor {
    * The amount of force to apply to the player when they jump while sprinting
    */
   SPRINT_JUMP_FORCE = this.JUMP_FORCE * 1.2
+
+  /**
+   * The amount of squish to apply to the player when they jump or land.
+   *
+   * Doing an even number divided by sprite width will ensure the player
+   * squishes to a whole number of pixels.
+   */
+  FX_SQUISH_AMOUNT = 8 / SPRITE_WIDTH
 
   /* Components */
 
@@ -251,18 +263,54 @@ export default class Player extends PhysicsActor {
     side: ex.Side,
     contact: ex.CollisionContact
   ): void {
+    if (contact.isCanceled()) {
+      return
+    }
+
     const otherBody = other.owner.get(ex.BodyComponent)
 
     if (
       otherBody?.collisionType === ex.CollisionType.Fixed ||
       otherBody?.collisionType === ex.CollisionType.Active
     ) {
-      const wasInAir =
-        Math.round(this.getGlobalPos().y - this.getGlobalOldPos().y) > 1
+      const wasInAir = this.oldVel.y > 0
 
       // player landed on the ground
       if (side === ex.Side.Bottom && wasInAir) {
         audioManager.playSfx(Resources.sfx.footstep)
+
+        // apply a squish animation when landing
+        const duration = 70
+        const scaleTo = 1 - this.FX_SQUISH_AMOUNT
+        const easing = ex.EasingFunctions.EaseOutCubic
+
+        this.actions
+          .runAction(
+            new EaseAction(
+              {
+                initial: 1,
+                target: scaleTo,
+                duration,
+                easing,
+              },
+              (value) => {
+                this.squishGraphic(value)
+              }
+            )
+          )
+          .runAction(
+            new EaseAction(
+              {
+                initial: scaleTo,
+                target: 1,
+                duration,
+                easing,
+              },
+              (value) => {
+                this.squishGraphic(value)
+              }
+            )
+          )
       }
     }
   }
@@ -447,26 +495,76 @@ export default class Player extends PhysicsActor {
   /**
    * Applies a jump force to the player.
    */
-  jump() {
-    let jumpForce = this.JUMP_FORCE
+  jump(force?: number, playSfx = true) {
+    if (force === undefined) {
+      force = this.JUMP_FORCE
 
-    if (this.controls.isSprinting) {
-      jumpForce = this.SPRINT_JUMP_FORCE
-    } else if (this.controls.isRunning) {
-      jumpForce = this.RUN_JUMP_FORCE
+      if (this.controls.isSprinting) {
+        force = this.SPRINT_JUMP_FORCE
+      } else if (this.controls.isRunning) {
+        force = this.RUN_JUMP_FORCE
+      }
     }
 
-    this.vel.y = -jumpForce
-    audioManager.playSfx(Resources.sfx.playerJump)
+    this.vel.y = -force
+    if (playSfx) {
+      audioManager.playSfx(Resources.sfx.playerJump)
+    }
+
+    // apply a stretch animation while jumping
+    coroutine(
+      this.scene!.engine,
+      function* () {
+        const duration = 70
+        const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
+        const easing = ex.EasingFunctions.EaseOutCubic
+
+        let elapsed = 0
+
+        // stretch player graphic while jumping
+        while (this.vel.y < -force! * 0.25) {
+          const { delta } = yield
+          elapsed += delta
+
+          if (elapsed < duration) {
+            this.squishGraphic(
+              easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+            )
+          }
+        }
+
+        elapsed = 0
+
+        // un-stretch player graphic while falling
+        while (!this.touching.bottom.length) {
+          const { delta } = yield
+          elapsed += delta
+
+          if (elapsed < duration) {
+            this.squishGraphic(
+              easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
+            )
+          }
+        }
+
+        this.squishGraphic(1)
+      },
+      this
+    )
   }
 
   bounceOffEnemy(enemy: EnemyActor) {
     if (enemy.dead) return
 
-    // use a higher jump force if we're jumping off an enemy
-    this.vel.y = -this.RUN_JUMP_FORCE
     enemy.kill('squish')
     audioManager.playSfx(Resources.sfx.squish)
+
+    // use a higher jump force for jumping off an enemy, unless we're sprinting
+    const force = !this.controls.isSprinting
+      ? this.RUN_JUMP_FORCE
+      : this.SPRINT_JUMP_FORCE
+
+    this.jump(force, false)
   }
 
   get maxVelocity() {
@@ -519,6 +617,16 @@ export default class Player extends PhysicsActor {
       this.vel.x = 0
       this.acc.x = 0
     }
+  }
+
+  /**
+   * Squishes the player's graphic by a scale factor. If below 1, it will
+   * squash the player, if above 1, it will stretch the player.
+   */
+  squishGraphic(scale: number) {
+    const y = scale
+    const x = 2 - y
+    this.graphics.current!.scale = ex.vec(x, y)
   }
 }
 
