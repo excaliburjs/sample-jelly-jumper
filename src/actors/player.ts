@@ -6,6 +6,7 @@ import { PhysicsActor } from '../classes/physics-actor'
 import { EnemyActor } from '../classes/enemy-actor'
 import { FakeDie } from './fake-die'
 import { audioManager } from '../util/audio-manager'
+import { GRAVITY } from '../util/world'
 
 const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img.player,
@@ -23,12 +24,12 @@ export default class Player extends PhysicsActor {
   /**
    * The amount of gravity to apply to the player when they are jumping.
    */
-  JUMP_GRAVITY = ex.Physics.acc.y * 0.5
+  JUMP_GRAVITY = GRAVITY.y * 0.5
 
   /**
    * The amount of gravity to apply to the player when they are near the apex of their jump.
    */
-  APEX_GRAVITY = ex.Physics.acc.y * 0.3
+  APEX_GRAVITY = GRAVITY.y * 0.3
 
   /**
    * The maximum speed the player can fall at.
@@ -175,7 +176,7 @@ export default class Player extends PhysicsActor {
     } else if (this.isUsingJumpGravity) {
       this.acc.setTo(0, this.JUMP_GRAVITY)
     } else {
-      this.acc.setTo(0, ex.Physics.acc.y)
+      this.acc.setTo(0, GRAVITY.y)
     }
 
     if (this.isOnLadder) {

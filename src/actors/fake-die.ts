@@ -1,4 +1,5 @@
 import * as ex from 'excalibur'
+import { GRAVITY } from '../util/world'
 
 // temporary until we have a real death system
 export class FakeDie extends ex.Actor {
@@ -10,7 +11,7 @@ export class FakeDie extends ex.Actor {
     })
 
     this.body.useGravity = false
-    this.acc.y = ex.Physics.acc.y / 2
+    this.acc.y = GRAVITY.y / 2
     this.graphics.use(
       new ex.Text({
         text: '// TODO: die',

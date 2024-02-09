@@ -2,9 +2,7 @@ import * as ex from 'excalibur'
 import { loader } from './resources'
 import Level1 from './scenes/level1'
 import Demo from './scenes/demo'
-
-ex.Physics.useArcadePhysics()
-ex.Physics.acc = new ex.Vector(0, 1450)
+import { GRAVITY } from './util/world'
 
 const game = new ex.Engine({
   resolution: {
@@ -14,6 +12,13 @@ const game = new ex.Engine({
   },
   displayMode: ex.DisplayMode.FitScreen,
   fixedUpdateFps: 60,
+  // maxFps: 60,
+  physics: {
+    gravity: GRAVITY,
+    arcade: {
+      contactSolveBias: ex.ContactSolveBias.VerticalFirst,
+    },
+  },
   antialiasing: {
     canvasImageRendering: 'pixelated',
     multiSampleAntialiasing: true,
@@ -34,10 +39,6 @@ const game = new ex.Engine({
     demo: Demo,
   },
 })
-
-// game.toggleDebug();
-// game.debug.tilemap.showColliderGeometry = true;
-// game.debug.collider.geometryLineWidth = 1.5;
 
 // start game
 game.start(loader)
