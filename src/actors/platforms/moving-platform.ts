@@ -59,6 +59,7 @@ export class MovingPlatform extends ex.Actor {
   ) {
     super({
       color: ex.Color.Green,
+      anchor: ex.vec(0, 0),
       collisionType: ex.CollisionType.Fixed,
       ...args,
     })
