@@ -15,16 +15,13 @@ const game = new ex.Engine({
   // maxFps: 60,
   physics: {
     gravity: GRAVITY,
+    solver: ex.SolverStrategy.Arcade,
     arcade: {
       contactSolveBias: ex.ContactSolveBias.VerticalFirst,
     },
   },
-  antialiasing: {
-    canvasImageRendering: 'pixelated',
-    multiSampleAntialiasing: true,
-    filtering: ex.ImageFiltering.Pixel,
-    pixelArtSampler: false,
-  },
+  pixelRatio: 4, // 4x upscale the resolution, logs an incorrect warning
+  pixelArt: true, // turn on pixel art sampler
   scenes: {
     root: {
       scene: Level1,
