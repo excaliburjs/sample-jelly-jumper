@@ -451,6 +451,7 @@ export default class Player extends PhysicsActor {
     }
 
     if (jumpPressed) {
+      // jump or fall off ladder
       if (this.isClimbingLadder) {
         this.isClimbingLadder = false
 
@@ -465,7 +466,6 @@ export default class Player extends PhysicsActor {
       } else if (isCloseToLeftWall || isCloseToRightWall) {
         this.wallJump(isCloseToLeftWall ? 'left' : 'right')
       }
-      // jump or fall off ladder
     }
     // cancel jump if we're not holding the jump button, but still
     // enforce a minimum jump height
