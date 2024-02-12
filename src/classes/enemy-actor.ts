@@ -4,6 +4,7 @@ import { Tag } from '../util/tag'
 import { HurtPlayerComponent } from '../components/behaviours/hurt-player'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { KillableComponent } from '../components/behaviours/killable'
+import { CollisionGroup } from '../util/collision-group'
 
 export interface EnemyActorArgs extends ex.ActorArgs {
   stompDuration?: number
@@ -16,6 +17,7 @@ export class EnemyActor extends PhysicsActor {
   constructor({ stompDuration, ...args }: EnemyActorArgs) {
     super({
       collisionType: ex.CollisionType.Active,
+      collisionGroup: CollisionGroup.Enemy,
       ...args,
     })
 

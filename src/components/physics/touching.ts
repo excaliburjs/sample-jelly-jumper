@@ -1,22 +1,28 @@
 import * as ex from 'excalibur'
 import { Tag } from '../../util/tag'
 
+type Side = 'left' | 'right' | 'top' | 'bottom'
 /**
  * Tracks which entities are touching this entity currently.
+ *
+ * left, right, top, and bottom will contain active or fixed entities,
+ * while passives will contain passive entities.
  */
 export class TouchingComponent extends ex.Component {
   type = 'touching'
 
-  left: ex.Actor[] = []
-  right: ex.Actor[] = []
-  top: ex.Actor[] = []
-  bottom: ex.Actor[] = []
+  private all = new Map<ex.Actor, Side>()
+
+  left = new Set<ex.Actor>()
+  right = new Set<ex.Actor>()
+  top = new Set<ex.Actor>()
+  bottom = new Set<ex.Actor>()
 
   /**
    * Entities that are touching this entity but are not solid. They are
    * not tracked by side because they can move through the entity.
    */
-  passives: ex.Actor[] = []
+  passives = new Set<ex.Actor>()
 
   onAdd(owner: ex.Actor): void {
     owner.on('collisionstart', (ev) => {
@@ -25,7 +31,7 @@ export class TouchingComponent extends ex.Component {
 
       if (ev.other.collider) {
         if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
-          this.passives.push(ev.other)
+          this.passives.add(ev.other)
         } else {
           const side = ev.side.toLowerCase() as
             | 'left'
@@ -33,26 +39,42 @@ export class TouchingComponent extends ex.Component {
             | 'top'
             | 'bottom'
 
-          this[side].push(ev.other)
+          this.all.set(ev.other, side)
+          this.updateSides()
         }
       }
     })
 
     owner.on('collisionend', (ev) => {
-      const side = ev.side.toLowerCase() as 'left' | 'right' | 'top' | 'bottom'
-      const remove = (arr: ex.Entity[]) => {
-        const index = arr.indexOf(ev.other)
-        if (index !== -1) {
-          arr.splice(index, 1)
+      if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
+        this.passives.delete(ev.other)
+      } else {
+        const side = ev.side.toLowerCase() as Side
+
+        // if this was the side we were tracking, remove it. otherwise we
+        // are still colliding with other but on a different side
+        if (this[side].has(ev.other)) {
+          this.all.delete(ev.other)
+          this.updateSides()
         }
       }
-
-      remove(this[side])
-      remove(this.passives)
     })
   }
 
+  private updateSides() {
+    this.left.clear()
+    this.right.clear()
+    this.top.clear()
+    this.bottom.clear()
+
+    for (const [actor, side] of this.all.entries()) {
+      this[side].add(actor)
+    }
+  }
+
   get ladders() {
-    return this.passives.filter((e) => e.hasTag(Tag.Ladder))
+    return new Set(
+      Array.from(this.passives).filter((e) => e.hasTag(Tag.Ladder))
+    )
   }
 }

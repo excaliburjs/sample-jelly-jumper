@@ -14,6 +14,7 @@ import { Tag } from '../util/tag'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { HurtPlayerComponent } from '../components/behaviours/hurt-player'
 import { KillableComponent } from '../components/behaviours/killable'
+import { CollisionGroup } from '../util/collision-group'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -194,9 +195,9 @@ export default class Player extends PhysicsActor {
   }
 
   get bouncepad() {
-    return this.touching.bottom.find((e) => e.hasTag('bouncepad')) as
-      | Bouncepad
-      | undefined
+    return Array.from(this.touching.bottom).find((e) =>
+      e.hasTag('bouncepad')
+    ) as Bouncepad | undefined
   }
 
   constructor(args: { x: number; y: number; z?: number }) {
@@ -207,6 +208,7 @@ export default class Player extends PhysicsActor {
       width: 16,
       height: 16,
       collisionType: ex.CollisionType.Active,
+      collisionGroup: CollisionGroup.Player,
       collider: ex.Shape.Box(12, 12, ex.vec(0.5, 1)),
     })
 
@@ -297,7 +299,7 @@ export default class Player extends PhysicsActor {
       this.isSlidingOnWall = false
     }
 
-    if (!this.touching.ladders.length) {
+    if (!this.touching.ladders.size) {
       this.isClimbingLadder = false
     }
 
@@ -461,7 +463,7 @@ export default class Player extends PhysicsActor {
 
     // climb ladder
     if (heldYDirection) {
-      if (this.touching.ladders.length) {
+      if (this.touching.ladders.size) {
         this.climbLadder()
       }
     }
@@ -588,7 +590,7 @@ export default class Player extends PhysicsActor {
         elapsed = 0
 
         // un-stretch player graphic while falling
-        while (!this.touching.bottom.length) {
+        while (!this.touching.bottom.size) {
           const { delta } = yield
           elapsed += delta
 
@@ -606,7 +608,7 @@ export default class Player extends PhysicsActor {
 
   climbLadder() {
     // it's possible to be touching multiple ladder tiles at once - find the closet one
-    const closestLadder = this.touching.ladders
+    const closestLadder = Array.from(this.touching.ladders)
       .sort((a, b) => {
         return (
           Math.abs(this.collider.bounds.bottom - a.collider.bounds.bottom) -
@@ -766,28 +768,12 @@ export default class Player extends PhysicsActor {
       ex.vec(side === 'left' ? -1 : 1, 0)
     )
 
-    // TODO: should use collision layers or something
-    const ignoreTags = [
-      Tag.Enemy,
-      Tag.Bouncepad,
-      Tag.Ladder,
-      Tag.OneWay,
-      Tag.WorldBounds,
-    ]
     const hits = [
       ...this.raycast(topRay, Math.abs(distance)),
       ...this.raycast(bottomRay, Math.abs(distance)),
-    ].filter((hit) => {
-      const owner = hit.body.owner
-
-      if (owner) {
-        if (ignoreTags.some((tag) => owner.hasTag(tag))) {
-          return false
-        }
-      }
-
-      return true
-    })
+    ]
+      // TODO: unsure how to achieve this with raycast collisionGroup/mask options
+      .filter((hit) => hit.body.group === CollisionGroup.Ground)
 
     return hits.length > 0
   }

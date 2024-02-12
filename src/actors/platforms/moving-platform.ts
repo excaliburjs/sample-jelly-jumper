@@ -2,6 +2,7 @@ import * as ex from 'excalibur'
 import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
 import { PassengerComponent } from '../../components/physics/passenger'
 import { Resources } from '../../resources'
+import { CollisionGroup } from '../../util/collision-group'
 
 const sprite = Resources.img.platform.toSprite()
 

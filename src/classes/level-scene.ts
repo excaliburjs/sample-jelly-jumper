@@ -15,6 +15,7 @@ import { Bouncepad, BouncepadArgs } from '../actors/platforms/bouncepad'
 import { AxeEnemy } from '../actors/hazards/swinging-axe'
 import { CircularSawEnemy } from '../actors/hazards/circular-saw'
 import { Tag } from '../util/tag'
+import { CollisionGroup } from '../util/collision-group'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -130,6 +131,8 @@ export default class LevelScene extends ex.Scene {
 
   onInitialize() {
     this.tilemap.addToScene(this)
+
+    this.setupCollisionGroups()
     this.setupCamera()
     this.setupBackground()
     this.setupWorldBounds()
@@ -140,6 +143,17 @@ export default class LevelScene extends ex.Scene {
   onActivate(context: ex.SceneActivationContext<unknown>): void {
     if (this.song) {
       audioManager.playSong(this.song)
+    }
+  }
+
+  setupCollisionGroups() {
+    const solidLayers = this.tilemap.getLayersByProperty('solid', true)
+
+    for (const layer of solidLayers) {
+      const tilemap = (layer as any).tilemap as ex.TileMap
+
+      const body = tilemap.get(ex.BodyComponent)
+      body.group = CollisionGroup.Ground
     }
   }
 

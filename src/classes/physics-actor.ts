@@ -12,17 +12,27 @@ export class PhysicsActor extends ex.Actor {
     this.addComponent(this.touching)
 
     this.on('preupdate', () => {
-      this.isOnGround = this.touching.bottom.length > 0
+      this.isOnGround = this.touching.bottom.size > 0
     })
     this.on('postupdate', () => {
       this._oldPosGlobal = this.getGlobalPos().clone()
     })
   }
 
-  raycast(ray: ex.Ray, distance: number) {
+  raycast(
+    ray: ex.Ray,
+    distance: number,
+    opts?: {
+      collisionGroup?: ex.CollisionGroup
+      collisionMask?: number
+      searchAllColliders?: boolean
+    }
+  ) {
     return this.scene!.physics.rayCast(ray, {
       maxDistance: distance,
-      searchAllColliders: true,
+      searchAllColliders: opts?.searchAllColliders,
+      collisionGroup: opts?.collisionGroup,
+      collisionMask: opts?.collisionMask,
     })
       .filter((hit) => hit.body !== this.body)
       .sort((a, b) => a.distance - b.distance)
