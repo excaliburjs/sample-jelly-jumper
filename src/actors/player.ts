@@ -451,14 +451,7 @@ export default class Player extends PhysicsActor {
     }
 
     if (jumpPressed) {
-      // normal jump
-      if (this.isOnGround) {
-        this.jump()
-      } else if (isCloseToLeftWall || isCloseToRightWall) {
-        this.wallJump(isCloseToLeftWall ? 'left' : 'right')
-      }
-      // jump or fall off ladder
-      else if (this.isClimbingLadder) {
+      if (this.isClimbingLadder) {
         this.isClimbingLadder = false
 
         // when down is held we'll just let the player fall, otherwise jump
@@ -466,6 +459,13 @@ export default class Player extends PhysicsActor {
           this.jump()
         }
       }
+      // normal jump
+      else if (this.isOnGround) {
+        this.jump()
+      } else if (isCloseToLeftWall || isCloseToRightWall) {
+        this.wallJump(isCloseToLeftWall ? 'left' : 'right')
+      }
+      // jump or fall off ladder
     }
     // cancel jump if we're not holding the jump button, but still
     // enforce a minimum jump height
@@ -605,18 +605,20 @@ export default class Player extends PhysicsActor {
       const isCloseEnoughOnX = Math.abs(this.pos.x - closestLadder.center.x) < 8
       const isJumping = this.vel.y <= -50
 
+      const toTile = (n: number) => Math.floor(Math.round(n) / 16)
+
       // if we're in the same tile as the ladder
       const isOccupyingSameTile =
-        Math.ceil(Math.round(this.collider.bounds.top) / 16) ===
-        Math.ceil(Math.round(closestLadder.collider.bounds.top) / 16)
+        toTile(this.collider.bounds.bottom) ===
+        toTile(closestLadder.collider.bounds.bottom)
 
       // if we're in the tile above the ladder
       const isStandingAboveLadder =
-        Math.ceil(Math.round(this.collider.bounds.top) / 16) <
-        Math.ceil(Math.round(closestLadder.collider.bounds.top) / 16)
+        Math.round(this.collider.bounds.bottom) <=
+        Math.round(closestLadder.collider.bounds.top)
 
       // climb on to the ladder
-      if (isCloseEnoughOnX && !isJumping) {
+      if (!this.isClimbingLadder && isCloseEnoughOnX && !isJumping) {
         if (heldYDirection === 'Up' && isOccupyingSameTile) {
           this.isClimbingLadder = true
         } else if (heldYDirection === 'Down' && isStandingAboveLadder) {
