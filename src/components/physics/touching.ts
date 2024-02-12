@@ -35,6 +35,9 @@ export class TouchingComponent extends ex.Component {
           | 'top'
           | 'bottom'
 
+        if (this.owner!.name === 'player') {
+          console.log('collisionstart', side, ev.other.name)
+        }
         if (ev.other.hasTag('ladder')) {
           this.ladders.push(ev.other)
         } else {

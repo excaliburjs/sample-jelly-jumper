@@ -161,7 +161,7 @@ export default class Player extends PhysicsActor {
   constructor(args: { x: number; y: number; z?: number }) {
     super({
       ...args,
-      name: 'Player',
+      name: 'player',
       anchor: new ex.Vector(0.5, 1),
       width: 16,
       height: 16,
