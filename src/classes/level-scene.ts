@@ -11,7 +11,7 @@ import { SpiderEnemy } from '../actors/enemies/spider'
 import { MovingPlatform } from '../actors/platforms/moving-platform'
 import { EnemySpawner } from '../actors/enemy-spawner'
 import { BirdEnemy } from '../actors/enemies/bird'
-import { LadderComponent } from '../components/physics/ladder'
+import { Bouncepad, BouncepadArgs } from '../actors/platforms/bouncepad'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -58,6 +58,16 @@ export default class LevelScene extends ex.Scene {
           )
         }
       )
+    },
+    Bouncepad: (props) => {
+      const x = props.object?.x ?? 0
+      const y = props.object?.y ?? 0
+      return new Bouncepad({
+        x,
+        y,
+        z: props.layer.order ?? 0,
+        type: props.object?.properties.get('type') as BouncepadArgs['type'],
+      })
     },
 
     /* Enemies */
@@ -195,7 +205,7 @@ export default class LevelScene extends ex.Scene {
         height: tileHeight,
         collisionType: ex.CollisionType.Passive,
       })
-      ladder.addComponent(new LadderComponent())
+      ladder.addTag('ladder')
       this.add(ladder)
     }
   }

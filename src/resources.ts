@@ -10,6 +10,9 @@ export const Resources = {
     birdPurple: new ex.ImageSource('/res/images/Bird_1.png'),
     birdOrange: new ex.ImageSource('/res/images/Bird_2.png'),
     platform: new ex.ImageSource('/res/images/Platform.png'),
+    bouncepadGreen: new ex.ImageSource('/res/images/Bouncepad_Green.png'),
+    bouncepadRed: new ex.ImageSource('/res/images/Bouncepad_Red.png'),
+    bouncepadWood: new ex.ImageSource('/res/images/Bouncepad_Wood.png'),
   },
 
   music: {

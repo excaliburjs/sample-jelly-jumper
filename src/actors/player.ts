@@ -9,6 +9,7 @@ import { audioManager } from '../util/audio-manager'
 import { GRAVITY } from '../util/world'
 import { EaseAction } from '../actions/EaseAction'
 import { coroutine } from '../util/coroutine'
+import { Bouncepad } from './platforms/bouncepad'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -128,9 +129,34 @@ export default class Player extends PhysicsActor {
    * True while the user is holding the jump button or reached the
    * apex of their jump before releasing the jump button.
    */
-  facing: 'left' | 'right' = 'right'
   isUsingJumpGravity = false
-  isOnLadder = false
+
+  /**
+   * The direction the player is facing.
+   */
+  facing: 'left' | 'right' = 'right'
+
+  /**
+   * True if the player is currently on a ladder.
+   */
+  isClimbingLadder = false
+
+  get maxVelocity() {
+    switch (true) {
+      case this.controls.isSprinting:
+        return this.SPRINT_MAX_VELOCITY
+      case this.controls.isRunning:
+        return this.RUN_MAX_VELOCITY
+      default:
+        return this.WALK_MAX_VELOCITY
+    }
+  }
+
+  get bouncepad() {
+    return this.touching.bottom.find((e) => e.hasTag('bouncepad')) as
+      | Bouncepad
+      | undefined
+  }
 
   constructor(args: { x: number; y: number; z?: number }) {
     super({
@@ -191,7 +217,7 @@ export default class Player extends PhysicsActor {
       this.acc.setTo(0, GRAVITY.y)
     }
 
-    if (this.isOnLadder) {
+    if (this.isClimbingLadder) {
       this.acc.setTo(0, 0)
       this.vel.setTo(0, 0)
     }
@@ -221,7 +247,7 @@ export default class Player extends PhysicsActor {
     }
 
     if (!this.touching.ladders.length) {
-      this.isOnLadder = false
+      this.isClimbingLadder = false
     }
   }
 
@@ -279,38 +305,50 @@ export default class Player extends PhysicsActor {
       if (side === ex.Side.Bottom && wasInAir) {
         audioManager.playSfx(Resources.sfx.footstep)
 
+        // stop moving if we landed on a bouncepad
+        if (other.owner.hasTag('bouncepad')) {
+          this.vel.x = 0
+        }
+
         // apply a squish animation when landing
         const duration = 70
         const scaleTo = 1 - this.FX_SQUISH_AMOUNT
         const easing = ex.EasingFunctions.EaseOutCubic
 
-        this.actions
-          .runAction(
-            new EaseAction(
-              {
-                initial: 1,
-                target: scaleTo,
-                duration,
-                easing,
-              },
-              (value) => {
-                this.squishGraphic(value)
-              }
-            )
-          )
-          .runAction(
-            new EaseAction(
-              {
-                initial: scaleTo,
-                target: 1,
-                duration,
-                easing,
-              },
-              (value) => {
-                this.squishGraphic(value)
-              }
-            )
-          )
+        coroutine(
+          this.scene!.engine,
+          function* () {
+            let elapsed = 0
+
+            // wait 1 frame for this.isOnGround to be true
+            yield
+
+            // animate squish as long as we're on the ground
+            while (elapsed < duration && this.isOnGround) {
+              const { delta } = yield
+              elapsed += delta
+
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+              )
+            }
+
+            this.squishGraphic(scaleTo)
+            elapsed = 0
+
+            while (elapsed < duration && this.isOnGround) {
+              const { delta } = yield
+              elapsed += delta
+
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), scaleTo, 1, duration)
+              )
+            }
+
+            this.squishGraphic(1)
+          },
+          this
+        )
       }
     }
   }
@@ -323,11 +361,12 @@ export default class Player extends PhysicsActor {
     const jumpHeld = this.controls.isHeld('Jump')
     const isOnGround = this.isOnGround
 
+    const isXMovementAllowed = !this.isClimbingLadder && !this.bouncepad
     const heldXDirection = this.controls.getHeldXDirection()
     const heldYDirection = this.controls.getHeldYDirection()
 
     // move left or right
-    if (heldXDirection && !this.isOnLadder) {
+    if (heldXDirection && isXMovementAllowed) {
       const direction = heldXDirection === 'Left' ? -1 : 1
       const accel = this.ACCELERATION * direction
 
@@ -349,8 +388,8 @@ export default class Player extends PhysicsActor {
         this.jump()
       }
       // jump or fall off ladder
-      else if (this.isOnLadder) {
-        this.isOnLadder = false
+      else if (this.isClimbingLadder) {
+        this.isClimbingLadder = false
 
         // when down is held we'll just let the player fall, otherwise jump
         if (heldYDirection !== 'Down') {
@@ -364,7 +403,7 @@ export default class Player extends PhysicsActor {
       !jumpHeld &&
       this.vel.y < 0 &&
       this.vel.y > -200 &&
-      !this.isOnLadder
+      !this.isClimbingLadder
     ) {
       this.vel.y *= 0.5
       this.isUsingJumpGravity = false
@@ -381,7 +420,7 @@ export default class Player extends PhysicsActor {
 
     this.graphics.flipHorizontal = this.facing === 'left'
 
-    if (this.isOnLadder) {
+    if (this.isClimbingLadder) {
       this.animation.set('ladder_climb')
       if (this.vel.y === 0) {
         this.animation.current.goToFrame(0)
@@ -436,6 +475,51 @@ export default class Player extends PhysicsActor {
         }
       }
     }
+
+    // apply a stretch animation when jumping
+    if (this.animation.get('jump') && this.oldVel.y >= 0 && this.vel.y < 0) {
+      coroutine(
+        this.scene!.engine,
+        function* () {
+          const duration = 70
+          const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
+          const easing = ex.EasingFunctions.EaseOutCubic
+
+          let elapsed = 0
+
+          const force = this.vel.y
+
+          // stretch player graphic while jumping
+          while (this.vel.y < force * 0.25) {
+            const { delta } = yield
+            elapsed += delta
+
+            if (elapsed < duration) {
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+              )
+            }
+          }
+
+          elapsed = 0
+
+          // un-stretch player graphic while falling
+          while (!this.touching.bottom.length) {
+            const { delta } = yield
+            elapsed += delta
+
+            if (elapsed < duration) {
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
+              )
+            }
+          }
+
+          this.squishGraphic(1)
+        },
+        this
+      )
+    }
   }
 
   climbLadder() {
@@ -468,14 +552,14 @@ export default class Player extends PhysicsActor {
       // climb on to the ladder
       if (isCloseEnoughOnX && !isJumping) {
         if (heldYDirection === 'Up' && isOccupyingSameTile) {
-          this.isOnLadder = true
+          this.isClimbingLadder = true
         } else if (heldYDirection === 'Down' && isStandingAboveLadder) {
-          this.isOnLadder = true
+          this.isClimbingLadder = true
           this.pos.y += 1
         }
       }
       // apply climbing speed
-      if (this.isOnLadder) {
+      if (this.isClimbingLadder) {
         this.pos.x = closestLadder.center.x
         this.vel.y = this.LADDER_CLIMB_SPEED * dir
         this.vel.x = 0
@@ -486,7 +570,7 @@ export default class Player extends PhysicsActor {
           heldYDirection === 'Down' &&
           !isStandingAboveLadder
         ) {
-          this.isOnLadder = false
+          this.isClimbingLadder = false
         }
       }
     }
@@ -496,6 +580,11 @@ export default class Player extends PhysicsActor {
    * Applies a jump force to the player.
    */
   jump(force?: number, playSfx = true) {
+    if (this.bouncepad) {
+      this.bouncepad.release()
+      return
+    }
+
     if (force === undefined) {
       force = this.JUMP_FORCE
 
@@ -510,47 +599,6 @@ export default class Player extends PhysicsActor {
     if (playSfx) {
       audioManager.playSfx(Resources.sfx.playerJump)
     }
-
-    // apply a stretch animation while jumping
-    coroutine(
-      this.scene!.engine,
-      function* () {
-        const duration = 70
-        const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
-        const easing = ex.EasingFunctions.EaseOutCubic
-
-        let elapsed = 0
-
-        // stretch player graphic while jumping
-        while (this.vel.y < -force! * 0.25) {
-          const { delta } = yield
-          elapsed += delta
-
-          if (elapsed < duration) {
-            this.squishGraphic(
-              easing(Math.min(elapsed, duration), 1, scaleTo, duration)
-            )
-          }
-        }
-
-        elapsed = 0
-
-        // un-stretch player graphic while falling
-        while (!this.touching.bottom.length) {
-          const { delta } = yield
-          elapsed += delta
-
-          if (elapsed < duration) {
-            this.squishGraphic(
-              easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
-            )
-          }
-        }
-
-        this.squishGraphic(1)
-      },
-      this
-    )
   }
 
   bounceOffEnemy(enemy: EnemyActor) {
@@ -565,17 +613,6 @@ export default class Player extends PhysicsActor {
       : this.SPRINT_JUMP_FORCE
 
     this.jump(force, false)
-  }
-
-  get maxVelocity() {
-    switch (true) {
-      case this.controls.isSprinting:
-        return this.SPRINT_MAX_VELOCITY
-      case this.controls.isRunning:
-        return this.RUN_MAX_VELOCITY
-      default:
-        return this.WALK_MAX_VELOCITY
-    }
   }
 
   /**

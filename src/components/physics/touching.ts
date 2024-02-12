@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { LadderComponent } from './ladder'
+import { Bouncepad } from '../../actors/platforms/bouncepad'
 
 /**
  * Tracks which entities are touching this entity currently.
@@ -20,39 +20,25 @@ export class TouchingComponent extends ex.Component {
       ev.other.collider ??= ev.other._collider
 
       if (ev.other.collider) {
-        const otherBounds = ev.other.collider.bounds
-        const bounds = owner.collider.bounds
-
-        const getSide = () => {
-          // Contact normal points away from collider A, but we aren't guaranteed an order
-          // so flip to match
-          let normal: ex.Vector;
-          if (ev.contact.colliderA === owner.collider.get()) {
-            normal = ev.contact.normal;
-          } else {
-            normal = ev.contact.normal.negate();
-          }
-
-          const side = ex.Side.fromDirection(normal);
-          if (side === ex.Side.Left) {
-            return 'left'
-          } else if (side === ex.Side.Right) {
-            return 'right'
-          } else if (side === ex.Side.Top) {
-            return 'top'
-          } else if (side === ex.Side.Bottom) {
-            return 'bottom'
-          }
+        // Contact normal points away from collider A, but we aren't guaranteed an order
+        // so flip to match
+        let normal: ex.Vector
+        if (ev.contact.colliderA === owner.collider.get()) {
+          normal = ev.contact.normal
+        } else {
+          normal = ev.contact.normal.negate()
         }
 
-        if (ev.other.has(LadderComponent)) {
+        const side = ex.Side.fromDirection(normal).toLowerCase() as
+          | 'left'
+          | 'right'
+          | 'top'
+          | 'bottom'
+
+        if (ev.other.hasTag('ladder')) {
           this.ladders.push(ev.other)
         } else {
-          const side = getSide()
-
-          if (side) {
-            this[side].push(ev.other)
-          }
+          this[side].push(ev.other)
         }
       }
     })
