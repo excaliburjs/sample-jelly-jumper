@@ -19,16 +19,7 @@ export class TouchingComponent extends ex.Component {
       ev.other.collider ??= ev.other._collider
 
       if (ev.other.collider) {
-        // Contact normal points away from collider A, but we aren't guaranteed an order
-        // so flip to match
-        let normal: ex.Vector
-        if (ev.contact.colliderA === owner.collider.get()) {
-          normal = ev.contact.normal
-        } else {
-          normal = ev.contact.normal.negate()
-        }
-
-        const side = ex.Side.fromDirection(normal).toLowerCase() as
+        const side = ev.side.toLowerCase() as
           | 'left'
           | 'right'
           | 'top'
@@ -43,6 +34,14 @@ export class TouchingComponent extends ex.Component {
     })
 
     owner.on('collisionend', (ev) => {
+      if (this.owner!.name === 'player') {
+        console.log('collisionend', ev.other.name);
+      }
+      const side = ev.side.toLowerCase() as
+          | 'left'
+          | 'right'
+          | 'top'
+          | 'bottom'
       const remove = (arr: ex.Entity[]) => {
         const index = arr.indexOf(ev.other)
         if (index !== -1) {
@@ -50,10 +49,7 @@ export class TouchingComponent extends ex.Component {
         }
       }
 
-      remove(this.left)
-      remove(this.right)
-      remove(this.top)
-      remove(this.bottom)
+      remove(this[side]);
       remove(this.ladders)
     })
   }

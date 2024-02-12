@@ -19,6 +19,9 @@ const game = new ex.Engine({
     arcade: {
       contactSolveBias: ex.ContactSolveBias.VerticalFirst,
     },
+    colliders: {
+      compositeStrategy: 'separate'
+    }
   },
   pixelRatio: 4, // 4x upscale the resolution, logs an incorrect warning
   pixelArt: true, // turn on pixel art sampler
