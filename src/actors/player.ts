@@ -300,8 +300,6 @@ export default class Player extends PhysicsActor {
     if (!this.isOnWall('right') && !this.isOnWall('left')) {
       this.isSlidingOnWall = false
     }
-
-    console.log(this.touching)
   }
 
   onPreCollisionResolve(
