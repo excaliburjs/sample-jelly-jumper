@@ -11,7 +11,7 @@ export class ControlsComponent extends ex.Component {
     Up: [ex.Keys.Up, ex.Buttons.DpadUp],
     Down: [ex.Keys.Down, ex.Buttons.DpadDown],
     Jump: [ex.Keys.A, ex.Buttons.Face1],
-    Run: [ex.Keys.S, ex.Buttons.Face2],
+    Run: [ex.Keys.S, ex.Buttons.Face3],
   } as const
 
   isHeld(control: keyof typeof this.controls) {
