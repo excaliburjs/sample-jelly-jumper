@@ -11,7 +11,11 @@ export class TouchingComponent extends ex.Component {
   top: ex.Actor[] = []
   bottom: ex.Actor[] = []
 
-  ladders: ex.Actor[] = []
+  /**
+   * Entities that are touching this entity but are not solid. They are
+   * not tracked by side because they can move through the entity.
+   */
+  passives: ex.Actor[] = []
 
   onAdd(owner: ex.Actor): void {
     owner.on('collisionstart', (ev) => {
@@ -19,29 +23,22 @@ export class TouchingComponent extends ex.Component {
       ev.other.collider ??= ev.other._collider
 
       if (ev.other.collider) {
-        const side = ev.side.toLowerCase() as
-          | 'left'
-          | 'right'
-          | 'top'
-          | 'bottom'
-
-        if (ev.other.hasTag('ladder')) {
-          this.ladders.push(ev.other)
+        if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
+          this.passives.push(ev.other)
         } else {
+          const side = ev.side.toLowerCase() as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+
           this[side].push(ev.other)
         }
       }
     })
 
     owner.on('collisionend', (ev) => {
-      if (this.owner!.name === 'player') {
-        console.log('collisionend', ev.other.name);
-      }
-      const side = ev.side.toLowerCase() as
-          | 'left'
-          | 'right'
-          | 'top'
-          | 'bottom'
+      const side = ev.side.toLowerCase() as 'left' | 'right' | 'top' | 'bottom'
       const remove = (arr: ex.Entity[]) => {
         const index = arr.indexOf(ev.other)
         if (index !== -1) {
@@ -49,8 +46,12 @@ export class TouchingComponent extends ex.Component {
         }
       }
 
-      remove(this[side]);
-      remove(this.ladders)
+      remove(this[side])
+      remove(this.passives)
     })
+  }
+
+  get ladders() {
+    return this.passives.filter((e) => e.hasTag('ladder'))
   }
 }
