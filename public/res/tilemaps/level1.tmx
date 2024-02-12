@@ -224,8 +224,12 @@
   <object id="32" x="464" y="304">
    <point/>
   </object>
-  <object id="52" name="Bouncepad" type="Bouncepad" x="608" y="432" width="16" height="16"/>
-  <object id="56" name="Bouncepad" type="Bouncepad" x="192" y="432" width="16" height="16"/>
+  <object id="52" name="Bouncepad" type="Bouncepad" x="1248" y="432" width="16" height="16">
+   <properties>
+    <property name="type" value="red"/>
+   </properties>
+  </object>
+  <object id="56" name="Bouncepad" type="Bouncepad" x="608" y="432" width="16" height="16"/>
  </objectgroup>
  <objectgroup id="2" name="actors">
   <object id="4" name="Player" type="Player" x="176" y="448">

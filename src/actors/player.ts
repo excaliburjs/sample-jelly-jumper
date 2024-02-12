@@ -555,7 +555,7 @@ export default class Player extends PhysicsActor {
           this.isClimbingLadder = true
         } else if (heldYDirection === 'Down' && isStandingAboveLadder) {
           this.isClimbingLadder = true
-          this.pos.y += 1
+          this.pos.y = Math.ceil(this.pos.y) + 1
         }
       }
       // apply climbing speed

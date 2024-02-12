@@ -21,7 +21,7 @@ const variants = {
     }),
   },
   red: {
-    force: 900,
+    force: 700,
     spritesheet: ex.SpriteSheet.fromImageSource({
       image: Resources.img.bouncepadRed,
       grid,
@@ -38,6 +38,7 @@ export class Bouncepad extends ex.Actor {
    * The time it takes for the bouncepad to compress and release.
    */
   COMPRESS_TIME = 150
+  COMPRESS_DISTANCE = 2
 
   spritesheet: ex.SpriteSheet
   force: number
@@ -103,11 +104,17 @@ export class Bouncepad extends ex.Actor {
     const topLeftPoint = this.colliderShape.points[0]
     const topRightPoint = this.colliderShape.points[1]
 
-    topLeftPoint.y += 2
-    topRightPoint.y += 2
+    topLeftPoint.y += this.COMPRESS_DISTANCE
+    topRightPoint.y += this.COMPRESS_DISTANCE
 
     // @ts-expect-error - private property
     this.colliderShape._localBoundsDirty = true
+
+    for (const actor of this.touching.top) {
+      if (actor instanceof ex.Actor) {
+        actor.pos.y += this.COMPRESS_DISTANCE
+      }
+    }
   }
 
   release() {
@@ -119,14 +126,15 @@ export class Bouncepad extends ex.Actor {
     const topLeftPoint = this.colliderShape.points[0]
     const topRightPoint = this.colliderShape.points[1]
 
-    topLeftPoint.y -= 2
-    topRightPoint.y -= 2
+    topLeftPoint.y -= this.COMPRESS_DISTANCE
+    topRightPoint.y -= this.COMPRESS_DISTANCE
 
     // @ts-expect-error - private property
     this.colliderShape._localBoundsDirty = true
 
     for (const actor of this.touching.top) {
       if (actor instanceof ex.Actor) {
+        actor.pos.y -= this.COMPRESS_DISTANCE
         actor.vel.y = -this.force
         audioManager.playSfx(Resources.sfx.playerJump)
       }
