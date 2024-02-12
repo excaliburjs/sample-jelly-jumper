@@ -40,6 +40,7 @@ export class SpiderEnemy extends EnemyActor {
   constructor(args: SpiderEnemyArgs) {
     super({
       ...args,
+      stompable: true,
       anchor: ex.vec(0.5, 32 / 48),
       collider: ex.Shape.Box(20, 4, ex.vec(0.5, 1)),
       collisionGroup: ex.CollisionGroupManager.groupByName('enemies'),

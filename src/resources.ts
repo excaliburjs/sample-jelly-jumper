@@ -13,6 +13,7 @@ export const Resources = {
     bouncepadGreen: new ex.ImageSource('/res/images/Bouncepad_Green.png'),
     bouncepadRed: new ex.ImageSource('/res/images/Bouncepad_Red.png'),
     bouncepadWood: new ex.ImageSource('/res/images/Bouncepad_Wood.png'),
+    axe: new ex.ImageSource('/res/images/Axe_Trap.png'),
   },
 
   music: {

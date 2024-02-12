@@ -42,6 +42,7 @@ export class BirdEnemy extends EnemyActor {
   constructor(args: BirdEnemyArgs) {
     super({
       ...args,
+      stompable: true,
       anchor: ex.vec(0.5, 0.6),
       collider: ex.Shape.Box(10, 5, ex.vec(0.5, 1)),
       collisionGroup: ex.CollisionGroupManager.groupByName('enemies'),

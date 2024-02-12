@@ -1,18 +1,23 @@
 import * as ex from 'excalibur'
 import { PhysicsActor } from './physics-actor'
 
-export interface EnemyActorArgs extends ex.ActorArgs {}
+export interface EnemyActorArgs extends ex.ActorArgs {
+  stompable?: boolean
+}
 
 export type EnemyKillMethod = 'instant' | 'squish'
 
 export class EnemyActor extends PhysicsActor {
   dead = false
-  constructor(args: EnemyActorArgs) {
+  stompable = false
+
+  constructor({ stompable, ...args }: EnemyActorArgs) {
     super({
       collisionType: ex.CollisionType.Active,
       ...args,
     })
 
+    this.stompable = stompable ?? false
     this.addTag('enemy')
   }
 

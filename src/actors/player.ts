@@ -300,6 +300,8 @@ export default class Player extends PhysicsActor {
     if (!this.isOnWall('right') && !this.isOnWall('left')) {
       this.isSlidingOnWall = false
     }
+
+    console.log(this.touching)
   }
 
   onPreCollisionResolve(
@@ -310,7 +312,7 @@ export default class Player extends PhysicsActor {
   ): void {
     super.onPreCollisionResolve(self, other, side, contact)
 
-    if (other.owner instanceof EnemyActor) {
+    if (other.owner instanceof EnemyActor && other.owner.stompable) {
       // a lenient check to see if we stomped on the enemy by using the previous position.y
       // (we could check for side === ex.Side.Bottom, but depending on the angle you stomp an enemy, it might not be the case)
       const posDelta = this.getGlobalPos().sub(this.getGlobalOldPos())
