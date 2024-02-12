@@ -475,9 +475,12 @@ export default class Player extends PhysicsActor {
         }
       }
     }
-
     // apply a stretch animation when jumping
-    if (this.animation.get('jump') && this.oldVel.y >= 0 && this.vel.y < 0) {
+    if (
+      this.animation.current === this.animation.get('jump') &&
+      this.oldVel.y >= 0 &&
+      this.vel.y < 0
+    ) {
       coroutine(
         this.scene!.engine,
         function* () {
@@ -580,6 +583,11 @@ export default class Player extends PhysicsActor {
    * Applies a jump force to the player.
    */
   jump(force?: number, playSfx = true) {
+    // this will be correctly set at the beginning of each frame, but we want to update it for the remainder
+    // of this frame incase any logic depends on it (e.g. animations)
+    this.isOnGround = false
+
+    // if we're on a bouncepad, trigger it to release immediately
     if (this.bouncepad) {
       this.bouncepad.release()
       return
@@ -596,6 +604,7 @@ export default class Player extends PhysicsActor {
     }
 
     this.vel.y = -force
+
     if (playSfx) {
       audioManager.playSfx(Resources.sfx.jump)
     }
