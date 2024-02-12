@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="9" nextobjectid="59">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="10" nextobjectid="61">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -232,10 +232,7 @@
   <object id="56" name="Bouncepad" type="Bouncepad" x="608" y="432" width="16" height="16"/>
   <object id="57" name="Bouncepad" type="Bouncepad" x="80" y="432" width="16" height="16"/>
  </objectgroup>
- <objectgroup id="2" name="actors">
-  <object id="4" name="Player" type="Player" x="176" y="448">
-   <point/>
-  </object>
+ <objectgroup id="2" name="enemies">
   <object id="22" name="Spider" type="SpiderEnemy" x="336" y="400">
    <point/>
   </object>
@@ -263,7 +260,15 @@
    </properties>
    <point/>
   </object>
-  <object id="58" name="AxeEnemy" type="AxeEnemy" x="224" y="336">
+  <object id="58" name="AxeEnemy" type="AxeEnemy" x="320" y="336">
+   <point/>
+  </object>
+  <object id="60" name="CircularSawEnemy" type="CircularSawEnemy" x="208" y="384">
+   <point/>
+  </object>
+ </objectgroup>
+ <objectgroup id="9" name="player">
+  <object id="59" name="Player" type="Player" x="160" y="448">
    <point/>
   </object>
  </objectgroup>

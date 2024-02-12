@@ -13,6 +13,7 @@ import { EnemySpawner } from '../actors/enemy-spawner'
 import { BirdEnemy } from '../actors/enemies/bird'
 import { Bouncepad, BouncepadArgs } from '../actors/platforms/bouncepad'
 import { AxeEnemy } from '../actors/enemies/swinging-axe'
+import { CircularSawEnemy } from '../actors/enemies/circular-saw'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -96,6 +97,14 @@ export default class LevelScene extends ex.Scene {
 
     AxeEnemy: (props) => {
       return new AxeEnemy({
+        x: props.object?.x ?? 0,
+        y: props.object?.y ?? 0,
+        z: props.layer.order ?? 0,
+      })
+    },
+
+    CircularSawEnemy: (props) => {
+      return new CircularSawEnemy({
         x: props.object?.x ?? 0,
         y: props.object?.y ?? 0,
         z: props.layer.order ?? 0,
