@@ -107,8 +107,8 @@ export class Bouncepad extends ex.Actor {
     topLeftPoint.y += this.COMPRESS_DISTANCE
     topRightPoint.y += this.COMPRESS_DISTANCE
 
-    // @ts-expect-error - private property
-    this.colliderShape._localBoundsDirty = true
+    // forces the collider to update
+    this.colliderShape.points = this.colliderShape.points
 
     for (const actor of this.touching.top) {
       if (actor instanceof ex.Actor) {
@@ -129,8 +129,8 @@ export class Bouncepad extends ex.Actor {
     topLeftPoint.y -= this.COMPRESS_DISTANCE
     topRightPoint.y -= this.COMPRESS_DISTANCE
 
-    // @ts-expect-error - private property
-    this.colliderShape._localBoundsDirty = true
+    // forces the collider to update
+    this.colliderShape.points = this.colliderShape.points
 
     for (const actor of this.touching.top) {
       if (actor instanceof ex.Actor) {

@@ -14,6 +14,8 @@ export class OneWayCollisionComponent extends ex.Component {
       this.onPreCollisionResolve(...args)
       ogOnPreCollisionResolve(...args)
     }
+
+    owner.addTag('one-way')
   }
 
   onPreCollisionResolve(

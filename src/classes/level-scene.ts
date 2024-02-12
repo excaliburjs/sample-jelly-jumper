@@ -137,30 +137,30 @@ export default class LevelScene extends ex.Scene {
     const tilemapWidth = this.tilemap.map.width * this.tilemap.map.tilewidth
     const tilemapHeight = this.tilemap.map.height * this.tilemap.map.tileheight
 
+    const bounds = new ex.Actor({
+      collisionType: ex.CollisionType.Fixed,
+      collider: new ex.CompositeCollider([
+        new ex.EdgeCollider({
+          begin: ex.vec(0, 0),
+          end: ex.vec(0, tilemapHeight),
+        }),
+        new ex.EdgeCollider({
+          begin: ex.vec(0, tilemapHeight),
+          end: ex.vec(tilemapWidth, tilemapHeight),
+        }),
+        new ex.EdgeCollider({
+          begin: ex.vec(tilemapWidth, tilemapHeight),
+          end: ex.vec(tilemapWidth, 0),
+        }),
+        new ex.EdgeCollider({
+          begin: ex.vec(tilemapWidth, 0),
+          end: ex.vec(0, 0),
+        }),
+      ]),
+    })
+    bounds.addTag('world-bounds')
     // create world bounds
-    this.engine.add(
-      new ex.Actor({
-        collisionType: ex.CollisionType.Fixed,
-        collider: new ex.CompositeCollider([
-          new ex.EdgeCollider({
-            begin: ex.vec(0, 0),
-            end: ex.vec(0, tilemapHeight),
-          }),
-          new ex.EdgeCollider({
-            begin: ex.vec(0, tilemapHeight),
-            end: ex.vec(tilemapWidth, tilemapHeight),
-          }),
-          new ex.EdgeCollider({
-            begin: ex.vec(tilemapWidth, tilemapHeight),
-            end: ex.vec(tilemapWidth, 0),
-          }),
-          new ex.EdgeCollider({
-            begin: ex.vec(tilemapWidth, 0),
-            end: ex.vec(0, 0),
-          }),
-        ]),
-      })
-    )
+    this.engine.add(bounds)
   }
 
   setupBackground() {

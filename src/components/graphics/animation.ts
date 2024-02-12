@@ -27,7 +27,7 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
     const anim = this._animations[name]
 
     // return if the animation is already playing
-    if (this.current === anim) return
+    if (this.is(name)) return
 
     if (startFromFrame) {
       anim.goToFrame(startFromFrame, durationLeft)
@@ -81,5 +81,9 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
    */
   get current() {
     return this.owner.graphics.current as ex.Animation
+  }
+
+  is(animation: Keys) {
+    return this.current === this.get(animation)
   }
 }

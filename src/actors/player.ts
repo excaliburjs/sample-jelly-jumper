@@ -17,7 +17,7 @@ const spritesheet = ex.SpriteSheet.fromImageSource({
   image: Resources.img.player,
   grid: {
     columns: 4,
-    rows: 6,
+    rows: 7,
     spriteWidth: SPRITE_WIDTH,
     spriteHeight: SPRITE_HEIGHT,
   },
@@ -40,6 +40,11 @@ export default class Player extends PhysicsActor {
    * The maximum speed the player can fall at.
    */
   MAX_FALL_SPEED = 270
+
+  /**
+   * The speed at which the player slides down a wall.
+   */
+  WALL_SLIDE_SPEED = 80
 
   /**
    * The speed at which the player can climb ladders.
@@ -102,6 +107,16 @@ export default class Player extends PhysicsActor {
   SPRINT_JUMP_FORCE = this.JUMP_FORCE * 1.2
 
   /**
+   * The distance in pixels the player will move away from the wall when wall jumping
+   */
+  WALL_JUMP_X_DISTANCE = 8
+
+  /**
+   * The duration of how long the player will move away from the wall when wall jumping
+   */
+  WALL_JUMP_DURATION = 70
+
+  /**
    * The amount of squish to apply to the player when they jump or land.
    *
    * Doing an even number divided by sprite width will ensure the player
@@ -119,7 +134,12 @@ export default class Player extends PhysicsActor {
     fall: ex.Animation.fromSpriteSheet(spritesheet, [13], 140),
     turn: ex.Animation.fromSpriteSheet(spritesheet, [16], 140),
     ladder_climb: ex.Animation.fromSpriteSheet(spritesheet, [20, 21], 140),
-    wall_climb: ex.Animation.fromSpriteSheet(spritesheet, [28, 29, 30], 140),
+    wall_slide: ex.Animation.fromSpriteSheet(
+      spritesheet,
+      [16],
+      140,
+      ex.AnimationStrategy.Freeze
+    ),
   })
   controls = new PlayerControlsComponent()
 
@@ -141,14 +161,31 @@ export default class Player extends PhysicsActor {
    */
   isClimbingLadder = false
 
-  get maxVelocity() {
+  isSlidingOnWall = false
+
+  isWallJumping = false
+
+  get maxXVelocity() {
     switch (true) {
       case this.controls.isSprinting:
         return this.SPRINT_MAX_VELOCITY
+
       case this.controls.isRunning:
         return this.RUN_MAX_VELOCITY
+
       default:
         return this.WALK_MAX_VELOCITY
+    }
+  }
+
+  get maxFallingVelocity() {
+    switch (true) {
+      case this.isSlidingOnWall: {
+        return this.WALL_SLIDE_SPEED
+      }
+
+      default:
+        return this.MAX_FALL_SPEED
     }
   }
 
@@ -166,7 +203,7 @@ export default class Player extends PhysicsActor {
       width: 16,
       height: 16,
       collisionType: ex.CollisionType.Active,
-      collider: ex.Shape.Box(10, 16, ex.vec(0.5, 1)),
+      collider: ex.Shape.Box(12, 12, ex.vec(0.5, 1)),
     })
 
     // we'll handle gravity ourselves
@@ -178,6 +215,12 @@ export default class Player extends PhysicsActor {
     this.animation.get('turn').events.on('frame', (frame) => {
       if (frame.frameIndex === 0) {
         audioManager.playSfx(Resources.sfx.turnAround)
+      }
+    })
+
+    this.animation.get('wall_slide').events.on('frame', (frame) => {
+      if (frame.frameIndex === 0) {
+        audioManager.playSfx(Resources.sfx.land)
       }
     })
   }
@@ -202,7 +245,6 @@ export default class Player extends PhysicsActor {
     if (this.vel.y < 0) {
       this.isUsingJumpGravity = this.controls.isHeld('Jump')
     }
-
     // if we're near the apex of our jump, use apex gravity
     if (this.isUsingJumpGravity && this.vel.y > -10 && this.vel.y < 10) {
       useApexGravity = true
@@ -222,6 +264,11 @@ export default class Player extends PhysicsActor {
       this.vel.setTo(0, 0)
     }
 
+    if (this.vel.y >= this.maxFallingVelocity) {
+      this.vel.y = this.maxFallingVelocity
+      this.acc.y = 0
+    }
+
     super.update(engine, delta)
   }
 
@@ -234,11 +281,9 @@ export default class Player extends PhysicsActor {
     )
 
     this.handleAnimation()
-    this.applyDeceleration()
 
-    // clamp to max velocity
-    if (this.vel.y > this.MAX_FALL_SPEED) {
-      this.vel.y = this.MAX_FALL_SPEED
+    if (!this.isWallJumping) {
+      this.applyDeceleration()
     }
 
     // reset jump gravity once we land on the ground
@@ -248,6 +293,10 @@ export default class Player extends PhysicsActor {
 
     if (!this.touching.ladders.length) {
       this.isClimbingLadder = false
+    }
+
+    if (!this.isOnWall('right') && !this.isOnWall('left')) {
+      this.isSlidingOnWall = false
     }
   }
 
@@ -315,40 +364,36 @@ export default class Player extends PhysicsActor {
         const scaleTo = 1 - this.FX_SQUISH_AMOUNT
         const easing = ex.EasingFunctions.EaseOutCubic
 
-        coroutine(
-          this.scene!.engine,
-          function* () {
-            let elapsed = 0
+        coroutine(this, function* () {
+          let elapsed = 0
 
-            // wait 1 frame for this.isOnGround to be true
-            yield
+          // wait 1 frame for this.isOnGround to be true
+          yield
 
-            // animate squish as long as we're on the ground
-            while (elapsed < duration && this.isOnGround) {
-              const { delta } = yield
-              elapsed += delta
+          // animate squish as long as we're on the ground
+          while (elapsed < duration && this.isOnGround) {
+            const { delta } = yield
+            elapsed += delta
 
-              this.squishGraphic(
-                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
-              )
-            }
+            this.squishGraphic(
+              easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+            )
+          }
 
-            this.squishGraphic(scaleTo)
-            elapsed = 0
+          this.squishGraphic(scaleTo)
+          elapsed = 0
 
-            while (elapsed < duration && this.isOnGround) {
-              const { delta } = yield
-              elapsed += delta
+          while (elapsed < duration && this.isOnGround) {
+            const { delta } = yield
+            elapsed += delta
 
-              this.squishGraphic(
-                easing(Math.min(elapsed, duration), scaleTo, 1, duration)
-              )
-            }
+            this.squishGraphic(
+              easing(Math.min(elapsed, duration), scaleTo, 1, duration)
+            )
+          }
 
-            this.squishGraphic(1)
-          },
-          this
-        )
+          this.squishGraphic(1)
+        })
       }
     }
   }
@@ -359,11 +404,15 @@ export default class Player extends PhysicsActor {
   handleInput(engine: ex.Engine, delta: number) {
     const jumpPressed = this.controls.wasPressed('Jump')
     const jumpHeld = this.controls.isHeld('Jump')
-    const isOnGround = this.isOnGround
 
-    const isXMovementAllowed = !this.isClimbingLadder && !this.bouncepad
+    const isXMovementAllowed =
+      !this.isClimbingLadder && !this.bouncepad && !this.isWallJumping
+
     const heldXDirection = this.controls.getHeldXDirection()
     const heldYDirection = this.controls.getHeldYDirection()
+
+    const isOnLeftWall = this.isOnWall('left')
+    const isOnRightWall = this.isOnWall('right')
 
     // move left or right
     if (heldXDirection && isXMovementAllowed) {
@@ -373,6 +422,22 @@ export default class Player extends PhysicsActor {
       this.facing = direction === -1 ? 'left' : 'right'
 
       this.acc.x += accel
+
+      if (!this.isOnGround) {
+        const isOnRightWall = this.isOnWall('right')
+        const isOnLeftWall = this.isOnWall('left')
+
+        if (
+          (isOnRightWall && heldXDirection === 'Right') ||
+          (isOnLeftWall && heldXDirection === 'Left')
+        ) {
+          this.isSlidingOnWall = true
+        } else {
+          this.isSlidingOnWall = false
+        }
+      }
+    } else {
+      this.isSlidingOnWall = false
     }
 
     // climb ladder
@@ -384,8 +449,10 @@ export default class Player extends PhysicsActor {
 
     if (jumpPressed) {
       // normal jump
-      if (isOnGround) {
+      if (this.isOnGround) {
         this.jump()
+      } else if (isOnLeftWall || isOnRightWall) {
+        this.wallJump(isOnLeftWall ? 'left' : 'right')
       }
       // jump or fall off ladder
       else if (this.isClimbingLadder) {
@@ -420,7 +487,9 @@ export default class Player extends PhysicsActor {
 
     this.graphics.flipHorizontal = this.facing === 'left'
 
-    if (this.isClimbingLadder) {
+    if (this.isSlidingOnWall) {
+      this.animation.set('wall_slide')
+    } else if (this.isClimbingLadder) {
       this.animation.set('ladder_climb')
       if (this.vel.y === 0) {
         this.animation.current.goToFrame(0)
@@ -439,8 +508,7 @@ export default class Player extends PhysicsActor {
             this.controls.isSprinting &&
             Math.abs(this.vel.x) > this.RUN_MAX_VELOCITY
           ) {
-            const fromRunToSprint =
-              this.animation.current === this.animation.get('run')
+            const fromRunToSprint = this.animation.is('run')
 
             this.animation.set(
               'sprint',
@@ -448,8 +516,7 @@ export default class Player extends PhysicsActor {
               fromRunToSprint ? currentFrameTimeLeft : 0
             )
           } else if (this.vel.x !== 0) {
-            const fromSprintToRun =
-              this.animation.current === this.animation.get('sprint')
+            const fromSprintToRun = this.animation.is('sprint')
 
             this.animation.set(
               'run',
@@ -475,53 +542,46 @@ export default class Player extends PhysicsActor {
         }
       }
     }
+
     // apply a stretch animation when jumping
-    if (
-      this.animation.current === this.animation.get('jump') &&
-      this.oldVel.y >= 0 &&
-      this.vel.y < 0
-    ) {
-      coroutine(
-        this.scene!.engine,
-        function* () {
-          const duration = 70
-          const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
-          const easing = ex.EasingFunctions.EaseOutCubic
+    if (this.animation.is('jump') && this.oldVel.y >= 0 && this.vel.y < 0) {
+      coroutine(this, function* () {
+        const duration = 70
+        const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
+        const easing = ex.EasingFunctions.EaseOutCubic
 
-          let elapsed = 0
+        let elapsed = 0
 
-          const force = this.vel.y
+        const force = this.vel.y
 
-          // stretch player graphic while jumping
-          while (this.vel.y < force * 0.25) {
-            const { delta } = yield
-            elapsed += delta
+        // stretch player graphic while jumping
+        while (this.vel.y < force * 0.25) {
+          const { delta } = yield
+          elapsed += delta
 
-            if (elapsed < duration) {
-              this.squishGraphic(
-                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
-              )
-            }
+          if (elapsed < duration) {
+            this.squishGraphic(
+              easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+            )
           }
+        }
 
-          elapsed = 0
+        elapsed = 0
 
-          // un-stretch player graphic while falling
-          while (!this.touching.bottom.length) {
-            const { delta } = yield
-            elapsed += delta
+        // un-stretch player graphic while falling
+        while (!this.touching.bottom.length) {
+          const { delta } = yield
+          elapsed += delta
 
-            if (elapsed < duration) {
-              this.squishGraphic(
-                easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
-              )
-            }
+          if (elapsed < duration) {
+            this.squishGraphic(
+              easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
+            )
           }
+        }
 
-          this.squishGraphic(1)
-        },
-        this
-      )
+        this.squishGraphic(1)
+      })
     }
   }
 
@@ -610,6 +670,41 @@ export default class Player extends PhysicsActor {
     }
   }
 
+  wallJump(side: 'left' | 'right') {
+    if (this.isWallJumping) return
+    this.jump()
+    this.isWallJumping = true
+    coroutine(
+      this,
+      function* () {
+        const dir = side === 'left' ? 1 : -1
+
+        // get velocity (px/second) so that WALL_JUMP_X_DISTANCE is reached in WALL_JUMP_DURATION
+        const wallJumpVel =
+          (this.WALL_JUMP_X_DISTANCE / (this.WALL_JUMP_DURATION / 1000)) * dir
+
+        let elapsed = 0
+
+        while (elapsed < this.WALL_JUMP_DURATION && this.isWallJumping) {
+          const { delta } = yield
+          elapsed += delta
+          this.vel.x = wallJumpVel
+        }
+
+        if (this.isWallJumping) {
+          const heldXDirection = this.controls.getHeldXDirection()
+
+          if (!heldXDirection) {
+            this.vel.x = 0
+          }
+        }
+
+        this.isWallJumping = false
+      },
+      'preupdate'
+    )
+  }
+
   bounceOffEnemy(enemy: EnemyActor) {
     if (enemy.dead) return
 
@@ -624,12 +719,66 @@ export default class Player extends PhysicsActor {
     this.jump(force, false)
   }
 
+  isOnWall(side: 'left' | 'right') {
+    const distance = 4
+    const topLeft = ex.vec(
+      this.collider.bounds.left + 1,
+      this.collider.bounds.top + 1
+    )
+    const bottomLeft = ex.vec(
+      this.collider.bounds.left + 1,
+      this.collider.bounds.bottom - 1
+    )
+    const topRight = ex.vec(
+      this.collider.bounds.right - 1,
+      this.collider.bounds.top + 1
+    )
+    const bottomRight = ex.vec(
+      this.collider.bounds.right - 1,
+      this.collider.bounds.bottom - 1
+    )
+
+    const topRay = new ex.Ray(
+      side === 'left' ? topLeft : topRight,
+      ex.vec(side === 'left' ? -1 : 1, 0)
+    )
+    const bottomRay = new ex.Ray(
+      side === 'left' ? bottomLeft : bottomRight,
+      ex.vec(side === 'left' ? -1 : 1, 0)
+    )
+
+    // TODO: should use collision layers or something
+    const ignoreTags = [
+      'enemy',
+      'bouncepad',
+      'ladder',
+      'one-way',
+      'world-bounds',
+    ]
+    const hits = [
+      ...this.raycast(topRay, Math.abs(distance)),
+      ...this.raycast(bottomRay, Math.abs(distance)),
+    ].filter((hit) => {
+      const owner = hit.body.owner
+
+      if (owner) {
+        if (ignoreTags.some((tag) => owner.hasTag(tag))) {
+          return false
+        }
+      }
+
+      return true
+    })
+
+    return hits.length > 0
+  }
+
   /**
    * Applies ground friction to the player's velocity.
    */
   applyDeceleration() {
     const isOnGround = this.isOnGround
-    const isOverMaxVelocity = Math.abs(this.vel.x) > this.maxVelocity
+    const isOverMaxXVelocity = Math.abs(this.vel.x) > this.maxXVelocity
 
     // ground deceleration
     if (isOnGround) {
@@ -638,7 +787,7 @@ export default class Player extends PhysicsActor {
         this.acc.x = -this.GROUND_TURN_DECELERATION * Math.sign(this.vel.x)
       }
       // decelerate if we're over the max velocity or stopped walking
-      else if (!this.controls.isMoving || isOverMaxVelocity) {
+      else if (!this.controls.isMoving || isOverMaxXVelocity) {
         if (this.vel.x !== 0) {
           this.acc.x = -this.STOP_DECELERATION * Math.sign(this.vel.x)
         }
@@ -648,9 +797,9 @@ export default class Player extends PhysicsActor {
     else {
       if (this.controls.isTurning) {
         this.acc.x = -this.AIR_TURN_DECELERATION * Math.sign(this.vel.x)
-      } else if (isOverMaxVelocity) {
+      } else if (isOverMaxXVelocity) {
         // in air, clamp to max velocity
-        this.vel.x = ex.clamp(this.vel.x, -this.maxVelocity, this.maxVelocity)
+        this.vel.x = ex.clamp(this.vel.x, -this.maxXVelocity, this.maxXVelocity)
         this.acc.x = 0
       }
     }

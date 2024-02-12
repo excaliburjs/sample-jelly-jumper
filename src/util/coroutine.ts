@@ -1,7 +1,11 @@
+import * as ex from 'excalibur'
 type CoroutineEventType = 'postupdate' | 'preupdate'
 
-export function coroutine<T, E extends CoroutineEventType = 'preupdate'>(
-  engine: ex.Engine,
+export function coroutine<
+  T extends ex.Engine | ex.Entity | ex.Scene,
+  E extends CoroutineEventType = 'preupdate'
+>(
+  self: T,
   callback: (
     this: T
   ) => Generator<
@@ -9,11 +13,19 @@ export function coroutine<T, E extends CoroutineEventType = 'preupdate'>(
     void,
     E extends 'preupdate' ? ex.PreUpdateEvent : ex.PostUpdateEvent
   >,
-  _this?: T,
   event: E = 'preupdate' as E
 ) {
+  let engine: ex.Engine
+  if (self instanceof ex.Engine) {
+    engine = self
+  } else if (self instanceof ex.Entity) {
+    engine = self.scene!.engine
+  } else if (self instanceof ex.Scene) {
+    engine = self.engine
+  }
+
   return new Promise<void>((resolve) => {
-    const generator = callback.call(_this as T)
+    const generator = callback.call(self)
     const loopFn = (ev: ex.PostUpdateEvent | ex.PreUpdateEvent) => {
       const result = generator.next(ev)
       if (result.done) {
