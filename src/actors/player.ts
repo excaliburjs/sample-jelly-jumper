@@ -413,8 +413,8 @@ export default class Player extends PhysicsActor {
     const heldXDirection = this.controls.getHeldXDirection()
     const heldYDirection = this.controls.getHeldYDirection()
 
-    const isOnLeftWall = this.isOnWall('left')
-    const isOnRightWall = this.isOnWall('right')
+    const isCloseToLeftWall = this.isOnWall('left', 4)
+    const isCloseToRightWall = this.isOnWall('right', 4)
 
     // move left or right
     if (heldXDirection && isXMovementAllowed) {
@@ -454,8 +454,8 @@ export default class Player extends PhysicsActor {
       // normal jump
       if (this.isOnGround) {
         this.jump()
-      } else if (isOnLeftWall || isOnRightWall) {
-        this.wallJump(isOnLeftWall ? 'left' : 'right')
+      } else if (isCloseToLeftWall || isCloseToRightWall) {
+        this.wallJump(isCloseToLeftWall ? 'left' : 'right')
       }
       // jump or fall off ladder
       else if (this.isClimbingLadder) {
@@ -722,24 +722,18 @@ export default class Player extends PhysicsActor {
     this.jump(force, false)
   }
 
-  isOnWall(side: 'left' | 'right') {
-    const distance = 4
-    const topLeft = ex.vec(
-      this.collider.bounds.left + 1,
-      this.collider.bounds.top + 1
-    )
-    const bottomLeft = ex.vec(
-      this.collider.bounds.left + 1,
-      this.collider.bounds.bottom - 1
-    )
-    const topRight = ex.vec(
-      this.collider.bounds.right - 1,
-      this.collider.bounds.top + 1
-    )
-    const bottomRight = ex.vec(
-      this.collider.bounds.right - 1,
-      this.collider.bounds.bottom - 1
-    )
+  isOnWall(side: 'left' | 'right', distance = 1) {
+    const bounds = new ex.BoundingBox({
+      left: Math.round(this.collider.bounds.left) + 1,
+      right: Math.round(this.collider.bounds.right) - 1,
+      top: Math.round(this.collider.bounds.top) + 1,
+      bottom: Math.round(this.collider.bounds.bottom) - 1,
+    })
+
+    const topLeft = ex.vec(bounds.left, bounds.top)
+    const bottomLeft = ex.vec(bounds.left, bounds.bottom)
+    const topRight = ex.vec(bounds.right, bounds.top)
+    const bottomRight = ex.vec(bounds.right, bounds.bottom)
 
     const topRay = new ex.Ray(
       side === 'left' ? topLeft : topRight,
