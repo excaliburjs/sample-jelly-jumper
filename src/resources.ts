@@ -20,9 +20,9 @@ export const Resources = {
     stage2: new ex.Sound('/res/music/stage2.ogg'),
   },
   sfx: {
-    playerJump: new ex.Sound('/res/sfx/player-jump.wav'),
-    playerLand: new ex.Sound('/res/sfx/player-land.wav'),
-    footstep: new ex.Sound('/res/sfx/footstep.wav'),
+    jump: new ex.Sound('/res/sfx/jump.wav'),
+    jumpSpring: new ex.Sound('/res/sfx/jump-spring.wav'),
+    land: new ex.Sound('/res/sfx/land.wav'),
     turnAround: new ex.Sound('/res/sfx/turn-around.wav'),
     squish: new ex.Sound('/res/sfx/squish.wav'),
   },

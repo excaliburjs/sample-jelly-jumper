@@ -303,7 +303,7 @@ export default class Player extends PhysicsActor {
 
       // player landed on the ground
       if (side === ex.Side.Bottom && wasInAir) {
-        audioManager.playSfx(Resources.sfx.footstep)
+        audioManager.playSfx(Resources.sfx.land)
 
         // stop moving if we landed on a bouncepad
         if (other.owner.hasTag('bouncepad')) {
@@ -597,7 +597,7 @@ export default class Player extends PhysicsActor {
 
     this.vel.y = -force
     if (playSfx) {
-      audioManager.playSfx(Resources.sfx.playerJump)
+      audioManager.playSfx(Resources.sfx.jump)
     }
   }
 

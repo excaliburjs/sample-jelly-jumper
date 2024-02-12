@@ -136,7 +136,7 @@ export class Bouncepad extends ex.Actor {
       if (actor instanceof ex.Actor) {
         actor.pos.y -= this.COMPRESS_DISTANCE
         actor.vel.y = -this.force
-        audioManager.playSfx(Resources.sfx.playerJump)
+        audioManager.playSfx(Resources.sfx.jumpSpring)
       }
     }
   }
