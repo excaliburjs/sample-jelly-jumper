@@ -20,8 +20,8 @@ const game = new ex.Engine({
       contactSolveBias: ex.ContactSolveBias.VerticalFirst,
     },
     colliders: {
-      compositeStrategy: 'separate'
-    }
+      compositeStrategy: 'separate',
+    },
   },
   pixelRatio: 4, // 4x upscale the resolution, logs an incorrect warning
   pixelArt: true, // turn on pixel art sampler

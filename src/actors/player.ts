@@ -595,7 +595,8 @@ export default class Player extends PhysicsActor {
     const closestLadder = this.touching.ladders
       .sort((a, b) => {
         return (
-          Math.abs(this.pos.x - a.center.x) - Math.abs(this.pos.x - b.center.x)
+          Math.abs(this.collider.bounds.bottom - a.collider.bounds.bottom) -
+          Math.abs(this.collider.bounds.bottom - b.collider.bounds.bottom)
         )
       })
       .at(0)
@@ -605,7 +606,6 @@ export default class Player extends PhysicsActor {
       const dir = heldYDirection === 'Up' ? -1 : 1
 
       const isCloseEnoughOnX = Math.abs(this.pos.x - closestLadder.center.x) < 8
-      const isJumping = this.vel.y <= -50
 
       const toTile = (n: number) => Math.floor(Math.round(n) / 16)
 
@@ -620,7 +620,7 @@ export default class Player extends PhysicsActor {
         Math.round(closestLadder.collider.bounds.top)
 
       // climb on to the ladder
-      if (!this.isClimbingLadder && isCloseEnoughOnX && !isJumping) {
+      if (!this.isClimbingLadder && isCloseEnoughOnX) {
         if (heldYDirection === 'Up' && isOccupyingSameTile) {
           this.isClimbingLadder = true
         } else if (heldYDirection === 'Down' && isStandingAboveLadder) {
