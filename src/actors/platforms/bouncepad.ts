@@ -37,7 +37,7 @@ export class Bouncepad extends ex.Actor {
   /**
    * The time it takes for the bouncepad to compress and release.
    */
-  COMPRESS_TIME = 150
+  COMPRESS_TIME = 250
   COMPRESS_DISTANCE = 2
 
   spritesheet: ex.SpriteSheet
@@ -73,7 +73,11 @@ export class Bouncepad extends ex.Actor {
         [1],
         this.COMPRESS_TIME
       ),
-      released: ex.Animation.fromSpriteSheet(this.spritesheet, [0, 1], 100),
+      released: ex.Animation.fromSpriteSheet(
+        this.spritesheet,
+        [0, 0, 0, 0, 1],
+        150
+      ),
     })
 
     this.colliderShape = ex.Shape.Box(16, 16, this.anchor)
