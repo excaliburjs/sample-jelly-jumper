@@ -312,11 +312,13 @@ export default class Player extends PhysicsActor {
   ): void {
     super.onPreCollisionResolve(self, other, side, contact)
 
-    if (other.owner instanceof EnemyActor && other.owner.stompable) {
+    if (other.owner instanceof EnemyActor) {
       // a lenient check to see if we stomped on the enemy by using the previous position.y
       // (we could check for side === ex.Side.Bottom, but depending on the angle you stomp an enemy, it might not be the case)
       const posDelta = this.getGlobalPos().sub(this.getGlobalOldPos())
-      const didStomp = self.bounds.bottom - posDelta.y < other.bounds.top + 1
+      const didStomp =
+        other.owner.stompable &&
+        self.bounds.bottom - posDelta.y < other.bounds.top + 1
 
       if (didStomp) {
         this.bounceOffEnemy(other.owner)
