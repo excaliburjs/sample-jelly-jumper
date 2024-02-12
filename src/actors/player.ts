@@ -286,9 +286,11 @@ export default class Player extends PhysicsActor {
       this.applyDeceleration()
     }
 
-    // reset jump gravity once we land on the ground
+    // reset some flags when we're on the ground
     if (this.isOnGround) {
       this.isUsingJumpGravity = false
+      this.isWallJumping = false
+      this.isSlidingOnWall = false
     }
 
     if (!this.touching.ladders.length) {
@@ -423,7 +425,8 @@ export default class Player extends PhysicsActor {
 
       this.acc.x += accel
 
-      if (!this.isOnGround) {
+      // wall slide
+      if (!this.isOnGround && this.vel.y > 0) {
         const isOnRightWall = this.isOnWall('right')
         const isOnLeftWall = this.isOnWall('left')
 
