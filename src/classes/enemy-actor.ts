@@ -1,24 +1,42 @@
 import * as ex from 'excalibur'
 import { PhysicsActor } from './physics-actor'
+import { Tag } from '../util/tag'
+import { HurtPlayerComponent } from '../components/behaviours/hurt-player'
+import { StompableComponent } from '../components/behaviours/stompable'
+import { KillableComponent } from '../components/behaviours/killable'
 
 export interface EnemyActorArgs extends ex.ActorArgs {
-  stompable?: boolean
+  stompDuration?: number
 }
 
-export type EnemyKillMethod = 'instant' | 'squish'
-
 export class EnemyActor extends PhysicsActor {
-  dead = false
-  stompable = false
+  protected killable: KillableComponent
+  protected stompable: StompableComponent
 
-  constructor({ stompable, ...args }: EnemyActorArgs) {
+  constructor({ stompDuration, ...args }: EnemyActorArgs) {
     super({
       collisionType: ex.CollisionType.Active,
       ...args,
     })
 
-    this.stompable = stompable ?? false
-    this.addTag('enemy')
+    this.addTag(Tag.Enemy)
+
+    this.killable = new KillableComponent({ stompDuration })
+    this.stompable = new StompableComponent()
+
+    this.addComponent(new HurtPlayerComponent({ amount: 1 }))
+    this.addComponent(this.stompable)
+    this.addComponent(this.killable)
+
+    this.killable.events.on('kill', this.onKill.bind(this))
+  }
+
+  get dead() {
+    return this.killable.dead
+  }
+
+  set dead(value) {
+    this.killable.dead = value
   }
 
   onPreCollisionResolve(
@@ -32,22 +50,5 @@ export class EnemyActor extends PhysicsActor {
     }
   }
 
-  kill(method: EnemyKillMethod = 'instant', duration = 700) {
-    if (this.dead) return
-    this.dead = true
-
-    if (method === 'instant') {
-      super.kill()
-    } else if (method === 'squish') {
-      this.actions
-        .callMethod(() => {
-          this.graphics.current!.scale = ex.vec(1, 0.25)
-        })
-        .delay(duration * 0.8)
-        .fade(0, duration * 0.2)
-        .callMethod(() => {
-          super.kill()
-        })
-    }
-  }
+  onKill() {}
 }

@@ -1,6 +1,7 @@
 import * as ex from 'excalibur'
-import { EnemyActor, EnemyKillMethod } from '../../classes/enemy-actor'
+import { EnemyActor } from '../../classes/enemy-actor'
 import { Resources } from '../../resources'
+import { KillableComponent } from '../../components/behaviours/killable'
 
 const grid = {
   rows: 1,
@@ -42,7 +43,7 @@ export class BirdEnemy extends EnemyActor {
   constructor(args: BirdEnemyArgs) {
     super({
       ...args,
-      stompable: true,
+      stompDuration: 1500,
       anchor: ex.vec(0.5, 0.6),
       collider: ex.Shape.Box(10, 5, ex.vec(0.5, 1)),
       collisionGroup: ex.CollisionGroupManager.groupByName('enemies'),
@@ -83,7 +84,7 @@ export class BirdEnemy extends EnemyActor {
     }
   }
 
-  kill(method: EnemyKillMethod) {
+  onKill() {
     this.deathPosition = this.pos.clone()
     const anim = this.graphics.current as ex.Animation
 
@@ -91,11 +92,5 @@ export class BirdEnemy extends EnemyActor {
     this.vel.x = 0
     this.vel.y = 0
     this.body.useGravity = false
-
-    if (method === 'squish') {
-      super.kill(method, 1500)
-    } else {
-      super.kill(method)
-    }
   }
 }

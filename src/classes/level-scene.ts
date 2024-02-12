@@ -12,8 +12,9 @@ import { MovingPlatform } from '../actors/platforms/moving-platform'
 import { EnemySpawner } from '../actors/enemy-spawner'
 import { BirdEnemy } from '../actors/enemies/bird'
 import { Bouncepad, BouncepadArgs } from '../actors/platforms/bouncepad'
-import { AxeEnemy } from '../actors/enemies/swinging-axe'
-import { CircularSawEnemy } from '../actors/enemies/circular-saw'
+import { AxeEnemy } from '../actors/hazards/swinging-axe'
+import { CircularSawEnemy } from '../actors/hazards/circular-saw'
+import { Tag } from '../util/tag'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -176,7 +177,7 @@ export default class LevelScene extends ex.Scene {
         }),
       ]),
     })
-    bounds.addTag('world-bounds')
+    bounds.addTag(Tag.WorldBounds)
     // create world bounds
     this.engine.add(bounds)
   }
@@ -223,7 +224,7 @@ export default class LevelScene extends ex.Scene {
         height: tileHeight,
         collisionType: ex.CollisionType.Passive,
       })
-      ladder.addTag('ladder')
+      ladder.addTag(Tag.Ladder)
       this.add(ladder)
     }
   }

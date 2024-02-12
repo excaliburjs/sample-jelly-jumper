@@ -10,6 +10,10 @@ import { GRAVITY } from '../util/world'
 import { EaseAction } from '../actions/EaseAction'
 import { coroutine } from '../util/coroutine'
 import { Bouncepad } from './platforms/bouncepad'
+import { Tag } from '../util/tag'
+import { StompableComponent } from '../components/behaviours/stompable'
+import { HurtPlayerComponent } from '../components/behaviours/hurt-player'
+import { KillableComponent } from '../components/behaviours/killable'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -309,19 +313,29 @@ export default class Player extends PhysicsActor {
     contact: ex.CollisionContact
   ): void {
     super.onPreCollisionResolve(self, other, side, contact)
+    const hurtPlayer = other.owner.has(HurtPlayerComponent)
+      ? other.owner.get(HurtPlayerComponent)
+      : undefined
+    const stompable = other.owner.has(StompableComponent)
+      ? other.owner.get(StompableComponent)
+      : undefined
+    const killable = other.owner.has(KillableComponent)
+      ? other.owner.get(KillableComponent)
+      : undefined
 
-    if (other.owner instanceof EnemyActor) {
+    if (hurtPlayer) {
       // a lenient check to see if we stomped on the enemy by using the previous position.y
       // (we could check for side === ex.Side.Bottom, but depending on the angle you stomp an enemy, it might not be the case)
       const posDelta = this.getGlobalPos().sub(this.getGlobalOldPos())
       const didStomp =
-        other.owner.stompable &&
+        stompable &&
+        !stompable.stomped &&
         self.bounds.bottom - posDelta.y < other.bounds.top + 1
 
       if (didStomp) {
-        this.bounceOffEnemy(other.owner)
+        this.stomp(other.owner)
       } else {
-        if (!other.owner.dead) {
+        if (!killable || !killable.dead) {
           if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
             this.scene?.add(
               new FakeDie({
@@ -712,13 +726,17 @@ export default class Player extends PhysicsActor {
     )
   }
 
-  bounceOffEnemy(enemy: EnemyActor) {
-    if (enemy.dead) return
+  stomp(other: ex.Entity) {
+    const stompable = other.get(StompableComponent)
+    const killable = other.get(KillableComponent)
 
-    enemy.kill('squish')
-    audioManager.playSfx(Resources.sfx.squish)
+    if (!stompable || !killable) return
+    if (killable.dead) return
 
-    // use a higher jump force for jumping off an enemy, unless we're sprinting
+    killable.kill('stomp')
+    audioManager.playSfx(Resources.sfx.stomp)
+
+    // use a higher jump force unless we're sprinting
     const force = !this.controls.isSprinting
       ? this.RUN_JUMP_FORCE
       : this.SPRINT_JUMP_FORCE
@@ -750,11 +768,11 @@ export default class Player extends PhysicsActor {
 
     // TODO: should use collision layers or something
     const ignoreTags = [
-      'enemy',
-      'bouncepad',
-      'ladder',
-      'one-way',
-      'world-bounds',
+      Tag.Enemy,
+      Tag.Bouncepad,
+      Tag.Ladder,
+      Tag.OneWay,
+      Tag.WorldBounds,
     ]
     const hits = [
       ...this.raycast(topRay, Math.abs(distance)),

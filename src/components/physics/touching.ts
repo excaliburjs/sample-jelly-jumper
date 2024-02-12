@@ -1,4 +1,5 @@
 import * as ex from 'excalibur'
+import { Tag } from '../../util/tag'
 
 /**
  * Tracks which entities are touching this entity currently.
@@ -52,6 +53,6 @@ export class TouchingComponent extends ex.Component {
   }
 
   get ladders() {
-    return this.passives.filter((e) => e.hasTag('ladder'))
+    return this.passives.filter((e) => e.hasTag(Tag.Ladder))
   }
 }

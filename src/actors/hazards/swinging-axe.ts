@@ -2,8 +2,9 @@ import * as ex from 'excalibur'
 import { Resources } from '../../resources'
 import { EnemyActor } from '../../classes/enemy-actor'
 import { GRAVITY } from '../../util/world'
+import { HurtPlayerComponent } from '../../components/behaviours/hurt-player'
 
-export class AxeEnemy extends EnemyActor {
+export class AxeEnemy extends ex.Actor {
   private elapsedMs = 0
 
   constructor(args: ex.ActorArgs) {
@@ -21,6 +22,7 @@ export class AxeEnemy extends EnemyActor {
     this.body.useGravity = false
     this.graphics.offset = ex.vec(0, -8)
     this.graphics.use(Resources.img.axe.toSprite())
+    this.addComponent(new HurtPlayerComponent({ amount: Infinity }))
   }
 
   onPreUpdate(_engine: ex.Engine, delta: number) {

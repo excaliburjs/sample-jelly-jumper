@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { EnemyActor, EnemyKillMethod } from '../../classes/enemy-actor'
+import { EnemyActor } from '../../classes/enemy-actor'
 import { Resources } from '../../resources'
 import Player from '../player'
 
@@ -40,7 +40,6 @@ export class SpiderEnemy extends EnemyActor {
   constructor(args: SpiderEnemyArgs) {
     super({
       ...args,
-      stompable: true,
       anchor: ex.vec(0.5, 32 / 48),
       collider: ex.Shape.Box(20, 4, ex.vec(0.5, 1)),
       collisionGroup: ex.CollisionGroupManager.groupByName('enemies'),
@@ -120,14 +119,12 @@ export class SpiderEnemy extends EnemyActor {
     }
   }
 
-  kill(method: EnemyKillMethod) {
+  onKill() {
     const anim = this.graphics.current as ex.Animation
 
     anim.pause()
     this.vel.x = 0
     this.vel.y = 0
     this.body.useGravity = false
-
-    super.kill(method)
   }
 }

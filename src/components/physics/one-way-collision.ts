@@ -1,4 +1,5 @@
 import * as ex from 'excalibur'
+import { Tag } from '../../util/tag'
 
 /**
  * A component that makes an actor's collision only work from the top.
@@ -15,7 +16,7 @@ export class OneWayCollisionComponent extends ex.Component {
       ogOnPreCollisionResolve(...args)
     }
 
-    owner.addTag('one-way')
+    owner.addTag(Tag.OneWay)
   }
 
   onPreCollisionResolve(

@@ -26,7 +26,7 @@ export const Resources = {
     jumpSpring: new ex.Sound('/res/sfx/jump-spring.wav'),
     land: new ex.Sound('/res/sfx/land.wav'),
     turnAround: new ex.Sound('/res/sfx/turn-around.wav'),
-    squish: new ex.Sound('/res/sfx/squish.wav'),
+    stomp: new ex.Sound('/res/sfx/stomp.wav'),
   },
   tiled: {
     level1: new TiledResource('/res/tilemaps/level1.tmx', {
