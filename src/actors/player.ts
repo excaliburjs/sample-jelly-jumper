@@ -256,6 +256,21 @@ export default class Player extends PhysicsActor {
   }
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
+    // reset some flags when we're on the ground
+    if (this.isOnGround) {
+      this.isUsingJumpGravity = false
+      this.isWallJumping = false
+      this.isSlidingOnWall = false
+    }
+
+    if (!this.isTouchingLadder) {
+      this.isClimbingLadder = false
+    }
+
+    if (!this.isOnWall('right') && !this.isOnWall('left')) {
+      this.isSlidingOnWall = false
+    }
+
     this.handleInput(engine, delta)
   }
 
@@ -306,21 +321,6 @@ export default class Player extends PhysicsActor {
 
     if (!this.isWallJumping) {
       this.applyDeceleration()
-    }
-
-    // reset some flags when we're on the ground
-    if (this.isOnGround) {
-      this.isUsingJumpGravity = false
-      this.isWallJumping = false
-      this.isSlidingOnWall = false
-    }
-
-    if (!this.isAboveLadder && !this.isTouchingLadder) {
-      this.isClimbingLadder = false
-    }
-
-    if (!this.isOnWall('right') && !this.isOnWall('left')) {
-      this.isSlidingOnWall = false
     }
   }
 
