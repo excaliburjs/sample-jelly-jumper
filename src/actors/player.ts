@@ -792,9 +792,9 @@ export default class Player extends PhysicsActor {
   }
 
   isOnWall(side: 'left' | 'right', distance = 1) {
-    const hits = this.raycastSide(side, distance, { searchAllColliders: true })
-      // TODO: unsure how to achieve this with raycast collisionGroup/mask options
-      .filter((hit) => hit.body.group === CollisionGroup.Ground)
+    const hits = this.raycastSide(side, distance, {
+      filter: (hit) => hit.body.group === CollisionGroup.Ground,
+    })
 
     return hits.length > 0
   }

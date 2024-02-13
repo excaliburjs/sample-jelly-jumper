@@ -22,17 +22,11 @@ export class PhysicsActor extends ex.Actor {
   raycast(
     ray: ex.Ray,
     distance: number,
-    opts?: {
-      collisionGroup?: ex.CollisionGroup
-      collisionMask?: number
-      searchAllColliders?: boolean
-    }
+    opts?: Omit<ex.RayCastOptions, 'maxDistance'>
   ) {
     return this.scene!.physics.rayCast(ray, {
       maxDistance: distance,
-      searchAllColliders: opts?.searchAllColliders,
-      collisionGroup: opts?.collisionGroup,
-      collisionMask: opts?.collisionMask,
+      ...opts,
     })
       .filter((hit) => hit.body !== this.body)
       .sort((a, b) => a.distance - b.distance)
@@ -41,11 +35,7 @@ export class PhysicsActor extends ex.Actor {
   raycastSide(
     side: 'left' | 'right' | 'top' | 'bottom',
     distance: number,
-    opts?: {
-      collisionGroup?: ex.CollisionGroup
-      collisionMask?: number
-      searchAllColliders?: boolean
-    }
+    opts?: Omit<ex.RayCastOptions, 'maxDistance'>
   ) {
     const bounds = new ex.BoundingBox({
       left: Math.round(this.collider.bounds.left) + 1,
