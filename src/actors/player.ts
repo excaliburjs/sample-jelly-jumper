@@ -115,7 +115,7 @@ export default class Player extends PhysicsActor {
   /**
    * The distance in pixels the player will move away from the wall when wall jumping
    */
-  WALL_JUMP_X_DISTANCE = 8
+  WALL_JUMP_X_DISTANCE = 4
 
   /**
    * The duration of how long the player will move away from the wall when wall jumping

@@ -67,8 +67,7 @@ export class CircularSawHazard extends PhysicsActor {
     }
 
     // move and rotate the saw
-    this.graphics.current!.rotation +=
-      ex.toRadians((this.speed * 3) / delta) * this.direction
+    this.graphics.current!.rotation += ex.toRadians((this.speed * 5) / delta)
     this.vel.x = this.speed * this.direction
 
     if (hit) {
