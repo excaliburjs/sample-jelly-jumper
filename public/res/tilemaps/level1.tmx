@@ -10,6 +10,11 @@
     <property name="ladder" type="bool" value="true"/>
    </properties>
   </tile>
+  <tile id="19">
+   <properties>
+    <property name="ladder" type="bool" value="true"/>
+   </properties>
+  </tile>
   <tile id="33">
    <properties>
     <property name="oneway" type="bool" value="true"/>
@@ -45,7 +50,17 @@
     <property name="ladder" type="bool" value="true"/>
    </properties>
   </tile>
+  <tile id="51">
+   <properties>
+    <property name="ladder" type="bool" value="true"/>
+   </properties>
+  </tile>
   <tile id="81">
+   <properties>
+    <property name="ladder" type="bool" value="true"/>
+   </properties>
+  </tile>
+  <tile id="83">
    <properties>
     <property name="ladder" type="bool" value="true"/>
    </properties>

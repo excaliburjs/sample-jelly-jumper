@@ -28,13 +28,11 @@ Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 
 ## TODO
 
-- Enemies
+- Health/dying
 - Items
 - Level 1, 2, 3
 - UI (health, score, etc)
 - Document file structure
-- Revise jump physics for easier tweaking
-- Palette swapping materials?
 
 ## Advanced TODO after basic game is done
 
