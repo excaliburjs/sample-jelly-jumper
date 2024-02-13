@@ -38,6 +38,7 @@ export class AnimationComponent<Keys extends string> extends ex.Component {
     // carry over scale from the previous graphic
     if (prevAnim) {
       anim.scale.setTo(prevAnim.scale.x, prevAnim.scale.y)
+      anim.opacity = prevAnim.opacity
     }
 
     this.owner.graphics.use(anim)

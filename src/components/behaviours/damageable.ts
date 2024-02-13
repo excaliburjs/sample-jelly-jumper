@@ -36,6 +36,8 @@ export class DamageableComponent extends ex.Component {
     coroutine(this.owner, function* () {
       let elapsed = 0
 
+      let flashRate = 100
+
       while (
         elapsed < Math.max(self.KNOCKBACK_DURATION, self.INVINCIBILITY_DURATION)
       ) {
@@ -50,6 +52,16 @@ export class DamageableComponent extends ex.Component {
         if (elapsed > self.INVINCIBILITY_DURATION) {
           self.isInvincible = false
         }
+
+        if (self.owner.graphics.current) {
+          const shouldFlash = Math.floor(elapsed / flashRate) % 2 === 0
+
+          self.owner.graphics.current.opacity = shouldFlash ? 0.35 : 1
+        }
+      }
+
+      if (self.owner.graphics.current) {
+        self.owner.graphics.current.opacity = 1
       }
     })
   }
