@@ -12,9 +12,13 @@ type Side = 'left' | 'right' | 'top' | 'bottom'
 export class TouchingComponent extends ex.Component {
   type = 'touching'
 
-  private all = new Map<
-    ex.Actor,
-    { side: Side; contact: ex.CollisionContact }
+  private contacts = new Map<
+    string,
+    {
+      contact: ex.CollisionContact
+      actor: ex.Actor
+      side: Side
+    }
   >()
 
   left = new Set<ex.Actor>()
@@ -39,57 +43,36 @@ export class TouchingComponent extends ex.Component {
   onAdd(owner: ex.Actor): void {
     // collect up all of the collisionstart/end events for each frame
     owner.on('collisionstart', (ev) => {
-      this.queue.collisionstart.push(ev)
+      // @ts-expect-error - bug in new tiled plugin has collider as undefined
+      ev.other.collider ??= ev.other._collider
+
+      if (ev.other.collider) {
+        if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
+          this.passives.add(ev.other)
+        } else {
+          const side = ev.side.toLowerCase() as
+            | 'left'
+            | 'right'
+            | 'top'
+            | 'bottom'
+
+          this.contacts.set(ev.contact.id, {
+            contact: ev.contact,
+            actor: ev.other,
+            side,
+          })
+          this.updateSides()
+        }
+      }
     })
 
     owner.on('collisionend', (ev) => {
-      this.queue.collisionend.push(ev)
-    })
-
-    // process the collisionstart/end events at the end of the frame
-    owner.on('initialize', () => {
-      // doing this in the scene's postupdate will ensure that it runs after all actor's postupdates
-      owner.scene!.on('postupdate', () => {
-        let update = false
-
-        // handle collisionend first, incase the same actor is in both lists
-        this.queue.collisionend.forEach((ev) => {
-          if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
-            this.passives.delete(ev.other)
-          } else {
-            this.all.delete(ev.other)
-            update = true
-          }
-        })
-
-        // handle collisionstart
-        this.queue.collisionstart.forEach((ev) => {
-          // @ts-expect-error - bug in new tiled plugin has collider as undefined
-          ev.other.collider ??= ev.other._collider
-
-          if (ev.other.collider) {
-            if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
-              this.passives.add(ev.other)
-            } else {
-              const side = ev.side.toLowerCase() as
-                | 'left'
-                | 'right'
-                | 'top'
-                | 'bottom'
-
-              this.all.set(ev.other, { side, contact: ev.contact })
-              update = true
-            }
-          }
-        })
-
-        if (update) {
-          this.updateSides()
-        }
-
-        this.queue.collisionstart.length = 0
-        this.queue.collisionend.length = 0
-      })
+      if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
+        this.passives.delete(ev.other)
+      } else {
+        this.contacts.delete(ev.lastContact.id)
+        this.updateSides()
+      }
     })
   }
 
@@ -99,7 +82,7 @@ export class TouchingComponent extends ex.Component {
     this.top.clear()
     this.bottom.clear()
 
-    for (const [actor, { side }] of this.all.entries()) {
+    for (const { side, actor } of this.contacts.values()) {
       this[side].add(actor)
     }
   }
