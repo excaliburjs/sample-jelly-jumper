@@ -41,7 +41,7 @@ export class SpiderEnemy extends EnemyActor {
     super({
       ...args,
       anchor: ex.vec(0.5, 32 / 48),
-      collider: ex.Shape.Box(20, 4, ex.vec(0.5, 1)),
+      collider: ex.Shape.Box(24, 4, ex.vec(0.5, 1)),
     })
 
     this.spritesheet = variants[args.type].spritesheet

@@ -49,7 +49,7 @@ export class BirdEnemy extends EnemyActor {
       ...args,
       stompDuration: 1500,
       anchor: ex.vec(0.5, 0.6),
-      collider: ex.Shape.Box(10, 5, ex.vec(0.5, 1)),
+      collider: ex.Shape.Box(16, 5, ex.vec(0.5, 1)),
       collisionType: ex.CollisionType.Passive,
     })
 
