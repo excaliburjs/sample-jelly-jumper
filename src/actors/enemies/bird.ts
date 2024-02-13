@@ -1,7 +1,6 @@
 import * as ex from 'excalibur'
 import { EnemyActor } from '../../classes/enemy-actor'
 import { Resources } from '../../resources'
-import { KillableComponent } from '../../components/behaviours/killable'
 
 const grid = {
   rows: 1,
@@ -13,6 +12,7 @@ const grid = {
 const variants = {
   purple: {
     speed: 20,
+    distance: 60,
     spritesheet: ex.SpriteSheet.fromImageSource({
       image: Resources.img.birdPurple,
       grid,
@@ -20,6 +20,7 @@ const variants = {
   },
   orange: {
     speed: 30,
+    distance: 100,
     spritesheet: ex.SpriteSheet.fromImageSource({
       image: Resources.img.birdOrange,
       grid,
@@ -35,10 +36,13 @@ export class BirdEnemy extends EnemyActor {
   spritesheet: ex.SpriteSheet
 
   speed: number
+  distance: number
   direction: 'left' | 'right' = 'left'
 
   private elapsedMs = 0
   private deathPosition: ex.Vector | null = null
+
+  private initialPos: ex.Vector
 
   constructor(args: BirdEnemyArgs) {
     super({
@@ -51,6 +55,7 @@ export class BirdEnemy extends EnemyActor {
 
     this.spritesheet = variants[args.type].spritesheet
     this.speed = variants[args.type].speed
+    this.distance = variants[args.type].distance
     this.body.useGravity = false
 
     this.graphics.use(
@@ -60,6 +65,8 @@ export class BirdEnemy extends EnemyActor {
         3000 / this.speed
       )
     )
+
+    this.initialPos = this.pos.clone()
   }
 
   onPreUpdate(engine: ex.Engine, delta: number): void {
@@ -80,6 +87,12 @@ export class BirdEnemy extends EnemyActor {
 
       this.pos.y +=
         Math.sin((this.elapsedMs / (this.speed * 10)) * Math.PI) * 0.3
+    }
+
+    if (this.pos.x < this.initialPos.x - this.distance) {
+      this.direction = 'right'
+    } else if (this.pos.x > this.initialPos.x) {
+      this.direction = 'left'
     }
   }
 
