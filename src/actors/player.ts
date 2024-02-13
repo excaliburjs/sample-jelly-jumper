@@ -200,6 +200,18 @@ export default class Player extends PhysicsActor {
     ) as Bouncepad | undefined
   }
 
+  get isTouchingLadder() {
+    return this.touching.ladders.size > 0
+  }
+
+  get isAboveLadder() {
+    return (
+      this.raycastSide('bottom', 1, { searchAllColliders: true }).filter(
+        (hit) => hit.body.owner?.hasTag(Tag.Ladder)
+      ).length > 0
+    )
+  }
+
   constructor(args: { x: number; y: number; z?: number }) {
     super({
       ...args,
@@ -303,7 +315,7 @@ export default class Player extends PhysicsActor {
       this.isSlidingOnWall = false
     }
 
-    if (!this.touching.ladders.size) {
+    if (!this.isAboveLadder && !this.isTouchingLadder) {
       this.isClimbingLadder = false
     }
 
@@ -467,9 +479,7 @@ export default class Player extends PhysicsActor {
 
     // climb ladder
     if (heldYDirection) {
-      if (this.touching.ladders.size) {
-        this.climbLadder()
-      }
+      this.climbLadder()
     }
 
     if (jumpPressed) {
@@ -611,58 +621,54 @@ export default class Player extends PhysicsActor {
   }
 
   climbLadder() {
-    // it's possible to be touching multiple ladder tiles at once - find the closet one
-    const closestLadder = Array.from(this.touching.ladders)
-      .sort((a, b) => {
-        return (
-          Math.abs(this.collider.bounds.bottom - a.collider.bounds.bottom) -
-          Math.abs(this.collider.bounds.bottom - b.collider.bounds.bottom)
-        )
-      })
-      .at(0)
+    const heldYDirection = this.controls.getHeldYDirection()
 
-    if (closestLadder) {
-      const heldYDirection = this.controls.getHeldYDirection()
+    if (this.isTouchingLadder) {
+      // it's possible to be touching multiple ladder tiles at once - find the closet one
+      const ladder = Array.from(this.touching.ladders)
+        .sort((a, b) => {
+          return (
+            Math.abs(this.collider.bounds.bottom - a.collider.bounds.bottom) -
+            Math.abs(this.collider.bounds.bottom - b.collider.bounds.bottom)
+          )
+        })
+        .at(0)
+
       const dir = heldYDirection === 'Up' ? -1 : 1
 
-      const isCloseEnoughOnX = Math.abs(this.pos.x - closestLadder.center.x) < 8
+      const isCloseEnoughOnX = Math.abs(this.pos.x - ladder!.center.x) < 8
 
       const toTile = (n: number) => Math.floor(Math.round(n) / 16)
 
       // if we're in the same tile as the ladder
       const isOccupyingSameTile =
         toTile(this.collider.bounds.bottom) ===
-        toTile(closestLadder.collider.bounds.bottom)
-
-      // if we're in the tile above the ladder
-      const isStandingAboveLadder =
-        Math.round(this.collider.bounds.bottom) <=
-        Math.round(closestLadder.collider.bounds.top)
+        toTile(ladder!.collider.bounds.bottom)
 
       // climb on to the ladder
-      if (!this.isClimbingLadder && isCloseEnoughOnX) {
-        if (heldYDirection === 'Up' && isOccupyingSameTile) {
-          this.isClimbingLadder = true
-        } else if (heldYDirection === 'Down' && isStandingAboveLadder) {
-          this.isClimbingLadder = true
-          this.pos.y = Math.ceil(this.pos.y) + 1
-        }
+      if (
+        heldYDirection === 'Up' &&
+        !this.isClimbingLadder &&
+        isOccupyingSameTile &&
+        isCloseEnoughOnX
+      ) {
+        this.isClimbingLadder = true
       }
+
       // apply climbing speed
       if (this.isClimbingLadder) {
-        this.pos.x = closestLadder.center.x
+        this.pos.x = ladder!.center.x
         this.vel.y = this.LADDER_CLIMB_SPEED * dir
         this.vel.x = 0
 
         // if we're on the ground, exit the ladder
-        if (
-          this.isOnGround &&
-          heldYDirection === 'Down' &&
-          !isStandingAboveLadder
-        ) {
+        if (this.isOnGround && heldYDirection === 'Down') {
           this.isClimbingLadder = false
         }
       }
+    } else if (this.isAboveLadder && heldYDirection === 'Down') {
+      this.isClimbingLadder = true
+      this.pos.y = Math.ceil(this.pos.y) + 1
     }
   }
 
@@ -733,10 +739,8 @@ export default class Player extends PhysicsActor {
   }
 
   stomp(other: ex.Entity) {
-    const stompable = other.get(StompableComponent)
     const killable = other.get(KillableComponent)
 
-    if (!stompable || !killable) return
     if (killable.dead) return
 
     killable.kill('stomp')
@@ -751,33 +755,7 @@ export default class Player extends PhysicsActor {
   }
 
   isOnWall(side: 'left' | 'right', distance = 1) {
-    const bounds = new ex.BoundingBox({
-      left: Math.round(this.collider.bounds.left) + 1,
-      right: Math.round(this.collider.bounds.right) - 1,
-      top: Math.round(this.collider.bounds.top) + 1,
-      bottom: Math.round(this.collider.bounds.bottom) - 1,
-    })
-
-    const topLeft = ex.vec(bounds.left, bounds.top)
-    const bottomLeft = ex.vec(bounds.left, bounds.bottom)
-    const topRight = ex.vec(bounds.right, bounds.top)
-    const bottomRight = ex.vec(bounds.right, bounds.bottom)
-
-    const topRay = new ex.Ray(
-      side === 'left' ? topLeft : topRight,
-      ex.vec(side === 'left' ? -1 : 1, 0)
-    )
-    const bottomRay = new ex.Ray(
-      side === 'left' ? bottomLeft : bottomRight,
-      ex.vec(side === 'left' ? -1 : 1, 0)
-    )
-
-    const hits = [
-      ...this.raycast(topRay, Math.abs(distance), { searchAllColliders: true }),
-      ...this.raycast(bottomRay, Math.abs(distance), {
-        searchAllColliders: true,
-      }),
-    ]
+    const hits = this.raycastSide(side, distance, { searchAllColliders: true })
       // TODO: unsure how to achieve this with raycast collisionGroup/mask options
       .filter((hit) => hit.body.group === CollisionGroup.Ground)
 

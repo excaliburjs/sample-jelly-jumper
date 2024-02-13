@@ -16,6 +16,7 @@ import { AxeEnemy } from '../actors/hazards/swinging-axe'
 import { CircularSawEnemy } from '../actors/hazards/circular-saw'
 import { Tag } from '../util/tag'
 import { CollisionGroup } from '../util/collision-group'
+import { Ladder } from '../actors/platforms/ladder'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -230,15 +231,12 @@ export default class LevelScene extends ex.Scene {
     for (const { exTile } of ladderTiles) {
       const col = exTile.x
       const row = exTile.y
-      const ladder = new ex.Actor({
-        anchor: ex.vec(0, 0),
+      const ladder = new Ladder({
         x: col * tileWidth,
         y: row * tileHeight,
         width: tileWidth,
         height: tileHeight,
-        collisionType: ex.CollisionType.Passive,
       })
-      ladder.addTag(Tag.Ladder)
       this.add(ladder)
     }
   }
