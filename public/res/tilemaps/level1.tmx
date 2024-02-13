@@ -248,13 +248,13 @@
    </properties>
    <point/>
   </object>
-  <object id="46" name="Bird" type="BirdEnemy" x="928" y="176">
+  <object id="46" name="Bird" type="BirdEnemy" x="880" y="176">
    <properties>
     <property name="type" value="purple"/>
    </properties>
    <point/>
   </object>
-  <object id="48" name="Bird" type="BirdEnemy" x="624" y="384">
+  <object id="48" name="Bird" type="BirdEnemy" x="528" y="304">
    <properties>
     <property name="type" value="orange"/>
    </properties>

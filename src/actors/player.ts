@@ -229,6 +229,10 @@ export default class Player extends PhysicsActor {
         audioManager.playSfx(Resources.sfx.land)
       }
     })
+
+    // for debugging
+    // @ts-ignore
+    window.player = this
   }
 
   onInitialize(engine: ex.Engine) {
@@ -769,8 +773,10 @@ export default class Player extends PhysicsActor {
     )
 
     const hits = [
-      ...this.raycast(topRay, Math.abs(distance)),
-      ...this.raycast(bottomRay, Math.abs(distance)),
+      ...this.raycast(topRay, Math.abs(distance), { searchAllColliders: true }),
+      ...this.raycast(bottomRay, Math.abs(distance), {
+        searchAllColliders: true,
+      }),
     ]
       // TODO: unsure how to achieve this with raycast collisionGroup/mask options
       .filter((hit) => hit.body.group === CollisionGroup.Ground)
