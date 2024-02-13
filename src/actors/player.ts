@@ -345,11 +345,6 @@ export default class Player extends PhysicsActor {
     if (!this.isWallJumping) {
       this.applyDeceleration()
     }
-
-    console.log({
-      isOnLeftWall: this.isOnWall('left', 4),
-      isOnRightWall: this.isOnWall('right', 4),
-    })
   }
 
   onPreCollisionResolve(

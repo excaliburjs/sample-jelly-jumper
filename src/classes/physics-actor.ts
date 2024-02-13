@@ -40,6 +40,7 @@ export class PhysicsActor extends ex.Actor {
   ) {
     return this.scene!.physics.rayCast(ray, {
       maxDistance: distance,
+      searchAllColliders: true, // temporary
       ...opts,
     })
       .filter((hit) => hit.body !== this.body)
