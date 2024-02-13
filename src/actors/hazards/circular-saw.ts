@@ -25,7 +25,6 @@ export class CircularSawHazard extends PhysicsActor {
 
     this.body.useGravity = false
     this.graphics.use(Resources.img.circularSaw.toSprite())
-    this.addComponent(new HurtPlayerComponent({ amount: Infinity }))
     this.addComponent(new CarriableComponent())
 
     const blade = new ex.Actor({
@@ -35,6 +34,7 @@ export class CircularSawHazard extends PhysicsActor {
       collisionType: ex.CollisionType.Passive,
       collisionGroup: CollisionGroup.Hazard,
     })
+    blade.addComponent(new HurtPlayerComponent({ amount: Infinity }))
     this.addChild(blade)
   }
 
