@@ -1,8 +1,8 @@
 import * as ex from 'excalibur'
 import { Resources } from '../../resources'
-import { EnemyActor } from '../../classes/enemy-actor'
 import { GRAVITY } from '../../util/world'
-import { HurtPlayerComponent } from '../../components/behaviours/hurt-player'
+import { DamageComponent } from '../../components/behaviours/damage'
+import { CollisionGroup } from '../../util/collision-group'
 
 export class AxeHazard extends ex.Actor {
   private elapsedMs = 0
@@ -15,6 +15,7 @@ export class AxeHazard extends ex.Actor {
       height: 48,
       rotation: 0,
       collisionType: ex.CollisionType.Passive,
+      collisionGroup: CollisionGroup.Hazard,
       // just the axe blade is the collider
       collider: ex.Shape.Box(28, 12, ex.vec(0.5, 0.5), ex.vec(0, 42)),
     })
@@ -22,7 +23,7 @@ export class AxeHazard extends ex.Actor {
     this.body.useGravity = false
     this.graphics.offset = ex.vec(0, -8)
     this.graphics.use(Resources.img.axe.toSprite())
-    this.addComponent(new HurtPlayerComponent({ amount: Infinity }))
+    this.addComponent(new DamageComponent({ amount: Infinity }))
   }
 
   onPreUpdate(_engine: ex.Engine, delta: number) {

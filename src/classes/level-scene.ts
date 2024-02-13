@@ -16,7 +16,8 @@ import { AxeHazard } from '../actors/hazards/swinging-axe'
 import { CircularSawHazard } from '../actors/hazards/circular-saw'
 import { Tag } from '../util/tag'
 import { CollisionGroup } from '../util/collision-group'
-import { Ladder } from '../actors/platforms/ladder'
+import { LadderTile } from '../actors/platforms/ladder-tile'
+import { SpikeTile } from '../actors/hazards/spike-tile'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -139,6 +140,7 @@ export default class LevelScene extends ex.Scene {
     this.setupWorldBounds()
     this.setupOneWayPlatforms()
     this.setupLadders()
+    this.setupSpikes()
   }
 
   onActivate(context: ex.SceneActivationContext<unknown>): void {
@@ -231,13 +233,31 @@ export default class LevelScene extends ex.Scene {
     for (const { exTile } of ladderTiles) {
       const col = exTile.x
       const row = exTile.y
-      const ladder = new Ladder({
+      const ladder = new LadderTile({
         x: col * tileWidth,
         y: row * tileHeight,
         width: tileWidth,
         height: tileHeight,
       })
       this.add(ladder)
+    }
+  }
+
+  setupSpikes() {
+    const spikeTiles = this.tilemap.getTilesByProperty('spike', true)
+    const tileWidth = this.tilemap.map.tilewidth
+    const tileHeight = this.tilemap.map.tileheight
+
+    for (const { exTile } of spikeTiles) {
+      const col = exTile.x
+      const row = exTile.y
+      const spike = new SpikeTile({
+        x: col * tileWidth,
+        y: row * tileHeight,
+        width: tileWidth,
+        height: tileHeight,
+      })
+      this.add(spike)
     }
   }
 }

@@ -1,15 +1,18 @@
 import * as ex from 'excalibur'
 import { Resources } from '../../resources'
-import { HurtPlayerComponent } from '../../components/behaviours/hurt-player'
 import { PhysicsActor } from '../../classes/physics-actor'
 import { CollisionGroup } from '../../util/collision-group'
 import { CarriableComponent } from '../../components/physics/carrier'
+import { DamageComponent } from '../../components/behaviours/damage'
 
 export class CircularSawHazard extends PhysicsActor {
   direction = 1
   speed = 25
 
-  bladeRadius = 14
+  bladeSize = {
+    width: 24,
+    height: 12,
+  }
 
   lastHit: ex.RayCastHit | null = null
 
@@ -20,6 +23,7 @@ export class CircularSawHazard extends PhysicsActor {
       width: 4,
       height: 4,
       collisionType: ex.CollisionType.Passive,
+      collisionGroup: CollisionGroup.Hazard,
     })
 
     this.pos.x += this.width * this.anchor.x
@@ -31,12 +35,13 @@ export class CircularSawHazard extends PhysicsActor {
 
     const blade = new ex.Actor({
       pos: ex.vec(0, 0),
-      anchor: ex.vec(0.5, 0.5),
-      radius: this.bladeRadius,
+      anchor: ex.vec(0.5, 1),
+      width: this.bladeSize.width,
+      height: this.bladeSize.height,
       collisionType: ex.CollisionType.Passive,
       collisionGroup: CollisionGroup.Hazard,
     })
-    blade.addComponent(new HurtPlayerComponent({ amount: Infinity }))
+    blade.addComponent(new DamageComponent({ amount: Infinity }))
     this.addChild(blade)
 
     this.addComponent(new CarriableComponent())
@@ -52,8 +57,8 @@ export class CircularSawHazard extends PhysicsActor {
   onPostUpdate(_engine: ex.Engine, delta: number) {
     const edge = Math.round(
       this.direction === 1
-        ? this.collider.bounds.right + this.bladeRadius
-        : this.collider.bounds.left - this.bladeRadius
+        ? this.collider.bounds.right + this.bladeSize.width / 2
+        : this.collider.bounds.left - this.bladeSize.width / 2
     )
     const bottom = Math.round(this.collider.bounds.bottom) - 1
 

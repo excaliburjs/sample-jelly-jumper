@@ -12,10 +12,11 @@ import { coroutine } from '../util/coroutine'
 import { Bouncepad } from './platforms/bouncepad'
 import { Tag } from '../util/tag'
 import { StompableComponent } from '../components/behaviours/stompable'
-import { HurtPlayerComponent } from '../components/behaviours/hurt-player'
 import { KillableComponent } from '../components/behaviours/killable'
 import { CollisionGroup } from '../util/collision-group'
 import { Smoke } from './fx/Smoke'
+import { HealthComponent } from '../components/behaviours/health'
+import { DamageableComponent } from '../components/behaviours/damageable'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -215,6 +216,17 @@ export default class Player extends PhysicsActor {
     )
   }
 
+  get isXMovementAllowed() {
+    const { isBeingKnockedBack } = this.get(DamageableComponent)
+
+    return (
+      !this.isClimbingLadder &&
+      !this.bouncepad &&
+      !this.isWallJumping &&
+      !isBeingKnockedBack
+    )
+  }
+
   constructor(args: { x: number; y: number; z?: number }) {
     super({
       ...args,
@@ -232,16 +244,12 @@ export default class Player extends PhysicsActor {
 
     this.addComponent(this.animation)
     this.addComponent(this.controls)
+    this.addComponent(new HealthComponent({ amount: 3 }))
+    this.addComponent(new DamageableComponent())
 
     this.animation.get('turn').events.on('frame', (frame) => {
       if (frame.frameIndex === 0) {
         audioManager.playSfx(Resources.sfx.turnAround)
-      }
-    })
-
-    this.animation.get('wall_slide').events.on('frame', (frame) => {
-      if (frame.frameIndex === 0) {
-        audioManager.playSfx(Resources.sfx.land)
       }
     })
 
@@ -333,6 +341,7 @@ export default class Player extends PhysicsActor {
   }
 
   onPostUpdate(engine: ex.Engine, delta: number): void {
+    const { isBeingKnockedBack } = this.get(DamageableComponent)
     // speed up the animation the faster we're moving
     this.animation.speed = Math.min(
       // increase anim speed exponentially up to 3x
@@ -342,7 +351,7 @@ export default class Player extends PhysicsActor {
 
     this.handleAnimation()
 
-    if (!this.isWallJumping) {
+    if (!this.isWallJumping && !isBeingKnockedBack) {
       this.applyDeceleration()
     }
   }
@@ -354,40 +363,30 @@ export default class Player extends PhysicsActor {
     contact: ex.CollisionContact
   ): void {
     super.onPreCollisionResolve(self, other, side, contact)
-    const hurtPlayer = other.owner.has(HurtPlayerComponent)
-      ? other.owner.get(HurtPlayerComponent)
-      : undefined
+
     const stompable = other.owner.has(StompableComponent)
       ? other.owner.get(StompableComponent)
       : undefined
-    const killable = other.owner.has(KillableComponent)
-      ? other.owner.get(KillableComponent)
-      : undefined
 
-    if (hurtPlayer) {
-      // a lenient check to see if we stomped on the enemy by using the previous position.y
-      // (we could check for side === ex.Side.Bottom, but depending on the angle you stomp an enemy, it might not be the case)
-      const posDelta = this.getGlobalPos().sub(this.getGlobalOldPos())
+    if (stompable) {
       const didStomp =
-        stompable &&
-        !stompable.stomped &&
-        self.bounds.bottom - posDelta.y < other.bounds.top + 1
+        stompable && !stompable.stomped && stompable.isBeingStomped(this)
 
       if (didStomp) {
         this.stomp(other.owner)
+        contact.cancel()
       } else {
-        if (!killable || !killable.dead) {
-          if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
-            this.scene?.add(
-              new FakeDie({
-                x: this.getGlobalPos().x,
-                y: this.getGlobalPos().y,
-              })
-            )
-          }
-        }
+        // if (!killable || !killable.dead) {
+        //   if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
+        //     this.scene?.add(
+        //       new FakeDie({
+        //         x: this.getGlobalPos().x,
+        //         y: this.getGlobalPos().y,
+        //       })
+        //     )
+        //   }
+        // }
       }
-      contact.cancel()
     }
   }
 
@@ -428,9 +427,6 @@ export default class Player extends PhysicsActor {
     const jumpPressed = this.controls.wasPressed('Jump')
     const jumpHeld = this.controls.isHeld('Jump')
 
-    const isXMovementAllowed =
-      !this.isClimbingLadder && !this.bouncepad && !this.isWallJumping
-
     const heldXDirection = this.controls.getHeldXDirection()
     const heldYDirection = this.controls.getHeldYDirection()
 
@@ -438,7 +434,7 @@ export default class Player extends PhysicsActor {
     const isCloseToRightWall = this.isOnWall('right', 4)
 
     // move left or right
-    if (heldXDirection && isXMovementAllowed) {
+    if (heldXDirection && this.isXMovementAllowed) {
       const direction = heldXDirection === 'Left' ? -1 : 1
       const accel = this.ACCELERATION * direction
 
@@ -510,6 +506,9 @@ export default class Player extends PhysicsActor {
     this.graphics.flipHorizontal = this.facing === 'left'
 
     if (this.isSlidingOnWall) {
+      if (!this.animation.is('wall_slide')) {
+        audioManager.playSfx(Resources.sfx.land)
+      }
       this.animation.set('wall_slide')
     } else if (this.isClimbingLadder) {
       this.animation.set('ladder_climb')
@@ -936,6 +935,10 @@ class PlayerControlsComponent extends ControlsComponent {
 
   get isTurning() {
     const heldDirection = this.getHeldXDirection()
+    const { isBeingKnockedBack } = this.owner.get(DamageableComponent)
+
+    if (isBeingKnockedBack) return false
+
     return (
       (heldDirection === 'Left' && this.owner.vel.x > 0) ||
       (heldDirection === 'Right' && this.owner.vel.x < 0)

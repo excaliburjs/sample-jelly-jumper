@@ -1,7 +1,7 @@
 import * as ex from 'excalibur'
 import { Tag } from '../../util/tag'
 
-export class Ladder extends ex.Actor {
+export class LadderTile extends ex.Actor {
   constructor(args: ex.ActorArgs) {
     super({
       anchor: ex.vec(0, 0),

@@ -29,6 +29,7 @@ export const Resources = {
     land: new ex.Sound('/res/sfx/land.wav'),
     turnAround: new ex.Sound('/res/sfx/turn-around.wav'),
     stomp: new ex.Sound('/res/sfx/stomp.wav'),
+    damage: new ex.Sound('/res/sfx/damage.wav'),
   },
   tiled: {
     level1: new TiledResource('/res/tilemaps/level1.tmx', {
