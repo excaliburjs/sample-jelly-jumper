@@ -9,6 +9,8 @@ export class CircularSawHazard extends PhysicsActor {
   direction = 1
   speed = 25
 
+  bladeRadius = 14
+
   lastHit: ex.RayCastHit | null = null
 
   constructor(args: ex.ActorArgs) {
@@ -25,24 +27,33 @@ export class CircularSawHazard extends PhysicsActor {
 
     this.body.useGravity = false
     this.graphics.use(Resources.img.circularSaw.toSprite())
-    this.addComponent(new CarriableComponent())
+    this.graphics.offset = ex.vec(0, 2)
 
     const blade = new ex.Actor({
       pos: ex.vec(0, 0),
       anchor: ex.vec(0.5, 0.5),
-      radius: 14,
+      radius: this.bladeRadius,
       collisionType: ex.CollisionType.Passive,
       collisionGroup: CollisionGroup.Hazard,
     })
     blade.addComponent(new HurtPlayerComponent({ amount: Infinity }))
     this.addChild(blade)
+
+    this.addComponent(new CarriableComponent())
+  }
+
+  onInitialize(engine: ex.Engine<any>): void {
+    this.graphics.material = new RenderTopHalfMaterial(
+      engine.graphicsContext,
+      this
+    )
   }
 
   onPostUpdate(_engine: ex.Engine, delta: number) {
     const edge = Math.round(
       this.direction === 1
-        ? this.collider.bounds.right
-        : this.collider.bounds.left
+        ? this.collider.bounds.right + this.bladeRadius
+        : this.collider.bounds.left - this.bladeRadius
     )
     const bottom = Math.round(this.collider.bounds.bottom) - 1
 
@@ -73,5 +84,47 @@ export class CircularSawHazard extends PhysicsActor {
     if (hit) {
       this.lastHit = hit
     }
+  }
+}
+
+export class RenderTopHalfMaterial extends ex.Material {
+  constructor(ctx: ex.ExcaliburGraphicsContext, owner: CircularSawHazard) {
+    super({
+      name: 'render-top-half-material',
+      fragmentSource: /*glsl*/ `#version 300 es
+        precision mediump float;
+  
+        uniform sampler2D u_graphic;
+        uniform float u_rotation; // rotation in radians
+
+        in vec2 v_uv;
+        out vec4 fragColor;
+
+        void main() {
+          vec2 center = vec2(0.5, 0.5); // Center of rotation
+          vec2 rotatedUV = vec2(
+              cos(u_rotation) * (v_uv.x - center.x) - sin(u_rotation) * (v_uv.y - center.y) + center.x,
+              sin(u_rotation) * (v_uv.x - center.x) + cos(u_rotation) * (v_uv.y - center.y) + center.y
+          );
+
+          // If the y-coordinate of the rotated UV is greater than 0.5, discard the pixel
+          if (rotatedUV.y > 0.5) {
+              discard;
+          }
+          
+          vec4 color = texture(u_graphic, v_uv);
+          fragColor = color;
+        }`,
+      graphicsContext: ctx,
+    })
+
+    owner.on('predraw', () => {
+      this.update((shader) => {
+        shader.trySetUniformFloat(
+          'u_rotation',
+          owner.graphics.current!.rotation
+        )
+      })
+    })
   }
 }
