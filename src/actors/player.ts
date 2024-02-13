@@ -391,7 +391,7 @@ export default class Player extends PhysicsActor {
         audioManager.playSfx(Resources.sfx.land)
 
         // stop moving if we landed on a bouncepad
-        if (other.owner.hasTag('bouncepad')) {
+        if (other.owner.hasTag(Tag.Bouncepad)) {
           this.vel.x = 0
         }
 
@@ -400,36 +400,40 @@ export default class Player extends PhysicsActor {
         const scaleTo = 1 - this.FX_SQUISH_AMOUNT
         const easing = ex.EasingFunctions.EaseOutCubic
 
-        coroutine(this, function* () {
-          let elapsed = 0
+        coroutine(
+          this,
+          function* () {
+            let elapsed = 0
 
-          // wait 1 frame for this.isOnGround to be true
-          yield
+            // wait 1 frame for this.isOnGround to be true
+            yield
 
-          // animate squish as long as we're on the ground
-          while (elapsed < duration && this.isOnGround) {
-            const { delta } = yield
-            elapsed += delta
+            // animate squish as long as we're on the ground
+            while (elapsed < duration && this.isOnGround) {
+              const { delta } = yield
+              elapsed += delta
 
-            this.squishGraphic(
-              easing(Math.min(elapsed, duration), 1, scaleTo, duration)
-            )
-          }
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+              )
+            }
 
-          this.squishGraphic(scaleTo)
-          elapsed = 0
+            this.squishGraphic(scaleTo)
+            elapsed = 0
 
-          while (elapsed < duration && this.isOnGround) {
-            const { delta } = yield
-            elapsed += delta
+            while (elapsed < duration && this.isOnGround) {
+              const { delta } = yield
+              elapsed += delta
 
-            this.squishGraphic(
-              easing(Math.min(elapsed, duration), scaleTo, 1, duration)
-            )
-          }
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), scaleTo, 1, duration)
+              )
+            }
 
-          this.squishGraphic(1)
-        })
+            this.squishGraphic(1)
+          },
+          'postupdate'
+        )
       }
     }
   }

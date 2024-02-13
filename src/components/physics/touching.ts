@@ -47,46 +47,49 @@ export class TouchingComponent extends ex.Component {
     })
 
     // process the collisionstart/end events at the end of the frame
-    owner.on('postupdate', () => {
-      let update = false
+    owner.on('initialize', () => {
+      // doing this in the scene's postupdate will ensure that it runs after all actor's postupdates
+      owner.scene!.on('postupdate', () => {
+        let update = false
 
-      // handle collisionend first, incase the same actor is in both lists
-      this.queue.collisionend.forEach((ev) => {
-        if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
-          this.passives.delete(ev.other)
-        } else {
-          this.all.delete(ev.other)
-          update = true
-        }
-      })
-
-      // handle collisionstart
-      this.queue.collisionstart.forEach((ev) => {
-        // @ts-expect-error - bug in new tiled plugin has collider as undefined
-        ev.other.collider ??= ev.other._collider
-
-        if (ev.other.collider) {
+        // handle collisionend first, incase the same actor is in both lists
+        this.queue.collisionend.forEach((ev) => {
           if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
-            this.passives.add(ev.other)
+            this.passives.delete(ev.other)
           } else {
-            const side = ev.side.toLowerCase() as
-              | 'left'
-              | 'right'
-              | 'top'
-              | 'bottom'
-
-            this.all.set(ev.other, { side, contact: ev.contact })
+            this.all.delete(ev.other)
             update = true
           }
+        })
+
+        // handle collisionstart
+        this.queue.collisionstart.forEach((ev) => {
+          // @ts-expect-error - bug in new tiled plugin has collider as undefined
+          ev.other.collider ??= ev.other._collider
+
+          if (ev.other.collider) {
+            if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
+              this.passives.add(ev.other)
+            } else {
+              const side = ev.side.toLowerCase() as
+                | 'left'
+                | 'right'
+                | 'top'
+                | 'bottom'
+
+              this.all.set(ev.other, { side, contact: ev.contact })
+              update = true
+            }
+          }
+        })
+
+        if (update) {
+          this.updateSides()
         }
+
+        this.queue.collisionstart.length = 0
+        this.queue.collisionend.length = 0
       })
-
-      if (update) {
-        this.updateSides()
-      }
-
-      this.queue.collisionstart.length = 0
-      this.queue.collisionend.length = 0
     })
   }
 
