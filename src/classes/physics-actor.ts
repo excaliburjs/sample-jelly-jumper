@@ -1,5 +1,6 @@
 import * as ex from 'excalibur'
 import { TouchingComponent } from '../components/physics/touching'
+import { CarriableComponent } from '../components/physics/carrier'
 
 export class PhysicsActor extends ex.Actor {
   touching = new TouchingComponent()
@@ -7,6 +8,11 @@ export class PhysicsActor extends ex.Actor {
   isOnGround = false
 
   private _oldPosGlobal = ex.vec(0, 0)
+
+  constructor(args: ex.ActorArgs) {
+    super(args)
+    this.addComponent(new CarriableComponent())
+  }
 
   onInitialize(engine: ex.Engine): void {
     this.addComponent(this.touching)
@@ -17,6 +23,14 @@ export class PhysicsActor extends ex.Actor {
     this.on('postupdate', () => {
       this._oldPosGlobal = this.getGlobalPos().clone()
     })
+  }
+
+  get canBeCarried() {
+    return this.get(CarriableComponent).canBeCarried
+  }
+
+  set canBeCarried(value: boolean) {
+    this.get(CarriableComponent).canBeCarried = value
   }
 
   raycast(

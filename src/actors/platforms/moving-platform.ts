@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
 import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
-import { PassengerComponent } from '../../components/physics/passenger'
+import { CarrierComponent } from '../../components/physics/carrier'
 import { Resources } from '../../resources'
 import { CollisionGroup } from '../../util/collision-group'
 
@@ -88,7 +88,7 @@ export class MovingPlatform extends ex.Actor {
     )
     cb(this.actions)
 
-    this.addComponent(new PassengerComponent())
+    this.addComponent(new CarrierComponent())
 
     if (oneWay) {
       this.addComponent(new OneWayCollisionComponent())

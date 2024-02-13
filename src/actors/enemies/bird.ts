@@ -67,6 +67,7 @@ export class BirdEnemy extends EnemyActor {
     )
 
     this.initialPos = this.pos.clone()
+    this.canBeCarried = false
   }
 
   onPreUpdate(engine: ex.Engine, delta: number): void {

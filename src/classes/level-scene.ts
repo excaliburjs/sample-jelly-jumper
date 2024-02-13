@@ -12,8 +12,8 @@ import { MovingPlatform } from '../actors/platforms/moving-platform'
 import { EnemySpawner } from '../actors/enemy-spawner'
 import { BirdEnemy } from '../actors/enemies/bird'
 import { Bouncepad, BouncepadArgs } from '../actors/platforms/bouncepad'
-import { AxeEnemy } from '../actors/hazards/swinging-axe'
-import { CircularSawEnemy } from '../actors/hazards/circular-saw'
+import { AxeHazard } from '../actors/hazards/swinging-axe'
+import { CircularSawHazard } from '../actors/hazards/circular-saw'
 import { Tag } from '../util/tag'
 import { CollisionGroup } from '../util/collision-group'
 import { Ladder } from '../actors/platforms/ladder'
@@ -98,16 +98,16 @@ export default class LevelScene extends ex.Scene {
       })
     }),
 
-    AxeEnemy: (props) => {
-      return new AxeEnemy({
+    AxeHazard: (props) => {
+      return new AxeHazard({
         x: props.object?.x ?? 0,
         y: props.object?.y ?? 0,
         z: props.layer.order ?? 0,
       })
     },
 
-    CircularSawEnemy: (props) => {
-      return new CircularSawEnemy({
+    CircularSawHazard: (props) => {
+      return new CircularSawHazard({
         x: props.object?.x ?? 0,
         y: props.object?.y ?? 0,
         z: props.layer.order ?? 0,

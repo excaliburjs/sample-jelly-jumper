@@ -4,7 +4,7 @@ import { EnemyActor } from '../../classes/enemy-actor'
 import { GRAVITY } from '../../util/world'
 import { HurtPlayerComponent } from '../../components/behaviours/hurt-player'
 
-export class AxeEnemy extends ex.Actor {
+export class AxeHazard extends ex.Actor {
   private elapsedMs = 0
 
   constructor(args: ex.ActorArgs) {
