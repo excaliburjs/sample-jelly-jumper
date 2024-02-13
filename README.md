@@ -21,7 +21,8 @@ Also works with gamepads.
 
 ## Credits
 
-Assets by [JuhoSprite](https://juhosprite.itch.io/super-mango-2d-pixelart-platformer-asset-pack16x16)
+Super Mango asset pack by [JuhoSprite](https://juhosprite.itch.io/super-mango-2d-pixelart-platformer-asset-pack16x16)
+Smoke FX by [@nyk_nck](https://nyknck.itch.io/fx062)
 
 Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 

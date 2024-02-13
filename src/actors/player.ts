@@ -15,6 +15,7 @@ import { StompableComponent } from '../components/behaviours/stompable'
 import { HurtPlayerComponent } from '../components/behaviours/hurt-player'
 import { KillableComponent } from '../components/behaviours/killable'
 import { CollisionGroup } from '../util/collision-group'
+import { Smoke } from './fx/Smoke'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -142,8 +143,10 @@ export default class Player extends PhysicsActor {
     wall_slide: ex.Animation.fromSpriteSheet(
       spritesheet,
       [16],
-      140,
-      ex.AnimationStrategy.Freeze
+      // we're using the 'loop' strategy to play smoke effects on each loop,
+      // so this is effectively the smoke fx spawn rate
+      100,
+      ex.AnimationStrategy.Loop
     ),
   })
   controls = new PlayerControlsComponent()
@@ -240,6 +243,26 @@ export default class Player extends PhysicsActor {
       if (frame.frameIndex === 0) {
         audioManager.playSfx(Resources.sfx.land)
       }
+    })
+
+    this.animation.get('sprint').events.on('frame', (frame) => {
+      if (frame.frameIndex % 2 === 0) {
+        this.spawnSmokePuffAtFeet(
+          this.facing === 'left' ? 'right' : 'left',
+          ex.vec(-2, 0)
+        )
+      }
+    })
+
+    this.animation.get('turn').events.on('frame', (frame) => {
+      this.spawnSmokePuffAtFeet(this.facing === 'left' ? 'right' : 'left')
+    })
+
+    this.animation.get('wall_slide').events.on('loop', (frame) => {
+      this.spawnSmokePuffAtHands(
+        this.facing,
+        ex.vec(ex.randomIntInRange(-1, 1), 0)
+      )
     })
 
     // for debugging
@@ -388,52 +411,12 @@ export default class Player extends PhysicsActor {
 
       // player landed on the ground
       if (side === ex.Side.Bottom && wasInAir) {
-        audioManager.playSfx(Resources.sfx.land)
-
         // stop moving if we landed on a bouncepad
         if (other.owner.hasTag(Tag.Bouncepad)) {
           this.vel.x = 0
         }
 
-        // apply a squish animation when landing
-        const duration = 70
-        const scaleTo = 1 - this.FX_SQUISH_AMOUNT
-        const easing = ex.EasingFunctions.EaseOutCubic
-
-        coroutine(
-          this,
-          function* () {
-            let elapsed = 0
-
-            // wait 1 frame for this.isOnGround to be true
-            yield
-
-            // animate squish as long as we're on the ground
-            while (elapsed < duration && this.isOnGround) {
-              const { delta } = yield
-              elapsed += delta
-
-              this.squishGraphic(
-                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
-              )
-            }
-
-            this.squishGraphic(scaleTo)
-            elapsed = 0
-
-            while (elapsed < duration && this.isOnGround) {
-              const { delta } = yield
-              elapsed += delta
-
-              this.squishGraphic(
-                easing(Math.min(elapsed, duration), scaleTo, 1, duration)
-              )
-            }
-
-            this.squishGraphic(1)
-          },
-          'postupdate'
-        )
+        this.land()
       }
     }
   }
@@ -624,6 +607,54 @@ export default class Player extends PhysicsActor {
     }
   }
 
+  land() {
+    audioManager.playSfx(Resources.sfx.land)
+
+    this.spawnSmoke('land', {
+      pos: ex.vec(this.center.x, this.collider.bounds.bottom - 8),
+      scale: ex.vec(0.5, 0.5),
+    })
+
+    // apply a squish animation when landing
+    const duration = 70
+    const scaleTo = 1 - this.FX_SQUISH_AMOUNT
+    const easing = ex.EasingFunctions.EaseOutCubic
+
+    coroutine(
+      this,
+      function* () {
+        let elapsed = 0
+
+        // wait 1 frame for this.isOnGround to be true
+        yield
+
+        // animate squish as long as we're on the ground
+        while (elapsed < duration && this.isOnGround) {
+          const { delta } = yield
+          elapsed += delta
+
+          this.squishGraphic(
+            easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+          )
+        }
+
+        this.squishGraphic(scaleTo)
+        elapsed = 0
+
+        while (elapsed < duration && this.isOnGround) {
+          const { delta } = yield
+          elapsed += delta
+
+          this.squishGraphic(
+            easing(Math.min(elapsed, duration), scaleTo, 1, duration)
+          )
+        }
+
+        this.squishGraphic(1)
+      },
+      'postupdate'
+    )
+  }
   climbLadder() {
     const heldYDirection = this.controls.getHeldYDirection()
 
@@ -711,6 +742,7 @@ export default class Player extends PhysicsActor {
     if (this.isWallJumping) return
     this.jump()
     this.isWallJumping = true
+    this.spawnSmokePuffAtFeet(side, ex.vec(0, -4))
     coroutine(
       this,
       function* () {
@@ -747,6 +779,7 @@ export default class Player extends PhysicsActor {
 
     if (killable.dead) return
 
+    this.land()
     killable.kill('stomp')
     audioManager.playSfx(Resources.sfx.stomp)
 
@@ -815,6 +848,43 @@ export default class Player extends PhysicsActor {
     const y = scale
     const x = 2 - y
     this.graphics.current!.scale = ex.vec(x, y)
+  }
+
+  spawnSmoke(
+    type: 'puff' | 'land',
+    args: { pos: ex.Vector; scale?: ex.Vector }
+  ) {
+    this.scene?.add(
+      new Smoke({
+        type,
+        z: this.z + 1,
+        ...args,
+      })
+    )
+  }
+
+  spawnSmokePuffAtFeet(side: 'left' | 'right', offset = ex.vec(0, 0)) {
+    this.spawnSmoke('puff', {
+      pos: ex.vec(
+        side === 'left'
+          ? this.collider.bounds.left + offset.x
+          : this.collider.bounds.right - offset.x,
+        this.collider.bounds.bottom + offset.y
+      ),
+      scale: ex.vec(0.35, 0.35),
+    })
+  }
+
+  spawnSmokePuffAtHands(side: 'left' | 'right', offset = ex.vec(0, 0)) {
+    this.spawnSmoke('puff', {
+      pos: ex.vec(
+        side === 'left'
+          ? this.collider.bounds.left + offset.x
+          : this.collider.bounds.right - offset.x,
+        this.center.y + offset.y
+      ),
+      scale: ex.vec(0.35, 0.35),
+    })
   }
 }
 

@@ -15,6 +15,8 @@ export const Resources = {
     bouncepadWood: new ex.ImageSource('/res/images/Bouncepad_Wood.png'),
     axe: new ex.ImageSource('/res/images/Axe_Trap.png'),
     circularSaw: new ex.ImageSource('/res/images/Circular_Saw.png'),
+    smokePuff: new ex.ImageSource('/res/images/Smoke_Puff.png'),
+    smokeLand: new ex.ImageSource('/res/images/Smoke_Land.png'),
   },
 
   music: {
