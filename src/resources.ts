@@ -20,8 +20,8 @@ export const Resources = {
   },
 
   music: {
-    stage1: new ex.Sound('/res/music/stage1.ogg'),
-    stage2: new ex.Sound('/res/music/stage2.ogg'),
+    stage1: new ex.Sound('/res/music/stage1.mp3'),
+    stage2: new ex.Sound('/res/music/stage2.mp3'),
   },
   sfx: {
     jump: new ex.Sound('/res/sfx/jump.wav'),
