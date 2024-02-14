@@ -1,6 +1,5 @@
 import * as ex from 'excalibur'
 import { PhysicsActor } from './physics-actor'
-import { Tag } from '../util/tag'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { KillableComponent } from '../components/behaviours/killable'
 import { CollisionGroup } from '../util/collision-group'
@@ -20,8 +19,6 @@ export class EnemyActor extends PhysicsActor {
       collisionGroup: CollisionGroup.Enemy,
       ...args,
     })
-
-    this.addTag(Tag.Enemy)
 
     this.killable = new KillableComponent({ stompDuration })
     this.stompable = new StompableComponent()

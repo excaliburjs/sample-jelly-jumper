@@ -14,7 +14,6 @@ import { BirdEnemy } from '../actors/enemies/bird'
 import { Bouncepad, BouncepadArgs } from '../actors/platforms/bouncepad'
 import { AxeHazard } from '../actors/hazards/swinging-axe'
 import { CircularSawHazard } from '../actors/hazards/circular-saw'
-import { Tag } from '../util/tag'
 import { CollisionGroup } from '../util/collision-group'
 import { LadderTile } from '../actors/platforms/ladder-tile'
 import { SpikeTile } from '../actors/hazards/spike-tile'
@@ -194,7 +193,7 @@ export default class LevelScene extends ex.Scene {
         }),
       ]),
     })
-    bounds.addTag(Tag.WorldBounds)
+
     // create world bounds
     this.engine.add(bounds)
   }

@@ -3,20 +3,17 @@ import { Resources } from '../resources'
 import { AnimationComponent } from '../components/graphics/animation'
 import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from '../classes/physics-actor'
-import { EnemyActor } from '../classes/enemy-actor'
-import { FakeDie } from './fake-die'
 import { audioManager } from '../util/audio-manager'
 import { GRAVITY } from '../util/world'
-import { EaseAction } from '../actions/EaseAction'
 import { coroutine } from '../util/coroutine'
 import { Bouncepad } from './platforms/bouncepad'
-import { Tag } from '../util/tag'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { KillableComponent } from '../components/behaviours/killable'
 import { CollisionGroup } from '../util/collision-group'
 import { Smoke } from './fx/Smoke'
 import { HealthComponent } from '../components/behaviours/health'
 import { DamageableComponent } from '../components/behaviours/damageable'
+import { ClimbableComponent } from '../components/behaviours/climbable'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -211,7 +208,7 @@ export default class Player extends PhysicsActor {
   get isAboveLadder() {
     return (
       this.raycastSide('bottom', 1, { searchAllColliders: true }).filter(
-        (hit) => hit.body.owner?.hasTag(Tag.Ladder)
+        (hit) => hit.body.owner?.has(ClimbableComponent)
       ).length > 0
     )
   }
@@ -411,7 +408,7 @@ export default class Player extends PhysicsActor {
       // player landed on the ground
       if (side === ex.Side.Bottom && wasInAir) {
         // stop moving if we landed on a bouncepad
-        if (other.owner.hasTag(Tag.Bouncepad)) {
+        if (other.owner instanceof Bouncepad) {
           this.vel.x = 0
         }
 

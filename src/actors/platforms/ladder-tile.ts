@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { Tag } from '../../util/tag'
+import { ClimbableComponent } from '../../components/behaviours/climbable'
 
 export class LadderTile extends ex.Actor {
   constructor(args: ex.ActorArgs) {
@@ -9,6 +9,6 @@ export class LadderTile extends ex.Actor {
       ...args,
     })
 
-    this.addTag(Tag.Ladder)
+    this.addComponent(new ClimbableComponent())
   }
 }

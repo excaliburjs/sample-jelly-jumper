@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { Tag } from '../../util/tag'
+import { ClimbableComponent } from '../behaviours/climbable'
 
 type Side = 'left' | 'right' | 'top' | 'bottom'
 
@@ -89,7 +89,7 @@ export class TouchingComponent extends ex.Component {
 
   get ladders() {
     return new Set(
-      Array.from(this.passives).filter((e) => e.hasTag(Tag.Ladder))
+      Array.from(this.passives).filter((e) => e.has(ClimbableComponent))
     )
   }
 }
