@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { ClimbableComponent } from '../behaviours/climbable'
+import { ClimbableComponent } from './climbable'
 
 type Side = 'left' | 'right' | 'top' | 'bottom'
 

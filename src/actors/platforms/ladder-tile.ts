@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { ClimbableComponent } from '../../components/behaviours/climbable'
+import { ClimbableComponent } from '../../components/physics/climbable'
 
 export class LadderTile extends ex.Actor {
   constructor(args: ex.ActorArgs) {

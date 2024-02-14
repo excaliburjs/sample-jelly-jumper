@@ -13,7 +13,7 @@ import { CollisionGroup } from '../util/collision-group'
 import { Smoke } from './fx/Smoke'
 import { HealthComponent } from '../components/behaviours/health'
 import { DamageableComponent } from '../components/behaviours/damageable'
-import { ClimbableComponent } from '../components/behaviours/climbable'
+import { ClimbableComponent } from '../components/physics/climbable'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
