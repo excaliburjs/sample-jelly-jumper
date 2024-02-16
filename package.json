@@ -7,7 +7,8 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
   },
   "author": "mattjennings",
   "license": "BSD-2-Clause",

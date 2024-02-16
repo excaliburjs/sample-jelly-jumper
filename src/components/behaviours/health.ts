@@ -5,7 +5,7 @@ export class HealthComponent extends ex.Component {
   private _amount: number
   private _max: number
 
-  events = new EventEmitter<{ die: void }>()
+  events = new EventEmitter<{ die: void; change: { amount: number } }>()
 
   constructor({ amount }: { amount: number }) {
     super()
@@ -24,6 +24,7 @@ export class HealthComponent extends ex.Component {
 
   set amount(value: number) {
     this._amount = value
+    this.events.emit('change', { amount: value })
     if (this._amount <= 0) {
       this.events.emit('die')
     }

@@ -34,8 +34,8 @@ export class ScrollingBackground extends ex.Entity {
 
     // calculate how many times the sprite needs to be repeated in the X and Y
     // directions to cover the entire viewport (plus one extra to account for scrolling)
-    const viewportWidth = this.scene.camera.viewport.width
-    const viewportHeight = this.scene.camera.viewport.height
+    const viewportWidth = this.scene!.camera.viewport.width
+    const viewportHeight = this.scene!.camera.viewport.height
     const xRepeat = Math.ceil(viewportWidth / sprite.width) + 1
     const yRepeat = Math.ceil(viewportHeight / sprite.height) + 1
 
@@ -55,7 +55,7 @@ export class ScrollingBackground extends ex.Entity {
     )
 
     this.on('pretransformdraw', () => {
-      const camera = this.scene.camera
+      const camera = this.scene!.camera
 
       const cameraLeft = camera.drawPos.x - _engine.halfDrawWidth
       const cameraTop = camera.drawPos.y - _engine.halfDrawHeight

@@ -92,7 +92,7 @@ export class CircularSawHazard extends PhysicsActor {
   }
 }
 
-export class RenderTopHalfMaterial extends ex.Material {
+class RenderTopHalfMaterial extends ex.Material {
   constructor(ctx: ex.ExcaliburGraphicsContext, owner: CircularSawHazard) {
     super({
       name: 'render-top-half-material',

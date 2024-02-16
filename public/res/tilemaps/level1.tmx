@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="12" nextobjectid="72">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="75">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -256,6 +256,11 @@
    <point/>
   </object>
  </objectgroup>
+ <objectgroup id="12" name="items">
+  <object id="72" template="templates/items/Coin.tx" type="CoinItem" x="320" y="448"/>
+  <object id="73" template="templates/items/Coin.tx" type="CoinItem" x="304" y="368"/>
+  <object id="74" template="templates/items/Coin.tx" type="CoinItem" x="320" y="368"/>
+ </objectgroup>
  <objectgroup id="10" name="hazards">
   <object id="68" template="templates/hazards/CircularSaw.tx" type="CircularSawHazard" x="448" y="416"/>
  </objectgroup>
@@ -283,7 +288,7 @@
   </object>
  </objectgroup>
  <objectgroup id="9" name="player">
-  <object id="59" name="Player" type="Player" x="288" y="400">
+  <object id="59" name="Player" type="Player" x="288" y="448">
    <point/>
   </object>
  </objectgroup>

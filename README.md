@@ -33,6 +33,7 @@ Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 - Level 1, 2, 3
 - UI (health, score, etc)
 - Document file structure
+- Coyote time
 
 ## Advanced TODO after basic game is done
 

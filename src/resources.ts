@@ -1,5 +1,6 @@
 import { TiledResource } from '@excaliburjs/plugin-tiled'
 import * as ex from 'excalibur'
+import { FontSource } from './util/font-source'
 
 export const Resources = {
   img: {
@@ -17,8 +18,16 @@ export const Resources = {
     circularSaw: new ex.ImageSource('/res/images/Circular_Saw.png'),
     smokePuff: new ex.ImageSource('/res/images/Smoke_Puff.png'),
     smokeLand: new ex.ImageSource('/res/images/Smoke_Land.png'),
+    coin: new ex.ImageSource('/res/images/Coin.png'),
+    coinsUi: new ex.ImageSource('/res/images/Coins_Ui.png'),
   },
 
+  fonts: {
+    round: new FontSource('/res/fonts/Round9x13.ttf', 'Round9x13', {
+      filtering: ex.ImageFiltering.Pixel,
+      quality: 4,
+    }),
+  },
   music: {
     stage1: new ex.Sound('/res/music/stage1.mp3'),
     stage2: new ex.Sound('/res/music/stage2.mp3'),
@@ -30,6 +39,7 @@ export const Resources = {
     turnAround: new ex.Sound('/res/sfx/turn-around.wav'),
     stomp: new ex.Sound('/res/sfx/stomp.wav'),
     damage: new ex.Sound('/res/sfx/damage.wav'),
+    collectCoin: new ex.Sound('/res/sfx/coin.wav'),
   },
   tiled: {
     level1: new TiledResource('/res/tilemaps/level1.tmx', {

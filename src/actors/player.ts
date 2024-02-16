@@ -3,7 +3,7 @@ import { Resources } from '../resources'
 import { AnimationComponent } from '../components/graphics/animation'
 import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from '../classes/physics-actor'
-import { audioManager } from '../util/audio-manager'
+import { AudioManager } from '../state/audio'
 import { GRAVITY } from '../util/world'
 import { coroutine } from '../util/coroutine'
 import { Bouncepad } from './platforms/bouncepad'
@@ -246,7 +246,7 @@ export default class Player extends PhysicsActor {
 
     this.animation.get('turn').events.on('frame', (frame) => {
       if (frame.frameIndex === 0) {
-        audioManager.playSfx(Resources.sfx.turnAround)
+        AudioManager.playSfx(Resources.sfx.turnAround)
       }
     })
 
@@ -270,6 +270,7 @@ export default class Player extends PhysicsActor {
       )
     })
 
+    this.addTag('player')
     // for debugging
     // @ts-ignore
     window.player = this
@@ -504,7 +505,7 @@ export default class Player extends PhysicsActor {
 
     if (this.isSlidingOnWall) {
       if (!this.animation.is('wall_slide')) {
-        audioManager.playSfx(Resources.sfx.land)
+        AudioManager.playSfx(Resources.sfx.land)
       }
       this.animation.set('wall_slide')
     } else if (this.isClimbingLadder) {
@@ -604,7 +605,7 @@ export default class Player extends PhysicsActor {
   }
 
   land() {
-    audioManager.playSfx(Resources.sfx.land)
+    AudioManager.playSfx(Resources.sfx.land)
 
     this.spawnSmoke('land', {
       pos: ex.vec(this.center.x, this.collider.bounds.bottom - 8),
@@ -730,7 +731,7 @@ export default class Player extends PhysicsActor {
     this.vel.y = -force
 
     if (playSfx) {
-      audioManager.playSfx(Resources.sfx.jump)
+      AudioManager.playSfx(Resources.sfx.jump)
     }
   }
 
@@ -777,7 +778,7 @@ export default class Player extends PhysicsActor {
 
     this.land()
     killable.kill('stomp')
-    audioManager.playSfx(Resources.sfx.stomp)
+    AudioManager.playSfx(Resources.sfx.stomp)
 
     // use a higher jump force unless we're sprinting
     const force = !this.controls.isSprinting

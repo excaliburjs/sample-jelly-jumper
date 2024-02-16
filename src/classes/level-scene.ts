@@ -3,7 +3,7 @@ import * as ex from 'excalibur'
 import { OneWayPlatform } from '../actors/platforms/one-way-platform'
 import Player from '../actors/player'
 import { ScrollingBackground } from '../actors/scrolling-background'
-import { audioManager } from '../util/audio-manager'
+import { AudioManager } from '../state/audio'
 import { LockToPlayerStrategy } from '../util/lock-to-player-strategy'
 
 import { FactoryProps, TiledObject } from '@excaliburjs/plugin-tiled'
@@ -17,6 +17,8 @@ import { CircularSawHazard } from '../actors/hazards/circular-saw'
 import { CollisionGroup } from '../util/collision-group'
 import { LadderTile } from '../actors/platforms/ladder-tile'
 import { SpikeTile } from '../actors/hazards/spike-tile'
+import { CoinItem } from '../actors/items/coin'
+import { LevelOverlay } from '../ui/level-overlay'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -113,6 +115,14 @@ export default class LevelScene extends ex.Scene {
         z: props.layer.order ?? 0,
       })
     },
+
+    CoinItem: (props) => {
+      return new CoinItem({
+        x: props.object?.x ?? 0,
+        y: props.object?.y ?? 0,
+        z: props.layer.order ?? 0,
+      })
+    },
   }
 
   constructor(args: {
@@ -133,6 +143,8 @@ export default class LevelScene extends ex.Scene {
   onInitialize() {
     this.tilemap.addToScene(this)
 
+    this.add(new LevelOverlay())
+
     this.setupCollisionGroups()
     this.setupCamera()
     this.setupBackground()
@@ -144,7 +156,7 @@ export default class LevelScene extends ex.Scene {
 
   onActivate(context: ex.SceneActivationContext<unknown>): void {
     if (this.song) {
-      audioManager.playSong(this.song)
+      AudioManager.playSong(this.song)
     }
   }
 

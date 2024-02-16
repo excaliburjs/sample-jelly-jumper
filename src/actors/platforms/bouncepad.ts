@@ -2,7 +2,7 @@ import * as ex from 'excalibur'
 import { Resources } from '../../resources'
 import { AnimationComponent } from '../../components/graphics/animation'
 import { TouchingComponent } from '../../components/physics/touching'
-import { audioManager } from '../../util/audio-manager'
+import { AudioManager } from '../../state/audio'
 import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
 
 const grid = {
@@ -140,7 +140,7 @@ export class Bouncepad extends ex.Actor {
       if (actor instanceof ex.Actor) {
         actor.pos.y -= this.COMPRESS_DISTANCE
         actor.vel.y = -this.force
-        audioManager.playSfx(Resources.sfx.jumpSpring)
+        AudioManager.playSfx(Resources.sfx.jumpSpring)
       }
     }
   }

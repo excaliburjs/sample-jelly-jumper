@@ -1,11 +1,15 @@
 import * as ex from 'excalibur'
 import { HealthComponent } from './health'
 import { coroutine } from '../../util/coroutine'
-import { audioManager } from '../../util/audio-manager'
+import { AudioManager } from '../../state/audio'
 import { Resources } from '../../resources'
 
 export class DamageableComponent extends ex.Component {
   declare owner: ex.Actor
+
+  events = new ex.EventEmitter<{
+    damage: { amount: number; knockback?: 'left' | 'right' }
+  }>()
 
   INVINCIBILITY_DURATION = 2000
   KNOCKBACK_DURATION = 200
@@ -18,9 +22,10 @@ export class DamageableComponent extends ex.Component {
     const self = this
     const health = this.owner.get(HealthComponent)
 
+    this.events.emit('damage', { amount, knockback })
     this.isInvincible = true
 
-    audioManager.playSfx(Resources.sfx.damage)
+    AudioManager.playSfx(Resources.sfx.damage)
     if (health) {
       health.amount -= amount
     }
