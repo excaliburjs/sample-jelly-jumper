@@ -1,7 +1,7 @@
 import * as ex from 'excalibur'
 import { Resources } from '../../resources'
 import { PhysicsActor } from '../../classes/physics-actor'
-import { CollisionGroup } from '../../util/collision-group'
+import { CollisionGroup } from '../../physics/collision'
 import { CarriableComponent } from '../../components/physics/carrier'
 import { DamageComponent } from '../../components/behaviours/damage'
 
@@ -23,7 +23,7 @@ export class CircularSawHazard extends PhysicsActor {
       width: 4,
       height: 4,
       collisionType: ex.CollisionType.Passive,
-      collisionGroup: CollisionGroup.Hazard,
+      collisionGroup: CollisionGroup.Enemy,
     })
 
     this.pos.x += this.width * this.anchor.x
@@ -39,9 +39,9 @@ export class CircularSawHazard extends PhysicsActor {
       width: this.bladeSize.width,
       height: this.bladeSize.height,
       collisionType: ex.CollisionType.Passive,
-      collisionGroup: CollisionGroup.Hazard,
+      collisionGroup: CollisionGroup.Enemy,
     })
-    blade.addComponent(new DamageComponent({ amount: Infinity }))
+    blade.addComponent(new DamageComponent({ amount: 1 }))
     this.addChild(blade)
 
     this.addComponent(new CarriableComponent())

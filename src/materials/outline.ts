@@ -1,7 +1,7 @@
 import * as ex from 'excalibur'
 
 /**
- * Outlines the graphic with a 1px black border
+ * Outlines the graphic with a black border
  */
 export class OutlineMaterial extends ex.Material {
   constructor(ctx: ex.ExcaliburGraphicsContext, thickness: number = 1) {

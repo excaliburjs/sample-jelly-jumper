@@ -2,7 +2,7 @@ import * as ex from 'excalibur'
 import { loader } from './resources'
 import Level1 from './scenes/level1'
 import Demo from './scenes/demo'
-import { GRAVITY } from './util/world'
+import { GRAVITY } from './physics/gravity'
 
 const game = new ex.Engine({
   resolution: {

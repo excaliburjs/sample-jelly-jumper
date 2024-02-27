@@ -1,6 +1,6 @@
 import { EventEmitter } from 'excalibur'
 
-let coins = 0
+let coins = 3
 
 /**
  * A general manager for game state

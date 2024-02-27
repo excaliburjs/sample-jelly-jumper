@@ -27,7 +27,7 @@ export class LevelOverlay extends ex.ScreenElement {
     this.coinCounter = new CoinCounter({ z: this.z })
     this.playerQuery = engine.currentScene.world.queryTags(['player'])
 
-    this.coinCounter.pos = ex.vec(32, 16)
+    this.coinCounter.pos = ex.vec(16, 16)
 
     this.addChild(this.coinCounter)
     this.pos = ex.vec(this.viewport.left, this.viewport.top)
@@ -59,15 +59,17 @@ class CoinCounter extends ex.ScreenElement {
   constructor(args: ex.ActorArgs = {}) {
     super({
       ...args,
+      anchor: ex.vec(0, 0.5),
     })
   }
 
   onInitialize(engine: ex.Engine<any>): void {
     this.label = new ex.Label({
+      anchor: ex.vec(0, 0.5),
       text: '0',
-      pos: ex.vec(10, 0),
+      pos: ex.vec(24, -1),
       font: Resources.fonts.round.toFont({
-        size: 16,
+        size: 20,
       }),
       color: ex.Color.White,
       z: this.z,
@@ -79,6 +81,7 @@ class CoinCounter extends ex.ScreenElement {
     )
     this.addChild(this.label)
     const icon = new ex.Actor({
+      anchor: ex.vec(0, 0.5),
       x: 0,
       y: 8,
       coordPlane: ex.CoordPlane.Screen,

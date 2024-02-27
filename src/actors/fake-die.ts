@@ -1,5 +1,5 @@
 import * as ex from 'excalibur'
-import { GRAVITY } from '../util/world'
+import { GRAVITY } from '../physics/gravity'
 
 // temporary until we have a real death system
 export class FakeDie extends ex.Actor {

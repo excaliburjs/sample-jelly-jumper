@@ -1,6 +1,6 @@
 import * as ex from 'excalibur'
 import { DamageComponent } from '../../components/behaviours/damage'
-import { CollisionGroup } from '../../util/collision-group'
+import { CollisionGroup } from '../../physics/collision'
 
 export class SpikeTile extends ex.Actor {
   constructor(args: ex.ActorArgs) {
@@ -11,11 +11,11 @@ export class SpikeTile extends ex.Actor {
       width: 16,
       height: 16,
       collisionType: ex.CollisionType.Fixed,
-      collisionGroup: CollisionGroup.Hazard,
+      collisionGroup: CollisionGroup.Ground,
     })
 
     this.addComponent(
-      new DamageComponent({ amount: Infinity, cancelContactOnDamage: false })
+      new DamageComponent({ amount: 1, cancelContactOnDamage: false })
     )
   }
 }

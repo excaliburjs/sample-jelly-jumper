@@ -2,7 +2,7 @@ import * as ex from 'excalibur'
 import { OneWayCollisionComponent } from '../../components/physics/one-way-collision'
 import { CarrierComponent } from '../../components/physics/carrier'
 import { Resources } from '../../resources'
-import { CollisionGroup } from '../../util/collision-group'
+import { CollisionGroup } from '../../physics/collision'
 
 const sprite = Resources.img.platform.toSprite()
 

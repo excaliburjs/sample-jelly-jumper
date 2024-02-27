@@ -2,7 +2,7 @@ import * as ex from 'excalibur'
 import { PhysicsActor } from './physics-actor'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { KillableComponent } from '../components/behaviours/killable'
-import { CollisionGroup } from '../util/collision-group'
+import { CollisionGroup } from '../physics/collision'
 import { DamageComponent } from '../components/behaviours/damage'
 
 export interface EnemyActorArgs extends ex.ActorArgs {

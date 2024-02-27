@@ -2,22 +2,22 @@ import * as ex from 'excalibur'
 import { CollectableComponent } from '../../components/behaviours/collectable'
 import { Resources } from '../../resources'
 import { AudioManager } from '../../state/audio'
-import { CollisionGroup } from '../../util/collision-group'
-import Player from '../player'
+import { CollisionGroup } from '../../physics/collision'
 import { GameManager } from '../../state/game'
+import Player from '../player'
 
 export class CoinItem extends ex.Actor {
-  private elapsedMs = 0
-  private collected = false
+  elapsedMs = 0
+  collected = false
 
   constructor(args: ex.ActorArgs) {
     super({
-      ...args,
       anchor: ex.vec(0.5, 0.75),
       collisionType: ex.CollisionType.Passive,
       collisionGroup: CollisionGroup.Item,
       width: 8,
       height: 8,
+      ...args,
     })
 
     this.pos.x += this.width * this.anchor.x
@@ -27,6 +27,10 @@ export class CoinItem extends ex.Actor {
     this.graphics.use(Resources.img.coin.toSprite())
   }
 
+  get collectable() {
+    return this.get(CollectableComponent)
+  }
+
   onPreUpdate(engine: ex.Engine<any>, delta: number): void {
     this.elapsedMs += delta
 
@@ -34,13 +38,14 @@ export class CoinItem extends ex.Actor {
     this.pos.y -= Math.sin(this.elapsedMs / 200) / 10
   }
 
-  onCollisionStart() {
-    if (this.collected) return
+  collect() {
+    if (!this.collectable.isCollectable || this.collectable.isCollected) return
 
     AudioManager.playSfx(Resources.sfx.collectCoin)
     GameManager.coins += 1
 
-    this.collected = true
+    this.collectable.isCollected = true
+    this.actions.clearActions()
     this.actions
       .runAction(
         new ex.ParallelActions([
@@ -51,5 +56,17 @@ export class CoinItem extends ex.Actor {
       .callMethod(() => {
         this.kill()
       })
+  }
+
+  onPreCollisionResolve(
+    self: ex.Collider,
+    other: ex.Collider,
+    side: ex.Side,
+    contact: ex.CollisionContact
+  ): void {
+    if (other.owner instanceof Player) {
+      this.collect()
+      contact.cancel()
+    }
   }
 }

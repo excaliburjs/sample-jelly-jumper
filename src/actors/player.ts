@@ -4,16 +4,18 @@ import { AnimationComponent } from '../components/graphics/animation'
 import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from '../classes/physics-actor'
 import { AudioManager } from '../state/audio'
-import { GRAVITY } from '../util/world'
+import { GRAVITY } from '../physics/gravity'
 import { coroutine } from '../util/coroutine'
 import { Bouncepad } from './platforms/bouncepad'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { KillableComponent } from '../components/behaviours/killable'
-import { CollisionGroup } from '../util/collision-group'
+import { CollisionGroup } from '../physics/collision'
 import { Smoke } from './fx/smoke'
 import { HealthComponent } from '../components/behaviours/health'
 import { DamageableComponent } from '../components/behaviours/damageable'
 import { ClimbableComponent } from '../components/physics/climbable'
+import { LostCoin } from './fx/lost-coin'
+import { GameManager } from '../state/game'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -239,10 +241,31 @@ export default class Player extends PhysicsActor {
     // we'll handle gravity ourselves
     this.body.useGravity = false
 
+    const damageable = new DamageableComponent()
     this.addComponent(this.animation)
     this.addComponent(this.controls)
+    this.addComponent(damageable)
     this.addComponent(new HealthComponent({ amount: 3 }))
-    this.addComponent(new DamageableComponent())
+
+    damageable.events.on('damage', ({ amount }) => {
+      const lostCoins =
+        GameManager.coins - amount < 0 ? GameManager.coins : amount
+      GameManager.coins -= lostCoins
+
+      for (let i = 0; i < lostCoins; i++) {
+        this.scene?.add(
+          new LostCoin({
+            pos: ex.vec(
+              this.facing === 'left'
+                ? this.collider.bounds.right
+                : this.collider.bounds.left,
+              this.collider.bounds.top
+            ),
+            vel: ex.vec(100 * (this.facing === 'right' ? -1 : 1), -200),
+          })
+        )
+      }
+    })
 
     this.animation.get('turn').events.on('frame', (frame) => {
       if (frame.frameIndex === 0) {

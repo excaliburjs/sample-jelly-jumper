@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="75">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="80" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="76">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -257,7 +257,7 @@
   </object>
  </objectgroup>
  <objectgroup id="12" name="items">
-  <object id="72" template="templates/items/Coin.tx" type="CoinItem" x="320" y="448"/>
+  <object id="72" template="templates/items/Coin.tx" type="CoinItem" x="352" y="448"/>
   <object id="73" template="templates/items/Coin.tx" type="CoinItem" x="304" y="368"/>
   <object id="74" template="templates/items/Coin.tx" type="CoinItem" x="320" y="368"/>
  </objectgroup>
@@ -284,6 +284,11 @@
   <object id="48" template="templates/enemies/Bird.tx" type="BirdEnemy" x="528" y="304">
    <properties>
     <property name="type" value="orange"/>
+   </properties>
+  </object>
+  <object id="75" template="templates/enemies/Spider.tx" type="SpiderEnemy" x="320" y="448">
+   <properties>
+    <property name="type" value="green"/>
    </properties>
   </object>
  </objectgroup>
