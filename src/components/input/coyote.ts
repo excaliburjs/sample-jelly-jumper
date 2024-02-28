@@ -11,9 +11,10 @@ interface CoyoteAction {
 }
 
 /**
- * Tracks a grace period for certain actions. For example, if you
+ * Tracks a grace period for certain actions. Typically jumping, for example if you
  * want to allow a player to jump for a few frames after they've
- * walked off a ledge, you can use this component to track that.
+ * walked off a ledge. However this component can be used for any
+ * action that needs a grace period.
  */
 export class CoyoteComponent<
   T extends Record<string, CoyoteAction>
