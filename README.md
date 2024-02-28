@@ -28,12 +28,9 @@ Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 
 ## TODO
 
-- Health/dying
-- Items
+- Death
 - Level 1, 2, 3
-- UI (health, score, etc)
 - Document file structure
-- Coyote time
 
 ## Advanced TODO after basic game is done
 

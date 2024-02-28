@@ -16,6 +16,7 @@ import { DamageableComponent } from '../components/behaviours/damageable'
 import { ClimbableComponent } from '../components/physics/climbable'
 import { LostCoin } from './fx/lost-coin'
 import { GameManager } from '../state/game'
+import { CoyoteComponent } from '../components/input/coyote'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -151,6 +152,14 @@ export default class Player extends PhysicsActor {
   })
   controls = new PlayerControlsComponent()
 
+  coyote = new CoyoteComponent({
+    // allow the player to jump for a short time after walking off a ledge
+    jump: {
+      time: 70,
+      condition: () => this.isOnGround,
+    },
+  })
+
   /* State */
 
   /**
@@ -244,6 +253,7 @@ export default class Player extends PhysicsActor {
     const damageable = new DamageableComponent()
     this.addComponent(this.animation)
     this.addComponent(this.controls)
+    this.addComponent(this.coyote)
     this.addComponent(damageable)
     this.addComponent(new HealthComponent({ amount: 3 }))
 
@@ -375,6 +385,8 @@ export default class Player extends PhysicsActor {
     if (!this.isWallJumping && !isBeingKnockedBack) {
       this.applyDeceleration()
     }
+
+    console.log(this.coyote.allow('jump'))
   }
 
   onPreCollisionResolve(
@@ -396,17 +408,6 @@ export default class Player extends PhysicsActor {
       if (didStomp) {
         this.stomp(other.owner)
         contact.cancel()
-      } else {
-        // if (!killable || !killable.dead) {
-        //   if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
-        //     this.scene?.add(
-        //       new FakeDie({
-        //         x: this.getGlobalPos().x,
-        //         y: this.getGlobalPos().y,
-        //       })
-        //     )
-        //   }
-        // }
       }
     }
   }
@@ -497,7 +498,7 @@ export default class Player extends PhysicsActor {
         }
       }
       // normal jump
-      else if (this.isOnGround) {
+      else if (this.isOnGround || this.coyote.allow('jump')) {
         this.jump()
       } else if (isCloseToLeftWall || isCloseToRightWall) {
         this.wallJump(isCloseToLeftWall ? 'left' : 'right')
@@ -734,6 +735,7 @@ export default class Player extends PhysicsActor {
     // this will be correctly set at the beginning of each frame, but we want to update it for the remainder
     // of this frame incase any logic depends on it (e.g. animations)
     this.isOnGround = false
+    this.coyote.reset('jump')
 
     // if we're on a bouncepad, trigger it to release immediately
     if (this.bouncepad) {
