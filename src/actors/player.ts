@@ -385,8 +385,6 @@ export default class Player extends PhysicsActor {
     if (!this.isWallJumping && !isBeingKnockedBack) {
       this.applyDeceleration()
     }
-
-    console.log(this.coyote.allow('jump'))
   }
 
   onPreCollisionResolve(
