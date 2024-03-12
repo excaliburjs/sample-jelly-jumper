@@ -32,20 +32,9 @@ export class TouchingComponent extends ex.Component {
    */
   passives = new Set<ex.Actor>()
 
-  private queue: {
-    collisionstart: ex.CollisionStartEvent[]
-    collisionend: ex.CollisionEndEvent[]
-  } = {
-    collisionstart: [],
-    collisionend: [],
-  }
-
   onAdd(owner: ex.Actor): void {
     // collect up all of the collisionstart/end events for each frame
     owner.on('collisionstart', (ev) => {
-      // @ts-expect-error - bug in new tiled plugin has collider as undefined
-      ev.other.collider ??= ev.other._collider
-
       if (ev.other.collider) {
         if (ev.other.body?.collisionType === ex.CollisionType.Passive) {
           this.passives.add(ev.other)

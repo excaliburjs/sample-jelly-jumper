@@ -14,11 +14,12 @@ export class CircularSawHazard extends PhysicsActor {
     height: 12,
   }
 
-  lastHit: ex.RayCastHit | null = null
+  lastGroundHit: ex.RayCastHit | null = null
 
   constructor(args: ex.ActorArgs) {
     super({
       ...args,
+      name: 'circular-saw',
       anchor: ex.vec(0.5, 0.5),
       width: 4,
       height: 4,
@@ -54,31 +55,37 @@ export class CircularSawHazard extends PhysicsActor {
     )
   }
 
-  onPostUpdate(_engine: ex.Engine, delta: number) {
-    const edge = Math.round(
+  onPreUpdate(_engine: ex.Engine, delta: number) {
+    const edge =
       this.direction === 1
         ? this.collider.bounds.right + this.bladeSize.width / 2
         : this.collider.bounds.left - this.bladeSize.width / 2
-    )
-    const bottom = Math.round(this.collider.bounds.bottom) - 1
 
-    // get velocity in pixels per frame
-    const velPx = this.vel.scale(delta / 1000)
+    const bottom = this.collider.bounds.bottom - 1
 
-    // check if next position is still on the platform
-    const [hit] = this.raycast(
-      new ex.Ray(ex.vec(edge + velPx.x, bottom), ex.Vector.Down),
-      2,
+    // check if we are still on the ground
+    const [groundHit] = this.raycast(
+      new ex.Ray(ex.vec(edge, bottom), ex.Vector.Down),
+      1,
       {
-        searchAllColliders: true,
-        filter: (hit) =>
-          hit.body.owner !== this &&
-          hit.body.collisionType !== ex.CollisionType.Passive,
+        collisionGroup: CollisionGroup.Ground,
       }
     )
 
-    // we've hit the end of the platform
-    if (!hit && this.lastHit) {
+    // check if we are hitting a wall
+    const [wallHit] = this.raycast(
+      new ex.Ray(
+        ex.vec(edge, bottom),
+        this.direction === 1 ? ex.Vector.Right : ex.Vector.Left
+      ),
+      1,
+      {
+        collisionGroup: CollisionGroup.Ground,
+      }
+    )
+
+    // we've either run out of ground or hit a wall, so reverse direction
+    if ((!groundHit && this.lastGroundHit) || wallHit) {
       this.direction *= -1
     }
 
@@ -86,8 +93,8 @@ export class CircularSawHazard extends PhysicsActor {
     this.graphics.current!.rotation += ex.toRadians((this.speed * 5) / delta)
     this.vel.x = this.speed * this.direction
 
-    if (hit) {
-      this.lastHit = hit
+    if (groundHit) {
+      this.lastGroundHit = groundHit
     }
   }
 }
