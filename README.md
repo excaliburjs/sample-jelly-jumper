@@ -30,8 +30,3 @@ Music & SFX by [Subspace Audio](https://opengameart.org/users/subspaceaudio)
 
 - Death
 - Level 1, 2, 3
-- Document file structure
-
-## Advanced TODO after basic game is done
-
-- Slopes

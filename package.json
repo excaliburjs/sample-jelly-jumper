@@ -13,8 +13,8 @@
   "author": "mattjennings",
   "license": "BSD-2-Clause",
   "dependencies": {
-    "@excaliburjs/plugin-tiled": "^0.29.0-alpha.2",
-    "excalibur": "^0.29.0-alpha.919"
+    "@excaliburjs/plugin-tiled": "^0.29.0",
+    "excalibur": "^0.29.1"
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
