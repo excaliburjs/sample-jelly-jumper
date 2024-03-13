@@ -1,6 +1,5 @@
 import * as ex from 'excalibur'
 import { HealthComponent } from './health'
-import { coroutine } from '../../util/coroutine'
 import { AudioManager } from '../../state/audio'
 import { Resources } from '../../resources'
 
@@ -19,7 +18,6 @@ export class DamageableComponent extends ex.Component {
 
   damage(amount: number, knockback?: 'left' | 'right') {
     if (this.isInvincible) return
-    const self = this
     const health = this.owner.get(HealthComponent)
 
     this.events.emit('damage', { amount, knockback })
@@ -38,36 +36,39 @@ export class DamageableComponent extends ex.Component {
       this.isBeingKnockedBack = true
     }
 
-    coroutine(this.owner, function* () {
-      let elapsed = 0
+    ex.coroutine(
+      this.owner!.scene!.engine,
+      function* (this: DamageableComponent): ReturnType<ex.CoroutineGenerator> {
+        let elapsed = 0
 
-      let flashRate = 100
+        let flashRate = 100
 
-      while (
-        elapsed < Math.max(self.KNOCKBACK_DURATION, self.INVINCIBILITY_DURATION)
-      ) {
-        const { delta } = yield
-        elapsed += delta
+        while (
+          elapsed <
+          Math.max(this.KNOCKBACK_DURATION, this.INVINCIBILITY_DURATION)
+        ) {
+          elapsed += yield 1
 
-        if (self.isBeingKnockedBack && elapsed > self.KNOCKBACK_DURATION) {
-          self.isBeingKnockedBack = false
-          self.owner.vel.x = 0
+          if (this.isBeingKnockedBack && elapsed > this.KNOCKBACK_DURATION) {
+            this.isBeingKnockedBack = false
+            this.owner.vel.x = 0
+          }
+
+          if (elapsed > this.INVINCIBILITY_DURATION) {
+            this.isInvincible = false
+          }
+
+          if (this.owner.graphics.current) {
+            const shouldFlash = Math.floor(elapsed / flashRate) % 2 === 0
+
+            this.owner.graphics.current.opacity = shouldFlash ? 0.35 : 1
+          }
         }
 
-        if (elapsed > self.INVINCIBILITY_DURATION) {
-          self.isInvincible = false
+        if (this.owner.graphics.current) {
+          this.owner.graphics.current.opacity = 1
         }
-
-        if (self.owner.graphics.current) {
-          const shouldFlash = Math.floor(elapsed / flashRate) % 2 === 0
-
-          self.owner.graphics.current.opacity = shouldFlash ? 0.35 : 1
-        }
-      }
-
-      if (self.owner.graphics.current) {
-        self.owner.graphics.current.opacity = 1
-      }
-    })
+      }.bind(this)
+    )
   }
 }

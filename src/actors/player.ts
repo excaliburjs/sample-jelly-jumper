@@ -5,7 +5,6 @@ import { ControlsComponent } from '../components/input/controls'
 import { PhysicsActor } from '../classes/physics-actor'
 import { AudioManager } from '../state/audio'
 import { GRAVITY } from '../physics/gravity'
-import { coroutine } from '../util/coroutine'
 import { Bouncepad } from './platforms/bouncepad'
 import { StompableComponent } from '../components/behaviours/stompable'
 import { KillableComponent } from '../components/behaviours/killable'
@@ -586,47 +585,48 @@ export default class Player extends PhysicsActor {
 
     // apply a stretch animation when jumping
     if (this.animation.is('jump') && this.oldVel.y >= 0 && this.vel.y < 0) {
-      coroutine(this, function* () {
-        const duration = 70
-        const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
-        const easing = ex.EasingFunctions.EaseOutCubic
+      ex.coroutine(
+        this.scene!.engine,
+        function* (this: Player): ReturnType<ex.CoroutineGenerator> {
+          const duration = 70
+          const scaleTo = 1 + 1 * this.FX_SQUISH_AMOUNT
+          const easing = ex.EasingFunctions.EaseOutCubic
+          const force = this.vel.y
 
-        let elapsed = 0
+          let elapsed = 0
 
-        const force = this.vel.y
+          // stretch player graphic while jumping
+          while (this.vel.y < force * 0.25) {
+            elapsed += yield 1
 
-        // stretch player graphic while jumping
-        while (this.vel.y < force * 0.25) {
-          const { delta } = yield
-          elapsed += delta
-
-          if (elapsed < duration) {
-            this.squishGraphic(
-              easing(Math.min(elapsed, duration), 1, scaleTo, duration)
-            )
+            if (elapsed < duration) {
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), 1, scaleTo, duration)
+              )
+            }
           }
-        }
 
-        elapsed = 0
+          elapsed = 0
 
-        // un-stretch player graphic while falling
-        while (!this.touching.bottom.size) {
-          const { delta } = yield
-          elapsed += delta
+          // un-stretch player graphic while jumping
+          while (!this.touching.bottom.size) {
+            elapsed += yield 1
 
-          if (elapsed < duration) {
-            this.squishGraphic(
-              easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
-            )
+            if (elapsed < duration) {
+              this.squishGraphic(
+                easing(Math.min(elapsed, duration), scaleTo, 1, duration * 2)
+              )
+            }
           }
-        }
 
-        this.squishGraphic(1)
-      })
+          this.squishGraphic(1)
+        }.bind(this)
+      )
     }
   }
 
   land() {
+    this.isOnGround = true
     AudioManager.playSfx(Resources.sfx.land)
 
     this.spawnSmoke('land', {
@@ -639,18 +639,14 @@ export default class Player extends PhysicsActor {
     const scaleTo = 1 - this.FX_SQUISH_AMOUNT
     const easing = ex.EasingFunctions.EaseOutCubic
 
-    coroutine(
-      this,
-      function* () {
+    ex.coroutine(
+      this.scene!.engine,
+      function* (this: Player): ReturnType<ex.CoroutineGenerator> {
         let elapsed = 0
-
-        // wait 1 frame for this.isOnGround to be true
-        yield
 
         // animate squish as long as we're on the ground
         while (elapsed < duration && this.isOnGround) {
-          const { delta } = yield
-          elapsed += delta
+          elapsed += yield 1
 
           this.squishGraphic(
             easing(Math.min(elapsed, duration), 1, scaleTo, duration)
@@ -661,8 +657,7 @@ export default class Player extends PhysicsActor {
         elapsed = 0
 
         while (elapsed < duration && this.isOnGround) {
-          const { delta } = yield
-          elapsed += delta
+          elapsed += yield 1
 
           this.squishGraphic(
             easing(Math.min(elapsed, duration), scaleTo, 1, duration)
@@ -670,10 +665,10 @@ export default class Player extends PhysicsActor {
         }
 
         this.squishGraphic(1)
-      },
-      'postupdate'
+      }.bind(this)
     )
   }
+
   climbLadder() {
     const heldYDirection = this.controls.getHeldYDirection()
 
@@ -763,20 +758,19 @@ export default class Player extends PhysicsActor {
     this.jump()
     this.isWallJumping = true
     this.spawnSmokePuffAtFeet(side, ex.vec(0, -4))
-    coroutine(
-      this,
-      function* () {
-        const dir = side === 'left' ? 1 : -1
 
+    ex.coroutine(
+      this.scene!.engine,
+      function* (this: Player): ReturnType<ex.CoroutineGenerator> {
+        let elapsed = 0
+
+        const dir = side === 'left' ? 1 : -1
         // get velocity (px/second) so that WALL_JUMP_X_DISTANCE is reached in WALL_JUMP_DURATION
         const wallJumpVel =
           (this.WALL_JUMP_X_DISTANCE / (this.WALL_JUMP_DURATION / 1000)) * dir
 
-        let elapsed = 0
-
         while (elapsed < this.WALL_JUMP_DURATION && this.isWallJumping) {
-          const { delta } = yield
-          elapsed += delta
+          elapsed += yield 1
           this.vel.x = wallJumpVel
         }
 
@@ -789,8 +783,7 @@ export default class Player extends PhysicsActor {
         }
 
         this.isWallJumping = false
-      },
-      'preupdate'
+      }.bind(this)
     )
   }
 
