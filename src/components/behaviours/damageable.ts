@@ -49,12 +49,12 @@ export class DamageableComponent extends ex.Component {
         ) {
           elapsed += yield 1
 
-          if (this.isBeingKnockedBack && elapsed > this.KNOCKBACK_DURATION) {
+          if (this.isBeingKnockedBack && elapsed >= this.KNOCKBACK_DURATION) {
             this.isBeingKnockedBack = false
             this.owner.vel.x = 0
           }
 
-          if (elapsed > this.INVINCIBILITY_DURATION) {
+          if (elapsed >= this.INVINCIBILITY_DURATION) {
             this.isInvincible = false
           }
 

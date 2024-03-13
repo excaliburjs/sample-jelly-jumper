@@ -16,6 +16,7 @@ import { ClimbableComponent } from '../components/physics/climbable'
 import { LostCoin } from './fx/lost-coin'
 import { GameManager } from '../state/game'
 import { CoyoteComponent } from '../components/input/coyote'
+import { FakeDie } from './fake-die'
 
 const SPRITE_WIDTH = 48
 const SPRITE_HEIGHT = 48
@@ -257,22 +258,33 @@ export default class Player extends PhysicsActor {
     this.addComponent(new HealthComponent({ amount: 3 }))
 
     damageable.events.on('damage', ({ amount }) => {
-      const lostCoins =
-        GameManager.coins - amount < 0 ? GameManager.coins : amount
-      GameManager.coins -= lostCoins
+      if (GameManager.coins === 0) {
+        if (!this.scene?.entities.find((e) => e instanceof FakeDie)) {
+          this.scene?.add(
+            new FakeDie({
+              x: this.getGlobalPos().x,
+              y: this.getGlobalPos().y,
+            })
+          )
+        }
+      } else {
+        const lostCoins =
+          GameManager.coins - amount < 0 ? GameManager.coins : amount
+        GameManager.coins -= lostCoins
 
-      for (let i = 0; i < lostCoins; i++) {
-        this.scene?.add(
-          new LostCoin({
-            pos: ex.vec(
-              this.facing === 'left'
-                ? this.collider.bounds.right
-                : this.collider.bounds.left,
-              this.collider.bounds.top
-            ),
-            vel: ex.vec(100 * (this.facing === 'right' ? -1 : 1), -200),
-          })
-        )
+        for (let i = 0; i < lostCoins; i++) {
+          this.scene?.add(
+            new LostCoin({
+              pos: ex.vec(
+                this.facing === 'left'
+                  ? this.collider.bounds.right
+                  : this.collider.bounds.left,
+                this.collider.bounds.top
+              ),
+              vel: ex.vec(100 * (this.facing === 'right' ? -1 : 1), -200),
+            })
+          )
+        }
       }
     })
 
