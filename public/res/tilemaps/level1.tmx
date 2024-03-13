@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="154">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="156">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -304,7 +304,7 @@
   <object id="122" template="templates/items/Coin.tx" x="80" y="32"/>
   <object id="123" template="templates/items/Coin.tx" x="48" y="32"/>
   <object id="124" template="templates/items/Coin.tx" x="16" y="32"/>
-  <object id="126" template="templates/items/Coin.tx" x="1264" y="400"/>
+  <object id="126" template="templates/items/Coin.tx" x="1264" y="384"/>
   <object id="127" template="templates/platforms/Bouncepad.tx" x="2032" y="416"/>
   <object id="128" template="templates/items/Coin.tx" x="2144" y="32"/>
   <object id="129" template="templates/items/Coin.tx" x="2112" y="32"/>
@@ -362,9 +362,12 @@ bouncepad to make the gap</text>
    <text pixelsize="12" wrap="1" halign="center">Jump while against
 the wall to climb</text>
   </object>
+  <object id="154" name="Text" type="Text" x="2480" y="352" width="80.2344" height="18.8438">
+   <text wrap="1">You win!</text>
+  </object>
  </objectgroup>
  <objectgroup id="9" name="player">
-  <object id="59" name="Player" type="Player" x="80" y="448">
+  <object id="155" name="Player" type="Player" x="80" y="448">
    <point/>
   </object>
  </objectgroup>
