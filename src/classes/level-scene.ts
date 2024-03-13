@@ -19,6 +19,7 @@ import { LadderTile } from '../actors/platforms/ladder-tile'
 import { SpikeTile } from '../actors/hazards/spike-tile'
 import { CoinItem } from '../actors/items/coin'
 import { LevelOverlay } from '../ui/level-overlay'
+import { Resources } from '../resources'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -100,6 +101,7 @@ export default class LevelScene extends ex.Scene {
       })
     }),
 
+    /* Hazards */
     AxeHazard: (props) => {
       return new AxeHazard({
         x: props.object?.x ?? 0,
@@ -116,12 +118,67 @@ export default class LevelScene extends ex.Scene {
       })
     },
 
+    /* Items */
     CoinItem: (props) => {
       return new CoinItem({
         x: props.object?.x ?? 0,
         y: props.object?.y ?? 0,
         z: props.layer.order ?? 0,
       })
+    },
+
+    /* UI */
+    Text: (props) => {
+      const text = props.object?.tiledObject?.text?.text ?? ''
+      const size = props.object?.tiledObject?.text?.pixelsize ?? 16
+      const width = props.object?.tiledObject?.width ?? 100
+      const height = props.object?.tiledObject?.height ?? 100
+      const x = props.object?.x ?? 0
+      const y = props.object?.y ?? 0
+
+      const textAlign = (() => {
+        switch (props.object?.tiledObject?.text?.halign) {
+          case 'center':
+            return ex.TextAlign.Center
+          case 'right':
+            return ex.TextAlign.Right
+          default:
+            return ex.TextAlign.Left
+        }
+      })()
+
+      const baseAlign = (() => {
+        switch (props.object?.tiledObject?.text?.valign) {
+          case 'center':
+            return ex.BaseAlign.Middle
+          case 'bottom':
+            return ex.BaseAlign.Bottom
+          default:
+            return ex.BaseAlign.Top
+        }
+      })()
+
+      const label = new ex.Label({
+        x,
+        y,
+        text,
+        width,
+        height,
+        font: Resources.fonts.round.toFont({
+          size: size,
+          color: ex.Color.White,
+          textAlign,
+          baseAlign,
+          shadow: {
+            blur: 2,
+            offset: ex.vec(2, 2),
+            color: ex.Color.Black,
+          },
+        }),
+        z: props.layer.order ?? 0,
+      })
+
+      return label
     },
   }
 

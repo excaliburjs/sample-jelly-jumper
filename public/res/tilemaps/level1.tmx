@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="13" nextobjectid="145">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="160" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="154">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -247,7 +247,7 @@
    </properties>
   </object>
   <object id="56" template="templates/platforms/Bouncepad.tx" type="Bouncepad" x="848" y="352"/>
-  <object id="70" x="464" y="400">
+  <object id="70" x="544" y="416">
    <point/>
   </object>
   <object id="83" template="templates/platforms/MovingPlatform.tx" type="MovingPlatform" x="1696" y="320" width="208" height="16">
@@ -344,8 +344,27 @@
   <object id="91" template="templates/enemies/Spider.tx" x="1392" y="112"/>
   <object id="144" template="templates/enemies/Bird.tx" x="240" y="352"/>
  </objectgroup>
+ <objectgroup id="13" name="text">
+  <object id="145" name="Text" type="Text" x="64" y="304" width="192" height="128">
+   <text pixelsize="12" wrap="1">Arrow keys to move
+
+A to jump
+
+S to run
+
+Gamepad works too!</text>
+  </object>
+  <object id="147" name="Text" type="Text" x="864" y="304" width="192" height="64">
+   <text pixelsize="12" wrap="1" halign="center">Jump when landing on the
+bouncepad to make the gap</text>
+  </object>
+  <object id="148" name="Text" type="Text" x="1152" y="336" width="144" height="32">
+   <text pixelsize="12" wrap="1" halign="center">Jump while against
+the wall to climb</text>
+  </object>
+ </objectgroup>
  <objectgroup id="9" name="player">
-  <object id="59" name="Player" type="Player" x="64" y="448">
+  <object id="59" name="Player" type="Player" x="80" y="448">
    <point/>
   </object>
  </objectgroup>
