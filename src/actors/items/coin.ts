@@ -41,7 +41,7 @@ export class CoinItem extends ex.Actor {
   collect() {
     if (!this.collectable.isCollectable || this.collectable.isCollected) return
 
-    AudioManager.playSfx(Resources.sfx.collectCoin)
+    AudioManager.playSfx(Resources.sfx.collectCoin, { force: true })
     GameManager.coins += 1
 
     this.collectable.isCollected = true

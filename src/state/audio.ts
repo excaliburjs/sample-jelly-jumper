@@ -13,14 +13,30 @@ export abstract class AudioManager {
     currentSong.loop = true
   }
 
-  static playSfx(
-    sfx: ex.Sound,
-    opts: { volume?: number; ignoreIfPlaying?: boolean } = {}
-  ) {
-    const { volume = 0.7, ignoreIfPlaying = false } = opts
+  /**
+   * Plays a sound effect if the sound is not already playing
+   */
+  static playSfx(sfx: ex.Sound, opts: PlaySfxOptions = {}) {
+    const { volume = 0.7, force = false } = opts
 
-    if (ignoreIfPlaying || !sfx.isPlaying()) {
+    if (force || !sfx.isPlaying()) {
       sfx.play(volume)
     }
   }
+}
+
+interface PlaySfxOptions {
+  /**
+   * The volume to play the sound at (0.0 to 1.0)
+   *
+   * @default 0.7
+   */
+  volume?: number
+
+  /**
+   * If true, the sound will play even if it is already playing
+   *
+   * @default false
+   */
+  force?: boolean
 }
