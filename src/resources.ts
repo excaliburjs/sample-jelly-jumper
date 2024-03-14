@@ -1,6 +1,5 @@
 import { TiledResource } from '@excaliburjs/plugin-tiled'
 import * as ex from 'excalibur'
-import { FontSource } from './util/font-source'
 
 export const Resources = {
   img: {
@@ -23,7 +22,7 @@ export const Resources = {
   },
 
   fonts: {
-    round: new FontSource('/res/fonts/Round9x13.ttf', 'Round9x13', {
+    round: new ex.FontSource('/res/fonts/Round9x13.ttf', 'Round9x13', {
       filtering: ex.ImageFiltering.Pixel,
       quality: 4,
     }),
