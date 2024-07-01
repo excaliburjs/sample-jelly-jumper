@@ -3,6 +3,7 @@ import { loader } from './resources'
 import Level1 from './scenes/level1'
 import Demo from './scenes/demo'
 import { GRAVITY } from './physics/gravity'
+import { AudioManager } from './state/audio'
 
 const game = new ex.Engine({
   resolution: {
@@ -39,6 +40,6 @@ const game = new ex.Engine({
     demo: Demo,
   },
 })
-
+AudioManager.init();
 // start game
-game.start(loader)
+game.start(loader);
