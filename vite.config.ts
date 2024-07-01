@@ -5,6 +5,7 @@ should be removed once example is ready to be published.
 */
 
 import { defineConfig } from 'vite'
+import { viteStaticCopy } from 'vite-plugin-static-copy';
 import fs from 'fs'
 
 const isExcaliburSymlinked =
@@ -15,6 +16,16 @@ const BASE_URL = process.env.NODE_ENV === 'production' ? '/sample-jelly-jumper/'
 
 export default defineConfig({
   base: BASE_URL,
+  plugins: [
+    viteStaticCopy({
+      targets: [
+        {
+          src: 'social.jpg',
+          dest: 'assets'
+        }
+      ]
+    })
+  ],
   optimizeDeps: {
     include: isExcaliburSymlinked ? [] : ['excalibur'],
   },
