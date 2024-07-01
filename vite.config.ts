@@ -12,8 +12,9 @@ const isExcaliburSymlinked =
   fs.lstatSync('./node_modules/excalibur').isSymbolicLink()
 
 export default defineConfig({
+  base: '/sample-jelly-jumper',
   optimizeDeps: {
-    include: isExcaliburSymlinked ? ['excalibur'] : [],
+    include: isExcaliburSymlinked ? [] : ['excalibur'],
   },
   resolve: {
     dedupe: isExcaliburSymlinked ? ['excalibur'] : [],
