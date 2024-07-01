@@ -11,8 +11,10 @@ const isExcaliburSymlinked =
   fs.existsSync('./node_modules/excalibur') &&
   fs.lstatSync('./node_modules/excalibur').isSymbolicLink()
 
+const BASE_URL = process.env.NODE_ENV === 'production' ? '/sample-jelly-jumper/' : '/';
+
 export default defineConfig({
-  base: '/sample-jelly-jumper/',
+  base: BASE_URL,
   optimizeDeps: {
     include: isExcaliburSymlinked ? [] : ['excalibur'],
   },
