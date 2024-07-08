@@ -1,9 +1,11 @@
 import * as ex from 'excalibur'
 import { TouchingComponent } from '../components/physics/touching'
 import { CarriableComponent } from '../components/physics/carrier'
+import { SlopesComponent } from '../components/physics/slopes'
 
 export class PhysicsActor extends ex.Actor {
   touching = new TouchingComponent()
+  slopes = new SlopesComponent()
 
   isOnGround = false
 
@@ -12,13 +14,14 @@ export class PhysicsActor extends ex.Actor {
   constructor(args: ex.ActorArgs) {
     super(args)
     this.addComponent(new CarriableComponent())
+    this.addComponent(this.slopes)
   }
 
   onInitialize(engine: ex.Engine): void {
     this.addComponent(this.touching)
 
     this.on('preupdate', () => {
-      this.isOnGround = this.touching.bottom.size > 0
+      this.isOnGround = this.touching.bottom.size > 0 || this.slopes.isOnSlope
     })
     this.on('postupdate', () => {
       this._oldPosGlobal = this.getGlobalPos().clone()

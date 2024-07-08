@@ -20,6 +20,7 @@ import { SpikeTile } from '../actors/hazards/spike-tile'
 import { CoinItem } from '../actors/items/coin'
 import { LevelOverlay } from '../ui/level-overlay'
 import { Resources } from '../resources'
+import { SlopesSystem } from '../components/physics/slopes'
 
 export default class LevelScene extends ex.Scene {
   song?: ex.Sound
@@ -195,6 +196,8 @@ export default class LevelScene extends ex.Scene {
     for (const [className, factory] of Object.entries(this.entityFactory)) {
       this.tilemap.registerEntityFactory(className, factory)
     }
+
+    this.world.systemManager.addSystem(SlopesSystem)
   }
 
   onInitialize() {
@@ -214,6 +217,32 @@ export default class LevelScene extends ex.Scene {
   onActivate(context: ex.SceneActivationContext<unknown>): void {
     if (this.song) {
       AudioManager.playSong(this.song)
+    }
+
+    const slopes = [
+      {
+        pos: ex.vec(150, 450),
+        anchor: ex.vec(1, 1),
+        collider: ex.Shape.Polygon([
+          ex.vec(0, 0),
+          ex.vec(-150, -150),
+          ex.vec(-150, 0),
+        ]),
+      },
+    ]
+
+    for (const slope of slopes) {
+      const actor = new ex.Actor({
+        ...slope,
+        collisionType: ex.CollisionType.Fixed,
+      })
+      actor.graphics.add(
+        new ex.Polygon({
+          points: (actor.collider.get() as ex.PolygonCollider).points,
+          color: ex.Color.Green,
+        })
+      )
+      this.add(actor)
     }
   }
 
