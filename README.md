@@ -1,6 +1,8 @@
-# Full Platformer Sample
+# Jelly Jumper Sample
 
-WIP
+Physics settings inspired by Super Mario World 
+
+![jelly jumper sample](./jelly-jumper.gif)
 
 ## Setup
 
