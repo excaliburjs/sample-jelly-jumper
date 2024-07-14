@@ -2,6 +2,8 @@
 
 Physics settings inspired by Super Mario World 
 
+[Play it here!](https://excaliburjs.com/sample-jelly-jumper/)
+
 ![jelly jumper sample](./jelly-jumper.gif)
 
 ## Setup
