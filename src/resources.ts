@@ -59,7 +59,7 @@ class DevLoader extends ex.Loader {
   dispose() {}
 }
 
-export const loader =
+export const loader = new DevLoader();
   process.env.NODE_ENV === 'development' ? new DevLoader() : new ex.Loader()
 
 for (const group of Object.values(Resources)) {

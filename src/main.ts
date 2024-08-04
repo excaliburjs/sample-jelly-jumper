@@ -42,4 +42,7 @@ const game = new ex.Engine({
 })
 AudioManager.init();
 // start game
-game.start(loader);
+game.start(loader).then(() => {
+  game.screen.pixelRatioOverride = 4;
+  game.screen.applyResolutionAndViewport();
+});
