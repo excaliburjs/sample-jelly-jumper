@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="260" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="191">
+<map version="1.10" tiledversion="1.10.2" orientation="orthogonal" renderorder="right-down" width="260" height="30" tilewidth="16" tileheight="16" infinite="0" nextlayerid="14" nextobjectid="192">
  <properties>
   <property name="excalibur" type="bool" value="true"/>
  </properties>
@@ -419,7 +419,7 @@ the wall to climb</text>
   </object>
  </objectgroup>
  <objectgroup id="9" name="player">
-  <object id="171" name="Player" type="Player" x="3153" y="94.5">
+  <object id="191" name="Player" type="Player" x="64" y="448">
    <point/>
   </object>
  </objectgroup>
