@@ -56,7 +56,7 @@ export class SpiderEnemy extends EnemyActor {
     )
   }
 
-  onPreUpdate(engine: ex.Engine, delta: number): void {
+  onPreUpdate(engine: ex.Engine, elapsed: number): void {
     if (this.dead) return
 
     const bottomLeft = this.raycast(
